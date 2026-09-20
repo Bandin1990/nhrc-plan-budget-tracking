@@ -163,9 +163,11 @@ export function sanitizeAndValidateAiProject(
     ? parsed.activities.map((a: any, idx: number) => {
         let rawCode = String(a.code || (idx + 1)).trim();
         rawCode = fromThaiNumerals(rawCode);
-        let cleanCode = String(idx + 1);
-        if (rawCode) {
-          const strippedPrefix = rawCode.replace(/^[A-Z0-9]+-/, '').replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
+        let cleanCode = rawCode || String(idx + 1);
+        if (/\d{2}[A-Z0-9]{1,2}-[0-9]{5}/.test(rawCode)) {
+          cleanCode = rawCode;
+        } else if (rawCode) {
+          const strippedPrefix = rawCode.replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
           const mClean = strippedPrefix.match(/(\d+(?:\.\d+)?)/);
           if (mClean) {
             cleanCode = mClean[1];

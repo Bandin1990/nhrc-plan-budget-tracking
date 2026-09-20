@@ -261,9 +261,16 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
     const cleanedActivities: ProjectActivity[] = (base.activities && base.activities.length > 0)
       ? base.activities.map((act, actIdx) => {
           let raw = fromThaiNumerals(String(act.code || (actIdx + 1))).trim();
-          raw = raw.replace(/^[A-Z0-9]+-/, '').replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
-          const mClean = raw.match(/(\d+(?:\.\d+)?)/);
-          const cleanCode = mClean ? mClean[1] : String(actIdx + 1);
+          let cleanCode = raw || String(actIdx + 1);
+          if (/\d{2}[A-Z0-9]{1,2}-[0-9]{5}/.test(raw)) {
+            cleanCode = raw;
+          } else if (raw) {
+            const strippedPrefix = raw.replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
+            const mClean = strippedPrefix.match(/(\d+(?:\.\d+)?)/);
+            if (mClean) {
+              cleanCode = mClean[1];
+            }
+          }
           return {
             ...act,
             code: cleanCode
