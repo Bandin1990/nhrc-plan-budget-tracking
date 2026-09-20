@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+  --font-thai: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+  --font-mono: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+  --color-brand-primary: #0a4d44;
+  --color-brand-dark: #073b34;
+  --color-brand-light: #0e5a4f;
+  --color-brand-mint: #10b981;
+}
+
+:root {
+  font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+  --font-scale: 115%;
+}
+
+*, *::before, *::after, input, button, select, textarea, optgroup, code, kbd, samp, pre, strong, span, p, div, table, td, th {
+  font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important;
+}
+
+html {
+  font-size: var(--font-scale);
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+html.dark body,
+body.dark {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+/* Balanced Typography Scale for TH Sarabun Readability */
+.text-\[10px\] {
+  font-size: 0.8rem !important;
+  line-height: 1.35 !important;
+}
+
+.text-\[11px\] {
+  font-size: 0.875rem !important;
+  line-height: 1.4 !important;
+}
+
+.text-xs {
+  font-size: 0.925rem !important;
+  line-height: 1.45 !important;
+}
+
+.text-sm {
+  font-size: 1.025rem !important;
+  line-height: 1.5 !important;
+}
+
+.text-base {
+  font-size: 1.125rem !important;
+  line-height: 1.55 !important;
+}
+
+.text-lg {
+  font-size: 1.275rem !important;
+  line-height: 1.5 !important;
+}
+
+.text-xl {
+  font-size: 1.45rem !important;
+  line-height: 1.4 !important;
+}
+
+.text-2xl {
+  font-size: 1.7rem !important;
+  line-height: 1.35 !important;
+}
+
+/* Print Styles for A4 Official Thai Government Documents */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 20mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Sarabun', 'TH Sarabun New', sans-serif !important;
+    font-size: 15pt !important;
+    line-height: 1.3 !important;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  header,
+  .fab-button,
+  .print-controls {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #333 !important;
+    padding: 4px 6px !important;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+/* Custom Clean Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 77, 68, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 77, 68, 0.45);
+}
