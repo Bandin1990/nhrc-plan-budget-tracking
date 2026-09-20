@@ -533,7 +533,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         {/* PERSPECTIVE 1: CATEGORY PIE CHARTS */}
         {activeChartTab === 'category' && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
               {categoryStats.map((cat) => (
                 <div
                   key={cat.name}
@@ -545,38 +545,38 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: cat.allocated,
                     totalSpent: cat.spent
                   })}
-                  className="p-5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-3.5"
+                  className="p-5.5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-4"
                 >
                   {/* Card Header */}
-                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-700">
-                    <h4 className="text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                    <h4 className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-white group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
                       {cat.name}
                     </h4>
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-xl flex items-center gap-1">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-xl flex items-center gap-1 shrink-0">
                       <span>{cat.projectCount} โครงการ</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
 
                   {/* Allocated Budget - NUMERICAL ONLY, NO COLOR SYMBOL */}
-                  <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
+                  <div className="flex items-center justify-between text-xs py-1.5 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
                     <span className="font-bold text-slate-600 dark:text-slate-300 shrink-0">
                       วงเงินจัดสรร:
                     </span>
-                    <span className="font-bold font-mono text-slate-900 dark:text-white text-xs sm:text-sm truncate ml-2">
-                      {formatCurrency(cat.allocated)} <span className="text-[10px] font-normal text-slate-500">บาท</span>
+                    <span className="font-bold font-mono text-slate-900 dark:text-white text-sm sm:text-base truncate ml-2">
+                      {formatCurrency(cat.allocated)} <span className="text-xs font-normal text-slate-500">บาท</span>
                     </span>
                   </div>
 
                   {/* Circular Pie/Donut Chart Component */}
-                  <div className="flex items-center gap-3.5 pt-1">
+                  <div className="flex items-center gap-4 pt-1">
                     {/* SVG Donut Chart */}
-                    <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
-                      <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                    <div className="relative w-22 h-22 shrink-0 flex items-center justify-center">
+                      <svg className="w-22 h-22 transform -rotate-90" viewBox="0 0 36 36">
                         {/* Background Remaining Arc (Amber) */}
                         <path
                           className="text-amber-400 dark:text-amber-500"
-                          strokeWidth="4"
+                          strokeWidth="3.8"
                           stroke="currentColor"
                           fill="none"
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -585,7 +585,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                         <path
                           className="text-emerald-500"
                           strokeDasharray={`${Math.min(100, Math.max(0, cat.percent))}, 100`}
-                          strokeWidth="4"
+                          strokeWidth="3.8"
                           strokeLinecap="round"
                           stroke="currentColor"
                           fill="none"
@@ -593,10 +593,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                        <span className="text-xs font-black text-slate-800 dark:text-white">
+                        <span className="text-sm font-black text-slate-800 dark:text-white">
                           {cat.percent.toFixed(0)}%
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400 leading-none">
+                        <span className="text-[10px] font-bold text-slate-400 leading-none">
                           เบิกจ่าย
                         </span>
                       </div>
@@ -605,34 +605,34 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     {/* Metrics Breakdown */}
                     <div className="flex-1 space-y-2 min-w-0">
                       {/* Spent Box */}
-                      <div className="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 space-y-0.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                          <span className="flex items-center gap-1 shrink-0">
+                      <div className="p-2.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 space-y-0.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                          <span className="flex items-center gap-1.5 shrink-0">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                             <span>เบิกจ่ายจริง</span>
                           </span>
-                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                             {cat.percent.toFixed(1)}%
                           </span>
                         </div>
-                        <div className="text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-300 font-mono tracking-tight truncate">
-                          {formatCurrency(cat.spent)} <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">บาท</span>
+                        <div className="text-sm sm:text-base font-bold text-emerald-800 dark:text-emerald-300 font-mono tracking-tight truncate">
+                          {formatCurrency(cat.spent)} <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">บาท</span>
                         </div>
                       </div>
 
                       {/* Remaining Box */}
-                      <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 space-y-0.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-800 dark:text-amber-400">
-                          <span className="flex items-center gap-1 shrink-0">
+                      <div className="p-2.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 space-y-0.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-400">
+                          <span className="flex items-center gap-1.5 shrink-0">
                             <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                            <span>คงเหลือ</span>
+                            <span>คงเหลือสุทธิ</span>
                           </span>
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-normal">
+                          <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                             {cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%
                           </span>
                         </div>
-                        <div className="text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-300 font-mono tracking-tight truncate">
-                          {formatCurrency(cat.remaining)} <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">บาท</span>
+                        <div className="text-sm sm:text-base font-bold text-amber-900 dark:text-amber-300 font-mono tracking-tight truncate">
+                          {formatCurrency(cat.remaining)} <span className="text-xs font-normal text-amber-600 dark:text-amber-400">บาท</span>
                         </div>
                       </div>
                     </div>
@@ -646,7 +646,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         {/* PERSPECTIVE 2: PROGRAM PIE CHARTS */}
         {activeChartTab === 'program' && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
               {programStats.map((prog) => (
                 <div
                   key={prog.code}
@@ -658,43 +658,43 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: prog.allocated,
                     totalSpent: prog.spent
                   })}
-                  className="p-5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-3.5"
+                  className="p-5.5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-4"
                 >
                   {/* Card Header */}
-                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
                     <div className="min-w-0 flex-1 mr-2">
                       <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
                         {prog.code}
                       </span>
-                      <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white mt-1.5 line-clamp-1 group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-white mt-1.5 line-clamp-1 group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
                         {prog.name}
                       </h4>
                     </div>
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-xl flex items-center gap-1 shrink-0">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-xl flex items-center gap-1 shrink-0">
                       <span>{prog.projectCount} โครงการ</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
 
                   {/* Allocated Budget - NUMERICAL ONLY, NO COLOR SYMBOL */}
-                  <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
+                  <div className="flex items-center justify-between text-xs py-1.5 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
                     <span className="font-bold text-slate-600 dark:text-slate-300 shrink-0">
                       วงเงินจัดสรร:
                     </span>
-                    <span className="font-bold font-mono text-slate-900 dark:text-white text-xs sm:text-sm truncate ml-2">
-                      {formatCurrency(prog.allocated)} <span className="text-[11px] font-normal text-slate-500">บาท</span>
+                    <span className="font-bold font-mono text-slate-900 dark:text-white text-sm sm:text-base truncate ml-2">
+                      {formatCurrency(prog.allocated)} <span className="text-xs font-normal text-slate-500">บาท</span>
                     </span>
                   </div>
 
                   {/* Circular Pie/Donut Chart Component */}
-                  <div className="flex items-center gap-3.5 pt-1">
+                  <div className="flex items-center gap-4 pt-1">
                     {/* SVG Donut Chart */}
-                    <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
-                      <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                    <div className="relative w-22 h-22 shrink-0 flex items-center justify-center">
+                      <svg className="w-22 h-22 transform -rotate-90" viewBox="0 0 36 36">
                         {/* Background Remaining Arc (Amber) */}
                         <path
                           className="text-amber-400 dark:text-amber-500"
-                          strokeWidth="4"
+                          strokeWidth="3.8"
                           stroke="currentColor"
                           fill="none"
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -703,7 +703,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                         <path
                           className="text-emerald-500"
                           strokeDasharray={`${Math.min(100, Math.max(0, prog.percent))}, 100`}
-                          strokeWidth="4"
+                          strokeWidth="3.8"
                           strokeLinecap="round"
                           stroke="currentColor"
                           fill="none"
@@ -711,10 +711,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                        <span className="text-xs font-black text-slate-800 dark:text-white">
+                        <span className="text-sm font-black text-slate-800 dark:text-white">
                           {prog.percent.toFixed(0)}%
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400 leading-none">
+                        <span className="text-[10px] font-bold text-slate-400 leading-none">
                           เบิกจ่าย
                         </span>
                       </div>
@@ -723,34 +723,34 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     {/* Metrics Breakdown */}
                     <div className="flex-1 space-y-2 min-w-0">
                       {/* Spent Box */}
-                      <div className="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 space-y-0.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                          <span className="flex items-center gap-1 shrink-0">
+                      <div className="p-2.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 space-y-0.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                          <span className="flex items-center gap-1.5 shrink-0">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                             <span>เบิกจ่ายจริง</span>
                           </span>
-                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                             {prog.percent.toFixed(1)}%
                           </span>
                         </div>
-                        <div className="text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-300 font-mono tracking-tight truncate">
-                          {formatCurrency(prog.spent)} <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">บาท</span>
+                        <div className="text-sm sm:text-base font-bold text-emerald-800 dark:text-emerald-300 font-mono tracking-tight truncate">
+                          {formatCurrency(prog.spent)} <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">บาท</span>
                         </div>
                       </div>
 
                       {/* Remaining Box */}
-                      <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 space-y-0.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-800 dark:text-amber-400">
-                          <span className="flex items-center gap-1 shrink-0">
+                      <div className="p-2.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 space-y-0.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-400">
+                          <span className="flex items-center gap-1.5 shrink-0">
                             <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                            <span>คงเหลือ</span>
+                            <span>คงเหลือสุทธิ</span>
                           </span>
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-normal">
+                          <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                             {prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%
                           </span>
                         </div>
-                        <div className="text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-300 font-mono tracking-tight truncate">
-                          {formatCurrency(prog.remaining)} <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">บาท</span>
+                        <div className="text-sm sm:text-base font-bold text-amber-900 dark:text-amber-300 font-mono tracking-tight truncate">
+                          {formatCurrency(prog.remaining)} <span className="text-xs font-normal text-amber-600 dark:text-amber-400">บาท</span>
                         </div>
                       </div>
                     </div>
