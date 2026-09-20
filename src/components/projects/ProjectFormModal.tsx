@@ -264,10 +264,61 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         quarter: m.quarter as 1 | 2 | 3 | 4,
         plannedSpent: allocated,
         plannedCommitted: m.quarter === 1 ? Math.round(totalBudget * 0.5 / 3) : 0,
-        operationMilestone: `ดำเนินงานประจำเดือน${m.name}`
       };
     });
     setMonthlyPlan(newPlan);
+  };
+
+  const [contractSigningMonth, setContractSigningMonth] = useState<number>(11); // Default November (Q1)
+
+  // 2.1 Auto-calculate & apply Cabinet Resolution targets (Q1 38%, Q2 61%, Q3 81%, Q4 100%)
+  const handleApplyCabinetTargets = () => {
+    const total = totalCalculatedBudget || 200000;
+    const q1Spent = total * 0.38;
+    const q2Spent = total * 0.23; // 61% - 38%
+    const q3Spent = total * 0.20; // 81% - 61%
+    const q4Spent = total * 0.19; // 100% - 81%
+
+    const updatedPlan = monthlyPlan.map((m) => {
+      let monthlyVal = 0;
+      if (m.quarter === 1) monthlyVal = Math.round(q1Spent / 3);
+      else if (m.quarter === 2) monthlyVal = Math.round(q2Spent / 3);
+      else if (m.quarter === 3) monthlyVal = Math.round(q3Spent / 3);
+      else monthlyVal = Math.round(q4Spent / 3);
+
+      return {
+        ...m,
+        plannedSpent: monthlyVal
+      };
+    });
+
+    setMonthlyPlan(updatedPlan);
+  };
+
+  // 2.2 Apply Investment Commitment in Q1 (ต.ค. - ธ.ค.)
+  const handleApplyInvestmentQ1Commitment = () => {
+    const total = totalCalculatedBudget || 200000;
+    const updatedPlan = monthlyPlan.map((m) => {
+      if (m.month === contractSigningMonth || (m.quarter === 1 && m.month === 11)) {
+        return { ...m, plannedCommitted: total };
+      } else {
+        return { ...m, plannedCommitted: 0 };
+      }
+    });
+    setMonthlyPlan(updatedPlan);
+  };
+
+  // 2.3 Apply Full Spending in Expected Contract Signing Month
+  const handleApplyContractSigningMonthPlan = () => {
+    const total = totalCalculatedBudget || 200000;
+    const updatedPlan = monthlyPlan.map((m) => {
+      if (m.month === contractSigningMonth) {
+        return { ...m, plannedSpent: total, plannedCommitted: total };
+      } else {
+        return { ...m, plannedSpent: 0, plannedCommitted: 0 };
+      }
+    });
+    setMonthlyPlan(updatedPlan);
   };
 
   if (!isOpen) return null;
@@ -1065,18 +1116,18 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
               <div className="border-b pb-2 border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
-                    ส่วนที่ 4 : แผนการดำเนินงานและการใช้จ่ายงบประมาณรายเดือน
+                    ส่วนที่ 2 : รายละเอียดแผนการใช้จ่ายงบประมาณ (มติ ครม. 21 ต.ค. 2568)
                   </h4>
                   <span className="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold text-[11px] px-2.5 py-1 rounded-full border border-amber-300">
                     มติ ครม. 21 ต.ค. 2568
                   </span>
                 </div>
                 <p className="text-slate-500 text-[11px] mt-1">
-                  วางแผนการเบิกจ่ายให้เป็นไปตามมาตรการเร่งรัดการเบิกจ่ายงบประมาณประจำปี พ.ศ. 2569 (สะสม: Q1 38%, Q2 61%, Q3 81%, Q4 100%)
+                  วางแผนการเบิกจ่ายให้เป็นไปตามมาตรการเร่งรัดการเบิกจ่ายงบประมาณประจำปี (สะสม: Q1 38%, Q2 61%, Q3 81%, Q4 100%)
                 </p>
               </div>
 
-              {/* Cabinet Targets KPI Summary Bar */}
+              {/* Cabinet Targets KPI Summary Bar (2.1) */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map((qNum) => {
                   const qVal = qNum as 1 | 2 | 3 | 4;
@@ -1106,6 +1157,71 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Automated Tools Toolbar for 2.1, 2.2, 2.3 */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>เครื่องมือจัดทำแผนงบประมาณอัตโนมัติ (สอดคล้อง มติ ครม. 21 ต.ค. 2568)</span>
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                  {/* 2.1 Auto Cabinet targets */}
+                  <button
+                    type="button"
+                    onClick={handleApplyCabinetTargets}
+                    className="p-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
+                  >
+                    <span className="flex items-center gap-1 text-[#0a4d44] dark:text-emerald-300 font-bold">
+                      <span>2.1 คำนวณแผนตาม มติ ครม.</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">
+                      ปรับรายเดือนอัตโนมัติให้เข้าเกณฑ์ Q1 38% | Q2 61% | Q3 81% | Q4 100%
+                    </span>
+                  </button>
+
+                  {/* 2.2 Q1 Investment commitment */}
+                  <button
+                    type="button"
+                    onClick={handleApplyInvestmentQ1Commitment}
+                    className="p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
+                  >
+                    <span className="flex items-center gap-1 text-blue-900 dark:text-blue-300 font-bold">
+                      <span>2.2 งบลงทุน: วางแผนก่อหนี้ Q1</span>
+                    </span>
+                    <span className="text-[10px] text-blue-700 dark:text-blue-400 font-normal">
+                      ตั้งวงเงินสัญญาผูกพัน PO เต็มวงเงินในไตรมาสที่ 1 (ต.ค. - ธ.ค.)
+                    </span>
+                  </button>
+
+                  {/* 2.3 Contract month spending */}
+                  <div className="p-2.5 bg-purple-50 dark:bg-purple-950/50 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-xl text-xs flex flex-col justify-between gap-1 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[11px]">2.3 เลือกเดือนสัญญาจัดจ้าง:</span>
+                      <select
+                        value={contractSigningMonth}
+                        onChange={(e) => setContractSigningMonth(Number(e.target.value))}
+                        className="px-1.5 py-0.5 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 rounded font-bold text-[10px] text-purple-900 dark:text-purple-200 outline-none"
+                      >
+                        {FISCAL_MONTHS.map(m => (
+                          <option key={m.month} value={m.month}>
+                            {m.name} (Q{m.quarter})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleApplyContractSigningMonthPlan}
+                      className="w-full mt-0.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-[10px] transition-colors cursor-pointer"
+                    >
+                      วางแผนเต็มวงเงินในเดือนสัญญา
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Investment Commitment Alert */}

@@ -73,6 +73,19 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             </h3>
           </div>
           <div className="flex items-center gap-2">
+            {isOwner && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenEditProject(project);
+                }}
+                className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#073b34] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs border border-emerald-500/30"
+                title="เข้าสู่หน้าจอบันทึกรายละเอียดค่าใช้จ่ายและแผนการใช้จ่ายงบประมาณ"
+              >
+                <Coins className="w-3.5 h-3.5 text-amber-300" />
+                <span>บันทึกรายละเอียดค่าใช้จ่าย</span>
+              </button>
+            )}
             <button
               onClick={() => setShowPrintPlan(true)}
               className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
