@@ -367,7 +367,6 @@ export const UserPermissionManagement: React.FC = () => {
                 <th className="py-3 px-3">สำนัก / สังกัด</th>
                 <th className="py-3 px-3">สิทธิ์ในระบบ (Role)</th>
                 <th className="py-3 px-3">โครงการที่รับผิดชอบ</th>
-                <th className="py-3 px-3 text-center">สลับใช้งาน (Switch)</th>
                 <th className="py-3 px-4 text-center">จัดการ</th>
               </tr>
             </thead>
@@ -424,20 +423,6 @@ export const UserPermissionManagement: React.FC = () => {
                     </td>
                     <td className="py-3 px-3 font-semibold text-slate-700 dark:text-slate-300">
                       {assignedCount}
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      {isCurrent ? (
-                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-1 rounded-full">
-                          กำลังใช้งาน
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => switchUser(u.id)}
-                          className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-[#0a4d44] hover:text-white text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-bold transition-colors"
-                        >
-                          สลับเป็นผู้ใช้นี้
-                        </button>
-                      )}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center gap-1.5">
