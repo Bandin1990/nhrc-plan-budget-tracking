@@ -612,44 +612,191 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             <div className="space-y-4 animate-fadeIn">
               <div className="border-b pb-2 border-slate-200 dark:border-slate-800">
                 <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
-                  ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ และแผนระดับต่าง ๆ
+                  ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ และแผนระดับต่าง ๆ (Dropdown Selection)
                 </h4>
                 <p className="text-slate-500 text-[11px] mt-0.5">
-                  เชื่อมโยงยุทธศาสตร์ชาติ 20 ปี, แผนแม่บทภายใต้ยุทธศาสตร์ชาติ และแผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ
+                  เลือกระดับยุทธศาสตร์ชาติ 20 ปี, แผนแม่บทภายใต้ยุทธศาสตร์ชาติ และแผนระดับต่าง ๆ จากรายการ (Dropdown)
                 </p>
               </div>
 
               <div className="space-y-4">
+                {/* 1. ยุทธศาสตร์ชาติ Dropdown */}
                 <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">1. ยุทธศาสตร์ชาติ (National Strategy)</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    1. ยุทธศาสตร์ชาติ (6 ด้าน)*
+                  </label>
+                  <select
+                    value={
+                      [
+                        'ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ',
+                        'ยุทธศาสตร์ชาติด้านความมั่นคง',
+                        'ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม',
+                        'ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์',
+                        'ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน',
+                        'ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม'
+                      ].includes(nationalStrategy)
+                        ? nationalStrategy
+                        : 'อื่น ๆ'
+                    }
+                    onChange={(e) => {
+                      if (e.target.value !== 'อื่น ๆ') {
+                        setNationalStrategy(e.target.value);
+                      } else {
+                        setNationalStrategy('ยุทธศาสตร์ชาติเพิ่มเติม (ระบุรายละเอียด)');
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
+                  >
+                    <option value="ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">
+                      1. ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ
+                    </option>
+                    <option value="ยุทธศาสตร์ชาติด้านความมั่นคง">
+                      2. ยุทธศาสตร์ชาติด้านความมั่นคง
+                    </option>
+                    <option value="ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม">
+                      3. ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม
+                    </option>
+                    <option value="ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์">
+                      4. ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์
+                    </option>
+                    <option value="ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน">
+                      5. ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน
+                    </option>
+                    <option value="ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม">
+                      6. ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม
+                    </option>
+                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
+                  </select>
                   <textarea
                     rows={2}
                     value={nationalStrategy}
                     onChange={(e) => setNationalStrategy(e.target.value)}
-                    placeholder="เช่น ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ"
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                    placeholder="รายละเอียดเพิ่มเติมความเชื่อมโยงยุทธศาสตร์ชาติ"
+                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                   />
                 </div>
 
+                {/* 2. แผนแม่บท Dropdown */}
                 <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">2. แผนแม่บทภายใต้ยุทธศาสตร์ชาติ (Master Plan)</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    2. แผนแม่บทภายใต้ยุทธศาสตร์ชาติ (Master Plan)*
+                  </label>
+                  <select
+                    value={
+                      [
+                        'ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ',
+                        'ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน',
+                        'ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม',
+                        'ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน',
+                        'ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย',
+                        'ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ',
+                        'ประเด็น 01 การต่างประเทศ',
+                        'ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส',
+                        'ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต'
+                      ].includes(masterPlan)
+                        ? masterPlan
+                        : 'อื่น ๆ'
+                    }
+                    onChange={(e) => {
+                      if (e.target.value !== 'อื่น ๆ') {
+                        setMasterPlan(e.target.value);
+                      } else {
+                        setMasterPlan('แผนแม่บทฯ ประเด็นเพิ่มเติม (ระบุรายละเอียด)');
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
+                  >
+                    <option value="ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">
+                      ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ
+                    </option>
+                    <option value="ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน">
+                      ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน
+                    </option>
+                    <option value="ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม">
+                      ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม
+                    </option>
+                    <option value="ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน">
+                      ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน
+                    </option>
+                    <option value="ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย">
+                      ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย
+                    </option>
+                    <option value="ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ">
+                      ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ
+                    </option>
+                    <option value="ประเด็น 01 การต่างประเทศ">
+                      ประเด็น 01 การต่างประเทศ
+                    </option>
+                    <option value="ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส">
+                      ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส
+                    </option>
+                    <option value="ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต">
+                      ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต
+                    </option>
+                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
+                  </select>
                   <textarea
                     rows={2}
                     value={masterPlan}
                     onChange={(e) => setMasterPlan(e.target.value)}
-                    placeholder="เช่น ประเด็นการบริการประชาชนและประสิทธิภาพภาครัฐ / สิทธิมนุษยชนและการคุ้มครอง"
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                    placeholder="รายละเอียดเพิ่มเติมแผนแม่บทภายใต้ยุทธศาสตร์ชาติ"
+                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                   />
                 </div>
 
+                {/* 3. แผนระดับต่าง ๆ ที่เกี่ยวข้อง Dropdown */}
                 <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">3. แผนระดับต่าง ๆ ที่เกี่ยวข้อง (Related Plans)</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    3. แผนระดับต่าง ๆ ที่เกี่ยวข้อง (Related Level 2/3 Plans)*
+                  </label>
+                  <select
+                    value={
+                      [
+                        'แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.',
+                        'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)',
+                        'แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)',
+                        'แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)',
+                        'แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน',
+                        'มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ'
+                      ].includes(relatedPlans)
+                        ? relatedPlans
+                        : 'อื่น ๆ'
+                    }
+                    onChange={(e) => {
+                      if (e.target.value !== 'อื่น ๆ') {
+                        setRelatedPlans(e.target.value);
+                      } else {
+                        setRelatedPlans('แผนระดับต่าง ๆ เพิ่มเติม (ระบุรายละเอียด)');
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
+                  >
+                    <option value="แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.">
+                      1. แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.
+                    </option>
+                    <option value="แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)">
+                      2. แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)
+                    </option>
+                    <option value="แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)">
+                      3. แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)
+                    </option>
+                    <option value="แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)">
+                      4. แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)
+                    </option>
+                    <option value="แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน">
+                      5. แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน
+                    </option>
+                    <option value="มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ">
+                      6. มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ
+                    </option>
+                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
+                  </select>
                   <textarea
                     rows={2}
                     value={relatedPlans}
                     onChange={(e) => setRelatedPlans(e.target.value)}
-                    placeholder="เช่น แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13, แผนปฏิบัติการประจำปี กสม., มติ ครม."
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                    placeholder="รายละเอียดเพิ่มเติมแผนระดับต่าง ๆ ที่เกี่ยวข้อง"
+                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                   />
                 </div>
               </div>
