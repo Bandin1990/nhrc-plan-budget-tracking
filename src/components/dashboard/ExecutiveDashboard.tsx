@@ -521,18 +521,18 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           <span className="font-bold text-slate-600 dark:text-slate-300">คำอธิบายแถบสี:</span>
           
           <div className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400">
-            <div className="w-3.5 h-3.5 rounded bg-blue-600"></div>
-            <span>🔵 วงเงินจัดสรร (Allocated)</span>
+            <div className="w-3.5 h-3.5 rounded bg-blue-600 shrink-0"></div>
+            <span>วงเงินจัดสรร (Allocated)</span>
           </div>
 
           <div className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-400">
-            <div className="w-3.5 h-3.5 rounded bg-emerald-500"></div>
-            <span>🟢 เบิกจ่ายจริง (Spent)</span>
+            <div className="w-3.5 h-3.5 rounded bg-emerald-500 shrink-0"></div>
+            <span>เบิกจ่ายจริง (Spent)</span>
           </div>
 
           <div className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400">
-            <div className="w-3.5 h-3.5 rounded bg-amber-500"></div>
-            <span>🟠 งบประมาณคงเหลือ (Remaining)</span>
+            <div className="w-3.5 h-3.5 rounded bg-amber-500 shrink-0"></div>
+            <span>งบประมาณคงเหลือ (Remaining)</span>
           </div>
         </div>
 
@@ -569,7 +569,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     {/* 1. Allocated (Blue) */}
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
-                        <span className="text-blue-700 dark:text-blue-400">🔵 จัดสรร</span>
+                        <span className="text-blue-700 dark:text-blue-400">จัดสรร</span>
                         <span className="font-mono text-slate-900 dark:text-white">
                           {formatCurrency(cat.allocated)} บาท
                         </span>
@@ -583,7 +583,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
                         <span className="text-emerald-700 dark:text-emerald-400">
-                          🟢 เบิกจ่าย ({cat.percent.toFixed(1)}%)
+                          เบิกจ่าย ({cat.percent.toFixed(1)}%)
                         </span>
                         <span className="font-mono text-emerald-700 dark:text-emerald-400">
                           {formatCurrency(cat.spent)} บาท
@@ -601,7 +601,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
                         <span className="text-amber-700 dark:text-amber-400">
-                          🟠 คงเหลือ ({cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%)
+                          คงเหลือ ({cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%)
                         </span>
                         <span className="font-mono text-amber-700 dark:text-amber-400">
                           {formatCurrency(cat.remaining)} บาท
@@ -659,7 +659,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     {/* 1. Allocated (Blue) */}
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
-                        <span className="text-blue-700 dark:text-blue-400">🔵 จัดสรร</span>
+                        <span className="text-blue-700 dark:text-blue-400">จัดสรร</span>
                         <span className="font-mono text-slate-900 dark:text-white">
                           {formatCurrency(prog.allocated)} บาท
                         </span>
@@ -673,7 +673,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
                         <span className="text-emerald-700 dark:text-emerald-400">
-                          🟢 เบิกจ่าย ({prog.percent.toFixed(1)}%)
+                          เบิกจ่าย ({prog.percent.toFixed(1)}%)
                         </span>
                         <span className="font-mono text-emerald-700 dark:text-emerald-400">
                           {formatCurrency(prog.spent)} บาท
@@ -691,7 +691,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between font-bold">
                         <span className="text-amber-700 dark:text-amber-400">
-                          🟠 คงเหลือ ({prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%)
+                          คงเหลือ ({prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%)
                         </span>
                         <span className="font-mono text-amber-700 dark:text-amber-400">
                           {formatCurrency(prog.remaining)} บาท
@@ -763,13 +763,13 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold shrink-0">
                   <span className="text-blue-700 dark:text-blue-400">
-                    🔵 จัดสรร: <strong className="font-mono text-slate-900 dark:text-white">{formatCurrency(u.allocated)}</strong> บ.
+                    จัดสรร: <strong className="font-mono text-slate-900 dark:text-white">{formatCurrency(u.allocated)}</strong> บ.
                   </span>
                   <span className="text-emerald-700 dark:text-emerald-400">
-                    🟢 เบิกจ่าย: <strong className="font-mono">{formatCurrency(u.spent)}</strong> บ. ({u.percent.toFixed(1)}%)
+                    เบิกจ่าย: <strong className="font-mono">{formatCurrency(u.spent)}</strong> บ. ({u.percent.toFixed(1)}%)
                   </span>
                   <span className="text-amber-700 dark:text-amber-400">
-                    🟠 คงเหลือ: <strong className="font-mono">{formatCurrency(u.remaining)}</strong> บ. ({u.allocated > 0 ? ((u.remaining / u.allocated) * 100).toFixed(1) : '0.0'}%)
+                    คงเหลือ: <strong className="font-mono">{formatCurrency(u.remaining)}</strong> บ. ({u.allocated > 0 ? ((u.remaining / u.allocated) * 100).toFixed(1) : '0.0'}%)
                   </span>
                 </div>
               </div>
@@ -806,11 +806,11 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
               <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
-              <span>🟢 เบิกจ่ายจริง</span>
+              <span>เบิกจ่ายจริง</span>
             </span>
             <span className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
               <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
-              <span>🟠 งบประมาณคงเหลือ</span>
+              <span>งบประมาณคงเหลือ</span>
             </span>
           </div>
           <button
