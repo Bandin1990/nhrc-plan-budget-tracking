@@ -184,11 +184,20 @@ export async function parsePdfOperationalPlan(
         const val = parseSpacedNumber(l);
         if (val > 1000) singleBudget = val;
       }
-      if (l.includes('กิจกรรม') && l.length > 5 && l.length < 150) {
+      if ((l.includes('กิจกรรม') || /^\s*\d{1,2}\.\d+/.test(fromThaiNumerals(l))) && l.length > 5 && l.length < 150) {
+        const cleanL = fromThaiNumerals(l);
+        const mCode = cleanL.match(/(?:กิจกรรมที่|กิจกรรม)?\s*(\d+(?:\.\d+)?)/i);
+        const codeVal = mCode ? mCode[1] : `${activities.length + 1}`;
+        let actName = l
+          .replace(/^.*?(กิจกรรมที่|กิจกรรม)\s*\d*(?:\.\d*)?\s*/, '')
+          .replace(/^\d+(?:\.\d+)?\s*[:.-]?\s*/, '')
+          .trim();
+        if (!actName || actName.length < 3) actName = l.trim();
+
         activities.push({
           id: `act_pdf_${timestamp}_${activities.length + 1}`,
-          code: `${activities.length + 1}`,
-          name: l.trim(),
+          code: codeVal,
+          name: actName,
           plannedPercent: 100,
           timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
           plannedBudget: 0,
@@ -299,7 +308,7 @@ export async function parsePdfOperationalPlan(
           
           subActs.push({
             id: `act_70_${timestamp}_${idx+1}_${actCount}`,
-            code: `${m.prefix}-${actCount}`,
+            code: `${actCount}`,
             name: lineName,
             plannedBudget: 0,
             timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
@@ -600,9 +609,10 @@ export async function parsePdfOperationalPlan(
 
       for (let a = 0; a < activityLines.length; a++) {
         const aLine = activityLines[a];
-        const mAct = aLine.match(/^(\d{1,2}\.\d+|\(\d+\))\s+(.+)$/);
+        const cleanLine = fromThaiNumerals(aLine);
+        const mAct = cleanLine.match(/^(?:กิจกรรมที่\s*)?(\d{1,2}(?:\.\d+)?|\(\d+\))[\s.:-]+(.+)$/i) || cleanLine.match(/^(\d{1,2}\.\d+|\(\d+\))\s*(.+)$/);
         if (mAct) {
-          const actCode = mAct[1];
+          let actCode = mAct[1].replace(/[()]/g, '').trim();
           const actRest = mAct[2];
           
           let actBudget = 0;
@@ -625,8 +635,8 @@ export async function parsePdfOperationalPlan(
 
           activities.push({
             id: `act_pdf_${timestamp}_${projects.length + 1}_${actIdx}`,
-            code: actCode,
-            name: actName || `กิจกรรมที่ ${actCode}`,
+            code: actCode || `${actIdx}`,
+            name: actName || `กิจกรรมที่ ${actCode || actIdx}`,
             plannedBudget: actBudget,
             timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
             plannedPercent: 100,

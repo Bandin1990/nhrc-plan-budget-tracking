@@ -17,7 +17,7 @@ import {
   AiProvider
 } from '../../services/aiWordExtractor';
 import { parsePdfOperationalPlan, STRATEGIC_PILLARS } from '../../services/pdfPlanExtractor';
-import { Project, NHRC_UNITS, NHRCUnit, BUDGET_PROGRAMS, ProgramCode } from '../../types/project';
+import { Project, ProjectActivity, NHRC_UNITS, NHRCUnit, BUDGET_PROGRAMS, ProgramCode } from '../../types/project';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency, fromThaiNumerals } from '../../utils/thaiNumber';
@@ -330,6 +330,30 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
   const applyEditsToProject = (): Project => {
     if (!parsedData?.project) throw new Error('No parsed project');
     const base = parsedData.project;
+    const cleanedActivities: ProjectActivity[] = (base.activities && base.activities.length > 0)
+      ? base.activities.map((act, actIdx) => {
+          let raw = fromThaiNumerals(String(act.code || (actIdx + 1))).trim();
+          raw = raw.replace(/^[A-Z0-9]+-/, '').replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
+          const mClean = raw.match(/(\d+(?:\.\d+)?)/);
+          const cleanCode = mClean ? mClean[1] : String(actIdx + 1);
+          return {
+            ...act,
+            code: cleanCode
+          };
+        })
+      : [
+          {
+            id: `act_${Date.now()}_1`,
+            code: '1',
+            name: `ดำเนินงานตาม ${editName.trim() || base.name || 'โครงการ'}`,
+            plannedBudget: editBudget || base.budgetAllocated || 0,
+            timeframe: `ต.ค. ${selectedFiscalYear - 1} - ก.ย. ${selectedFiscalYear}`,
+            plannedPercent: 100,
+            actualSpent: 0,
+            status: 'not_started'
+          }
+        ];
+
     return {
       ...base,
       name: editName.trim() || base.name || 'โครงการนำเข้า',
@@ -337,6 +361,7 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
       division: editDivision,
       subDivision: editSubDivision.trim(),
       budgetAllocated: editBudget,
+      activities: cleanedActivities,
       isBaselineLocked: isBaselineLocked,
       unlockedForEdit: false,
       responsiblePerson: {
@@ -477,7 +502,16 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
             status: 'on_track'
           }
         ],
-        activities: proj.activities && proj.activities.length > 0 ? proj.activities : [
+        activities: proj.activities && proj.activities.length > 0 ? proj.activities.map((act, actIdx) => {
+          let raw = fromThaiNumerals(String(act.code || (actIdx + 1))).trim();
+          raw = raw.replace(/^[A-Z0-9]+-/, '').replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
+          const mClean = raw.match(/(\d+(?:\.\d+)?)/);
+          const cleanCode = mClean ? mClean[1] : String(actIdx + 1);
+          return {
+            ...act,
+            code: cleanCode
+          };
+        }) : [
           {
             id: `act_${Date.now()}_1`,
             code: '1',

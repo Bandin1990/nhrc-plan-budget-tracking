@@ -160,16 +160,28 @@ export function sanitizeAndValidateAiProject(
 ): { project: Partial<Project>; activities: ProjectActivity[] } {
   const timestamp = Date.now();
   const validatedActivities: ProjectActivity[] = Array.isArray(parsed.activities)
-    ? parsed.activities.map((a: any, idx: number) => ({
-        id: a.id || `act_ai_${timestamp}_${idx + 1}`,
-        code: String(a.code || idx + 1),
-        name: String(a.name || `กิจกรรมที่ ${idx + 1}`),
-        plannedBudget: Number(a.plannedBudget) || 0,
-        timeframe: String(a.timeframe || `ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}`),
-        plannedPercent: Number(a.plannedPercent) || 0,
-        actualSpent: 0,
-        status: 'not_started' as const
-      }))
+    ? parsed.activities.map((a: any, idx: number) => {
+        let rawCode = String(a.code || (idx + 1)).trim();
+        rawCode = fromThaiNumerals(rawCode);
+        let cleanCode = String(idx + 1);
+        if (rawCode) {
+          const strippedPrefix = rawCode.replace(/^[A-Z0-9]+-/, '').replace(/^(?:กิจกรรมที่|กิจกรรม)\s*/i, '');
+          const mClean = strippedPrefix.match(/(\d+(?:\.\d+)?)/);
+          if (mClean) {
+            cleanCode = mClean[1];
+          }
+        }
+        return {
+          id: a.id || `act_ai_${timestamp}_${idx + 1}`,
+          code: cleanCode,
+          name: String(a.name || `กิจกรรมที่ ${cleanCode}`),
+          plannedBudget: Number(a.plannedBudget) || 0,
+          timeframe: String(a.timeframe || `ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}`),
+          plannedPercent: Number(a.plannedPercent) || 0,
+          actualSpent: 0,
+          status: 'not_started' as const
+        };
+      })
     : [];
 
   const actTotalBudget = validatedActivities.reduce((s, a) => s + a.plannedBudget, 0);
