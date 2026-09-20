@@ -22,6 +22,16 @@ CREATE TABLE IF NOT EXISTS public.projects (
   responsible_person JSONB NOT NULL DEFAULT '{}'::jsonb,
   is_strategic BOOLEAN DEFAULT false,
   strategic_pillar INTEGER,
+  operation_method TEXT,
+  budget_source TEXT,
+  budget_category TEXT,
+  national_strategy TEXT,
+  master_plan TEXT,
+  related_plans TEXT,
+  strategic_section2 JSONB DEFAULT '{}'::jsonb,
+  target_group TEXT,
+  target_area TEXT,
+  expected_benefits JSONB DEFAULT '[]'::jsonb,
   budget_allocated NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
   budget_spent NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
   budget_committed NUMERIC(15, 2) DEFAULT 0.00,
@@ -46,6 +56,18 @@ CREATE TABLE IF NOT EXISTS public.projects (
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()),
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- Migrations for existing projects table
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS operation_method TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS budget_source TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS budget_category TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS national_strategy TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS master_plan TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS related_plans TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS strategic_section2 JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS target_group TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS target_area TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS expected_benefits JSONB DEFAULT '[]'::jsonb;
 
 CREATE INDEX IF NOT EXISTS idx_projects_fy ON public.projects (fiscal_year);
 CREATE INDEX IF NOT EXISTS idx_projects_division ON public.projects (division);
