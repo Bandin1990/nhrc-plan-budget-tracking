@@ -259,7 +259,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         <div className="flex items-center justify-between">
           <h3 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
             <DollarSign className="w-4 h-4 text-[#0a4d44] dark:text-emerald-400" />
-            <span>สถานะงบประมาณประจำปี (4 กล่องงบประมาณ)</span>
+            <span>สถานะงบประมาณประจำปี</span>
           </h3>
           <span className="text-xs text-slate-400">หน่วย: บาท (THB)</span>
         </div>
@@ -270,7 +270,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#0a4d44]"></div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                1. งบประมาณทั้งหมด (จัดสรร)
+                งบประมาณทั้งหมด (จัดสรร)
               </span>
               <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#0a4d44] dark:text-emerald-400 flex items-center justify-center border border-emerald-200/50 dark:border-emerald-800">
                 <DollarSign className="w-5 h-5" />
@@ -295,7 +295,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500"></div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                2. งบเบิกจ่ายจริง (สะสม)
+                งบเบิกจ่ายจริง (สะสม)
               </span>
               <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200/50 dark:border-emerald-800">
                 <TrendingUp className="w-5 h-5" />
@@ -320,7 +320,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-sky-500"></div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                3. งบประมาณคงเหลือสุทธิ
+                งบประมาณคงเหลือสุทธิ
               </span>
               <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-200/50 dark:border-sky-800">
                 <Scale className="w-5 h-5" />
@@ -345,7 +345,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-amber-500"></div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                4. ส่งคืนเข้าส่วนกลาง (เงินเหลือ)
+                ส่งคืนเข้าส่วนกลาง (เงินเหลือ)
               </span>
               <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-200/50 dark:border-amber-800">
                 <Coins className="w-5 h-5" />
@@ -372,7 +372,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         <div className="flex items-center justify-between">
           <h3 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
             <FolderKanban className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>สถานะความก้าวหน้าโครงการ (4 สถานะหลัก)</span>
+            <span>สถานะความก้าวหน้าโครงการ</span>
           </h3>
           <span className="text-xs text-slate-400">หน่วย: โครงการ</span>
         </div>
