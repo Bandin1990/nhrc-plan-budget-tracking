@@ -32,6 +32,7 @@ export const AppContent: React.FC = () => {
   const { projects, reports, memos, getReportById, getMemoById, setSelectedDivision } = useProjects();
 
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Modals
   const [isWordImportOpen, setIsWordImportOpen] = useState(false);
@@ -120,6 +121,7 @@ export const AppContent: React.FC = () => {
       <Navbar 
         onOpenQuickSearch={() => setActiveTab('project_catalog')}
         onNavigate={(tab) => setActiveTab(tab)}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
       {/* Main Layout Area */}
@@ -127,11 +129,13 @@ export const AppContent: React.FC = () => {
         {/* Sidebar */}
         <Sidebar 
           activeTab={activeTab} 
-          onSelectTab={(tab) => setActiveTab(tab)} 
+          onSelectTab={(tab) => setActiveTab(tab)}
+          isMobileOpen={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Dynamic Content Canvas */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && (
             <ExecutiveDashboard
               onNavigate={(tab) => setActiveTab(tab)}

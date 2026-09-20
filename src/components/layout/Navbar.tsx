@@ -3,7 +3,7 @@ import {
   Search, Calendar, Moon, Sun, Bell, 
   Check, ChevronDown, ShieldCheck, LogOut, Users,
   X, FolderKanban, ArrowRight, Sparkles, Building2, Clock, Scale,
-  FileUp, LayoutDashboard, Target, TrendingUp, BarChart3, Database
+  FileUp, LayoutDashboard, Target, TrendingUp, BarChart3, Database, Menu
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,9 +15,10 @@ import { formatCurrency } from '../../utils/thaiNumber';
 interface NavbarProps {
   onOpenQuickSearch: () => void;
   onNavigate?: (tab: NavTab) => void;
+  onToggleMobileMenu?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate, onToggleMobileMenu }) => {
   const { 
     fiscalYear, setFiscalYear, 
     isDarkMode, toggleDarkMode, 
@@ -121,24 +122,35 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate })
   return (
     <header className="sticky top-0 z-40 bg-[#0a4d44] text-white shadow-md select-none border-b border-[#083b34]">
       {/* Top Main Bar */}
-      <div className="flex items-center justify-between px-3 lg:px-6 h-16 gap-3">
-        {/* Left: Branding & Titles */}
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center justify-between px-2.5 sm:px-4 lg:px-6 h-16 gap-2 sm:gap-3">
+        {/* Left: Branding & Mobile Hamburger */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Menu Hamburger Button */}
+          {onToggleMobileMenu && (
+            <button
+              type="button"
+              onClick={onToggleMobileMenu}
+              className="md:hidden p-2 rounded-xl bg-[#073b34] hover:bg-[#052c27] text-emerald-200 hover:text-white border border-emerald-600/40 transition-colors cursor-pointer shrink-0"
+              title="เปิดเมนูการใช้งาน"
+            >
+              <Menu className="w-5 h-5 text-emerald-300" />
+            </button>
+          )}
 
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 bg-white/95 rounded-xl flex items-center justify-center p-1 shadow-md shrink-0 border border-white/20">
-              <NhrcLogo size={34} />
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/95 rounded-xl flex items-center justify-center p-1 shadow-md shrink-0 border border-white/20">
+              <NhrcLogo size={32} />
             </div>
             <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
-                  ระบบติดตามผลการดำเนินงานและการใช้จ่ายงบประมาณ
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h1 className="text-xs sm:text-base lg:text-lg font-bold tracking-tight text-white truncate">
+                  ระบบติดตามแผนและงบประมาณ
                 </h1>
                 <span className="hidden xl:inline-block text-xs font-bold bg-[#126b5f] text-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-400/30 shrink-0">
-                  ระบบติดตามแผนปฏิบัติการ
+                  สำนักงาน กสม.
                 </span>
               </div>
-              <p className="text-xs text-emerald-200/90 font-medium truncate">
+              <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium truncate">
                 สำนักงานคณะกรรมการสิทธิมนุษยชนแห่งชาติ
               </p>
             </div>

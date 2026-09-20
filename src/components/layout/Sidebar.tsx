@@ -2,10 +2,11 @@ import React from 'react';
 import { 
   LayoutDashboard, TrendingUp, FolderKanban, FileUp, Target, 
   Clock, Printer, Scale, FileText, History, BarChart3, Building2, 
-  Users, Cloud, Settings, ChevronLeft, ChevronRight
+  Users, Cloud, Settings, ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { NhrcLogo } from '../common/NhrcLogo';
 
 export type NavTab = 
   | 'dashboard'
@@ -26,10 +27,17 @@ export type NavTab =
 interface SidebarProps {
   activeTab: NavTab;
   onSelectTab: (tab: NavTab) => void;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab }) => {
-  const { isSidebarCollapsed, toggleSidebar, projects, fiscalYear } = useProjects();
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  activeTab, 
+  onSelectTab,
+  isMobileOpen = false,
+  onCloseMobile
+}) => {
+  const { isSidebarCollapsed, toggleSidebar, fiscalYear } = useProjects();
   const { currentUser } = useAuth();
 
   const menuGroups = [
@@ -77,79 +85,139 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab }) => {
     }] : [])
   ];
 
-  return (
-    <aside
-      className={`bg-[#073b34] text-white flex flex-col transition-all duration-300 select-none z-30 shrink-0 border-r border-[#052c27] ${
-        isSidebarCollapsed ? 'w-16' : 'w-64'
-      }`}
-    >
-      {/* Collapse Toggle Header */}
-      <div className="p-3 flex items-center justify-between border-b border-emerald-800/40">
-        {!isSidebarCollapsed && (
-          <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wider">
-            เมนูการปฏิบัติงาน
-          </span>
-        )}
-        <button
-          onClick={toggleSidebar}
-          title={isSidebarCollapsed ? 'ขยายเมนู' : 'ซ่อนเมนูหลัก'}
-          className="flex items-center gap-1.5 text-xs text-emerald-200 hover:text-white bg-[#052c27] hover:bg-[#04201c] px-2 py-1.5 rounded-md border border-emerald-700/40 transition-colors w-full justify-center"
-        >
-          {isSidebarCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <>
-              <ChevronLeft className="w-4 h-4" />
-              <span>ซ่อนเมนูหลัก</span>
-            </>
-          )}
-        </button>
-      </div>
+  const handleNavClick = (tabId: NavTab) => {
+    onSelectTab(tabId);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
+  };
 
-      {/* Navigation List */}
-      <div className="flex-1 overflow-y-auto py-2 px-2 space-y-4">
-        {menuGroups.map((group, gIdx) => (
-          <div key={gIdx} className="space-y-1">
-            {!isSidebarCollapsed && (
-              <p className="px-2.5 text-[11px] font-bold text-emerald-300/70 tracking-wider uppercase">
-                {group.title}
-              </p>
+  const renderNavContent = (isCollapsed: boolean, isMobileView: boolean) => (
+    <div className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
+      {menuGroups.map((group, gIdx) => (
+        <div key={gIdx} className="space-y-1">
+          {!isCollapsed && (
+            <p className="px-2.5 text-[11px] font-bold text-emerald-300/70 tracking-wider uppercase">
+              {group.title}
+            </p>
+          )}
+          <div className="space-y-0.5">
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id as NavTab)}
+                  title={isCollapsed ? item.label : undefined}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-[#073b34] font-bold shadow-md'
+                      : 'text-emerald-100 hover:bg-[#094c43] hover:text-white'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0a4d44]' : (item as any).highlight ? 'text-amber-300' : 'text-emerald-300'}`} />
+                  {!isCollapsed && (
+                    <>
+                      <span className="truncate text-left leading-snug flex-1">{item.label}</span>
+                      {(item as any).highlight && (
+                        <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md shrink-0 ${
+                          isActive ? 'bg-[#0a4d44] text-white' : 'bg-amber-400 text-slate-900 shadow-xs'
+                        }`}>
+                          ตั้งต้นแผน
+                        </span>
+                      )}
+                    </>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop Sidebar (md breakpoint and up) */}
+      <aside
+        className={`hidden md:flex bg-[#073b34] text-white flex-col transition-all duration-300 select-none z-30 shrink-0 border-r border-[#052c27] ${
+          isSidebarCollapsed ? 'w-16' : 'w-64'
+        }`}
+      >
+        {/* Desktop Header */}
+        <div className="p-3 flex items-center justify-between border-b border-emerald-800/40">
+          {!isSidebarCollapsed && (
+            <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wider">
+              เมนูการปฏิบัติงาน
+            </span>
+          )}
+          <button
+            onClick={toggleSidebar}
+            title={isSidebarCollapsed ? 'ขยายเมนู' : 'ซ่อนเมนูหลัก'}
+            className="flex items-center gap-1.5 text-xs text-emerald-200 hover:text-white bg-[#052c27] hover:bg-[#04201c] px-2 py-1.5 rounded-md border border-emerald-700/40 transition-colors w-full justify-center cursor-pointer"
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <>
+                <ChevronLeft className="w-4 h-4" />
+                <span>ซ่อนเมนูหลัก</span>
+              </>
             )}
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onSelectTab(item.id as NavTab)}
-                    title={isSidebarCollapsed ? item.label : undefined}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                      isActive
-                        ? 'bg-white text-[#073b34] font-bold shadow-sm'
-                        : 'text-emerald-100 hover:bg-[#094c43] hover:text-white'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0a4d44]' : (item as any).highlight ? 'text-amber-300' : 'text-emerald-300'}`} />
-                    {!isSidebarCollapsed && (
-                      <>
-                        <span className="truncate text-left leading-snug flex-1">{item.label}</span>
-                        {(item as any).highlight && (
-                          <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md shrink-0 ${
-                            isActive ? 'bg-[#0a4d44] text-white' : 'bg-amber-400 text-slate-900 shadow-xs'
-                          }`}>
-                            ตั้งต้นแผน
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </button>
-                );
-              })}
+          </button>
+        </div>
+
+        {/* Desktop Navigation Links */}
+        {renderNavContent(isSidebarCollapsed, false)}
+      </aside>
+
+      {/* 2. Mobile Slide-Over Drawer Overlay (< md breakpoint) */}
+      {isMobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Dark Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={onCloseMobile}
+          />
+
+          {/* Drawer Container */}
+          <div className="relative flex-1 max-w-xs w-full bg-[#073b34] text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200 border-r border-[#052c27]">
+            {/* Mobile Drawer Header */}
+            <div className="p-4 bg-[#0a4d44] border-b border-emerald-800/60 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 bg-white/95 rounded-lg flex items-center justify-center p-1 shadow-sm shrink-0">
+                  <NhrcLogo size={26} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white truncate">สำนักงาน กสม.</h3>
+                  <p className="text-[10px] text-emerald-200 truncate">ปีงบประมาณ {fiscalYear}</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="p-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-900 text-emerald-200 hover:text-white border border-emerald-600/40 transition-colors cursor-pointer"
+                title="ปิดเมนู"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Mobile Drawer Navigation List */}
+            {renderNavContent(false, true)}
+
+            {/* Drawer Footer */}
+            <div className="p-3 border-t border-emerald-800/40 bg-[#052c27] text-center text-[11px] text-emerald-300/80 font-medium">
+              ระบบติดตามแผนและงบประมาณ กสม.
             </div>
           </div>
-        ))}
-      </div>
-    </aside>
+        </div>
+      )}
+    </>
   );
 };
+
+export default Sidebar;
