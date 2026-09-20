@@ -20,7 +20,6 @@ import { UnitBreakdownView } from './components/reports/UnitBreakdownView';
 import { UserPermissionManagement } from './components/auth/UserPermissionManagement';
 import { SystemSettingsView } from './components/settings/SystemSettingsView';
 import { UserManualView } from './components/manual/UserManualView';
-import { FloatingActionButton } from './components/common/FloatingActionButton';
 import { Project } from './types/project';
 import { ProgressReport } from './types/progress';
 import { OfficialMemoData } from './types/budget';
@@ -271,13 +270,6 @@ export const AppContent: React.FC = () => {
           )}
         </main>
       </div>
-
-      {/* Floating Action Button */}
-      <FloatingActionButton
-        onOpenNewProject={handleOpenNewProject}
-        onOpenWordImport={() => setActiveTab('word_import')}
-        onOpenNewTransfer={() => setActiveTab('budget_transfers')}
-      />
 
       {/* Modals */}
       <WordImportModal

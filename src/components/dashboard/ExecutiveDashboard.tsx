@@ -770,7 +770,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Building2 className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
-              <span>งบประมาณจำแนกตามสำนัก / ส่วนราชการ (14 สำนัก)</span>
+              <span>งบประมาณจำแนกตามสำนัก</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               สรุปงบประมาณจัดสรร เบิกจ่าย และคงเหลือสุทธิจำแนกรายสำนัก
