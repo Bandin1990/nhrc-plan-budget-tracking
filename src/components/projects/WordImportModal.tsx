@@ -121,9 +121,38 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
     if (isPdf) {
-      setParsingStepText('กำลังสแกนโครงสร้างเอกสาร PDF (ค้นหาตารางแผนปฏิบัติการ)...');
+      // Step 1: If AI is enabled and API Key is set, prioritize AI Smart Extraction first
+      if (isAiEnabled && apiKey.trim()) {
+        setParsingStepText(`กำลังส่งไฟล์ PDF ให้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างและสกัดตารางกิจกรรม...`);
+        try {
+          const aiRes = await extractProjectFromPdfWithAi(file, selectedFiscalYear, apiKey);
+          if (aiRes.success && (aiRes.project || (aiRes.projects && aiRes.projects.length > 0))) {
+            const proj = aiRes.project || aiRes.projects![0];
+            setParsedData({
+              project: {
+                ...proj,
+                fiscalYear: selectedFiscalYear,
+                isBaselineLocked: isBaselineLocked
+              },
+              projects: aiRes.projects,
+              isMultiProject: aiRes.isMultiProject,
+              extractedActivities: aiRes.extractedActivities || proj.activities || [],
+              rawText: '',
+              sourceType: 'pdf_ai'
+            });
+            setAiSuccessBadge(true);
+            initEditFields(proj);
+            setIsParsing(false);
+            setParsingStepText('');
+            return;
+          }
+        } catch (aiErr) {
+          console.warn('AI PDF extraction failed in modal, falling back to local parser:', aiErr);
+        }
+      }
 
-      // Try local plan parser first
+      // Step 2: High-Speed Offline PDF Plan Parser (Fallback)
+      setParsingStepText('กำลังสแกนโครงสร้างเอกสาร PDF (ค้นหาตารางแผนปฏิบัติการ)...');
       try {
         const planRes = await parsePdfOperationalPlan(file, selectedFiscalYear);
         if (planRes.projects && planRes.projects.length > 0) {
@@ -157,43 +186,6 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
         setIsParsing(false);
         setParsingStepText('');
         return;
-      }
-
-      setParsingStepText(`กำลังส่งไฟล์ PDF ให้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างและสกัดตารางกิจกรรม...`);
-      try {
-        const aiRes = await extractProjectFromPdfWithAi(file, selectedFiscalYear, apiKey);
-        if (aiRes.success && (aiRes.project || (aiRes.projects && aiRes.projects.length > 0))) {
-          const proj = aiRes.project || aiRes.projects![0];
-          setParsedData({
-            project: {
-              ...proj,
-              fiscalYear: selectedFiscalYear,
-              isBaselineLocked: isBaselineLocked
-            },
-            projects: aiRes.projects,
-            isMultiProject: aiRes.isMultiProject,
-            extractedActivities: aiRes.extractedActivities || proj.activities || [],
-            rawText: '',
-            sourceType: 'pdf_ai'
-          });
-          setAiSuccessBadge(true);
-          initEditFields(proj);
-        } else {
-          const err = aiRes.error || 'ไม่สามารถสกัดข้อมูลจากไฟล์ PDF ได้ กรุณาตรวจสอบความถูกต้องของเอกสาร';
-          setErrorMsg(err);
-          if (err.includes('API Key') || err.includes('denied') || err.includes('ระงับ') || err.includes('สิทธิ์')) {
-            setShowApiKeyInput(true);
-          }
-        }
-      } catch (err: any) {
-        const msg = `เกิดข้อผิดพลาดในการอ่านไฟล์ PDF: ${err.message || 'ไม่ทราบสาเหตุ'}`;
-        setErrorMsg(msg);
-        if (msg.includes('API Key') || msg.includes('denied') || msg.includes('ระงับ') || msg.includes('สิทธิ์')) {
-          setShowApiKeyInput(true);
-        }
-      } finally {
-        setIsParsing(false);
-        setParsingStepText('');
       }
       return;
     }
@@ -441,7 +433,7 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                <span>นำเข้าแผนปฏิบัติการจากไฟล์ Word / PDF</span>
+                <span>นำเข้าแผนปฏิบัติการประจำปี</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 รองรับไฟล์ข้อเสนอโครงการ (.docx / .doc) และไฟล์เล่มแผน (.pdf) ด้วย AI

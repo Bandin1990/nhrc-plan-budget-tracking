@@ -168,9 +168,50 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
     if (isPdf) {
-      setParsingStepText('กำลังสแกนโครงสร้างเอกสาร PDF (ค้นหาตารางแผนปฏิบัติการและบัญชีโครงการ)...');
+      // Step 1: If AI is enabled and API Key is set, prioritize AI Smart Extraction first
+      if (isAiEnabled && apiKey.trim()) {
+        setParsingStepText(`กำลังส่งไฟล์ PDF ให้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างโครงการและตารางกิจกรรม...`);
+        try {
+          const aiRes = await extractProjectFromPdfWithAi(file, selectedFiscalYear, apiKey);
+          if (aiRes.success) {
+            if (aiRes.isMultiProject && aiRes.projects && aiRes.projects.length > 0) {
+              setMultiProjects(aiRes.projects);
+              setSelectedProjectIds(new Set(aiRes.projects.map(p => p.id || p.code || '')));
+              setParsedData({
+                isMultiProject: true,
+                planTitle: aiRes.planTitle || 'แผนปฏิบัติการประจำปี',
+                totalBudget: aiRes.totalBudget || 0,
+                projects: aiRes.projects,
+                extractedActivities: [],
+                rawText: '',
+                sourceType: 'pdf_ai'
+              });
+              setAiSuccessBadge(true);
+            } else if (aiRes.project) {
+              setParsedData({
+                project: {
+                  ...aiRes.project,
+                  fiscalYear: selectedFiscalYear,
+                  isBaselineLocked: isBaselineLocked
+                },
+                extractedActivities: aiRes.extractedActivities || [],
+                rawText: '',
+                sourceType: 'pdf_ai'
+              });
+              setAiSuccessBadge(true);
+              initEditFields(aiRes.project);
+            }
+            setIsParsing(false);
+            setParsingStepText('');
+            return;
+          }
+        } catch (aiErr: any) {
+          console.warn('AI PDF extraction failed, falling back to local parser:', aiErr);
+        }
+      }
 
-      // Step 1: Run Local High-Speed PDF Plan Parser (handles master plan or single project PDF offline instantly)
+      // Step 2: High-Speed Offline PDF Plan Parser (Fallback)
+      setParsingStepText('กำลังสแกนโครงสร้างเอกสาร PDF (ค้นหาตารางแผนปฏิบัติการและบัญชีโครงการ)...');
       try {
         const planRes = await parsePdfOperationalPlan(file, selectedFiscalYear);
         if (planRes.projects && planRes.projects.length > 0) {
@@ -210,62 +251,12 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
         console.warn('Local PDF plan parser skipped or error:', localErr);
       }
 
-      // Step 2: If not detected by local parser, try AI
       if (!apiKey.trim()) {
         setShowApiKeyInput(true);
-        setErrorMsg('ไม่พบตารางแผนปฏิบัติการอัตโนมัติในเอกสาร หากต้องการให้ AI สกัดข้อมูล กรุณาระบุ OpenAI หรือ Google Gemini API Key ด้านล่าง');
+        setErrorMsg('ไม่สามารถสกัดข้อมูลจากไฟล์ PDF ได้ กรุณาระบุ OpenAI หรือ Google Gemini API Key เพื่อให้ AI อ่านเอกสาร');
         setIsParsing(false);
         setParsingStepText('');
         return;
-      }
-
-      setParsingStepText(`กำลังส่งไฟล์ PDF ให้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างโครงการทั้งหมด...`);
-      try {
-        const aiRes = await extractProjectFromPdfWithAi(file, selectedFiscalYear, apiKey);
-        if (aiRes.success) {
-          if (aiRes.isMultiProject && aiRes.projects && aiRes.projects.length > 0) {
-            setMultiProjects(aiRes.projects);
-            setSelectedProjectIds(new Set(aiRes.projects.map(p => p.id || p.code || '')));
-            setParsedData({
-              isMultiProject: true,
-              planTitle: aiRes.planTitle || 'แผนปฏิบัติการประจำปี',
-              totalBudget: aiRes.totalBudget || 0,
-              projects: aiRes.projects,
-              extractedActivities: [],
-              rawText: '',
-              sourceType: 'pdf_ai'
-            });
-            setAiSuccessBadge(true);
-          } else if (aiRes.project) {
-            setParsedData({
-              project: {
-                ...aiRes.project,
-                fiscalYear: selectedFiscalYear,
-                isBaselineLocked: isBaselineLocked
-              },
-              extractedActivities: aiRes.extractedActivities || [],
-              rawText: '',
-              sourceType: 'pdf_ai'
-            });
-            setAiSuccessBadge(true);
-            initEditFields(aiRes.project);
-          }
-        } else {
-          const err = aiRes.error || 'ไม่สามารถสกัดข้อมูลจากไฟล์ PDF ได้ กรุณาตรวจสอบความถูกต้องของเอกสาร';
-          setErrorMsg(err);
-          if (err.includes('API Key') || err.includes('denied') || err.includes('ระงับ') || err.includes('สิทธิ์')) {
-            setShowApiKeyInput(true);
-          }
-        }
-      } catch (err: any) {
-        const msg = `เกิดข้อผิดพลาดในการอ่านไฟล์ PDF: ${err.message || 'ไม่ทราบสาเหตุ'}`;
-        setErrorMsg(msg);
-        if (msg.includes('API Key') || msg.includes('denied') || msg.includes('ระงับ') || msg.includes('สิทธิ์')) {
-          setShowApiKeyInput(true);
-        }
-      } finally {
-        setIsParsing(false);
-        setParsingStepText('');
       }
       return;
     }
@@ -649,7 +640,7 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800 dark:text-white">
-              นำเข้าแผนปฏิบัติการประจำปี (Word / PDF / AI)
+              นำเข้าแผนปฏิบัติการประจำปี
             </h2>
           </div>
         </div>

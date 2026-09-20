@@ -33,25 +33,23 @@ export const STRATEGIC_PILLARS: Record<number, string> = {
  * e.g. "ท า" -> "ทำ", "ส านักงาน" -> "สำนักงาน", "ประจ าปี" -> "ประจำปี"
  */
 export function fixThaiSpacedVowels(text: string): string {
+  if (!text) return '';
   return text
+    .replace(/ำ/g, 'า')
+    .replace(/สาหรับ/g, 'สำหรับ')
+    .replace(/จานวน/g, 'จำนวน')
+    .replace(/ดาเนิน/g, 'ดำเนิน')
+    .replace(/จัดทา/g, 'จัดทำ')
+    .replace(/ทาหน้าที่/g, 'ทำหน้าที่')
     .replace(/([\u0E01-\u0E2E])\s+([ะาำเแโใไ])/g, '$1$2')
     .replace(/([เแโใไ])\s+([\u0E01-\u0E2E])/g, '$1$2')
-    .replace(/ท\s+า/g, 'ทำ')
-    .replace(/ส\s+า/g, 'สา')
-    .replace(/จ\s+า/g, 'จำ')
-    .replace(/ด\s+า/g, 'ดำ')
-    .replace(/ค\s+า/g, 'คำ')
-    .replace(/น\s+า/g, 'นำ')
-    .replace(/ป\s+า/g, 'ปำ')
-    .replace(/ร\s+า/g, 'รำ')
-    .replace(/ล\s+า/g, 'ลำ')
-    .replace(/จัดท\s*า/g, 'จัดทำ')
-    .replace(/ส\s*านักงาน/g, 'สำนักงาน')
-    .replace(/ประจ\s*าปี/g, 'ประจำปี')
-    .replace(/ด\s*าเนินงาน/g, 'ดำเนินงาน')
-    .replace(/จ\s*านวน/g, 'จำนวน')
-    .replace(/ส\s*าหรับ/g, 'สำหรับ')
-    .replace(/ค\s*าสั่ง/g, 'คำสั่ง');
+    .replace(/ส\s*า\s*นั\s*ก\s*ง\s*า\s*น/g, 'สำนักงาน')
+    .replace(/ป\s*ร\s*ะ\s*จ\s*า\s*ป\s*ี/g, 'ประจำปี')
+    .replace(/โ\s*ค\s*ร\s*ง\s*ก\s*า\s*ร/g, 'โครงการ')
+    .replace(/ก\s*ิ\s*จ\s*ก\s*ร\s*ร\s*ม/g, 'กิจกรรม')
+    .replace(/ง\s*บ\s*ป\s*ร\s*ะ\s*ม\s*า\s*ณ/g, 'งบประมาณ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
@@ -293,10 +291,13 @@ export async function parsePdfOperationalPlan(
         const fullBlock = blockLines.join(' ');
 
         let budget = 0;
+        const codeSuffixNum = parseInt(code.split('-')[1], 10);
         const bMatches = fullBlock.match(/[\d,]{4,}(?:\.\d{2})?/g) || [];
         for (const bm of bMatches) {
           const val = parseFloat(bm.replace(/,/g, ''));
-          if (val > 2575 && val !== 7000000) { budget = val; }
+          if (val >= 2560 && val <= 2575) continue; // skip years
+          if (Math.abs(val - codeSuffixNum) < 1) continue; // skip code suffix number!
+          if (val > 1000) { budget = val; }
         }
 
         let div: NHRCUnit = 'สนย.';
