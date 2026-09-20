@@ -255,13 +255,13 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       )}
 
       {/* SECTION 1: 4 Budget Summary Cards */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-            <DollarSign className="w-4 h-4 text-[#0a4d44] dark:text-emerald-400" />
+          <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
             <span>สถานะงบประมาณประจำปี</span>
           </h3>
-          <span className="text-xs text-slate-400">หน่วย: บาท (THB)</span>
+          <span className="text-xs font-medium text-slate-400">หน่วย: บาท (THB)</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -272,9 +272,6 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                 งบประมาณทั้งหมด (จัดสรร)
               </span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#0a4d44] dark:text-emerald-400 flex items-center justify-center border border-emerald-200/50 dark:border-emerald-800">
-                <DollarSign className="w-5 h-5" />
-              </div>
             </div>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -297,9 +294,6 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                 งบเบิกจ่ายจริง (สะสม)
               </span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200/50 dark:border-emerald-800">
-                <TrendingUp className="w-5 h-5" />
-              </div>
             </div>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
@@ -322,9 +316,6 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                 งบประมาณคงเหลือสุทธิ
               </span>
-              <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-200/50 dark:border-sky-800">
-                <Scale className="w-5 h-5" />
-              </div>
             </div>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-bold text-sky-600 dark:text-sky-400 tracking-tight">
@@ -347,9 +338,6 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                 ส่งคืนเข้าส่วนกลาง (เงินเหลือ)
               </span>
-              <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-200/50 dark:border-amber-800">
-                <Coins className="w-5 h-5" />
-              </div>
             </div>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-bold text-amber-700 dark:text-amber-400 tracking-tight">
@@ -368,13 +356,13 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* SECTION 2: 4 Project Status Cards */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-            <FolderKanban className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <FolderKanban className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span>สถานะความก้าวหน้าโครงการ</span>
           </h3>
-          <span className="text-xs text-slate-400">หน่วย: โครงการ</span>
+          <span className="text-xs font-medium text-slate-400">หน่วย: โครงการ</span>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -472,16 +460,8 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       {/* SECTION 3: EXECUTIVE PIE CHARTS (เบิกจ่าย vs คงเหลือ) */}
       {/* ========================================================================= */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-5">
-        {/* Header Title & Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
-            <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white">
-              รายงานสรุปงบประมาณสำหรับผู้บริหาร
-            </h3>
-          </div>
-
-          {/* Perspective Switcher Tabs */}
+        {/* Perspective Switcher Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs shrink-0">
             <button
               type="button"
