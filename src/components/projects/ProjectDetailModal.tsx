@@ -79,19 +79,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   onClose();
                   onOpenEditProject(project);
                 }}
-                className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#073b34] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs border border-emerald-500/30"
+                className="bg-[#0a4d44] hover:bg-[#073b34] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs border border-emerald-500/30 cursor-pointer"
                 title="เข้าสู่หน้าจอบันทึกรายละเอียดค่าใช้จ่ายและแผนการใช้จ่ายงบประมาณ"
               >
-                <Coins className="w-3.5 h-3.5 text-amber-300" />
                 <span>บันทึกรายละเอียดค่าใช้จ่าย</span>
               </button>
             )}
             <button
               onClick={() => setShowPrintPlan(true)}
-              className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+              className="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
               title="พิมพ์แบบฟอร์มรายละเอียดโครงการ (5 ส่วน)"
             >
-              <Printer className="w-3.5 h-3.5" />
               <span>พิมพ์แบบโครงการ</span>
             </button>
             <button
@@ -364,18 +362,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPrintPlan(true)}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
               <span>พิมพ์แบบฟอร์มรายละเอียดโครงการ</span>
             </button>
 
             {isOwner && (
               <button
                 onClick={() => onOpenEditProject(project)}
-                className="flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-white px-4 py-2 rounded-xl text-xs font-bold"
+                className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
               >
-                <Edit3 className="w-3.5 h-3.5" />
                 <span>แก้ไขโครงการ</span>
               </button>
             )}
@@ -383,18 +379,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             <button
               onClick={() => onOpenReportProgress(project)}
               disabled={!isOwner}
-              className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#083b34] text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40"
+              className="bg-[#0a4d44] hover:bg-[#083b34] text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
             >
-              <Clock className="w-3.5 h-3.5" />
               <span>บันทึกรายงานผล 2 เดือน (สนย.3)</span>
             </button>
 
             <button
               onClick={() => onOpenBudgetTransfer(project)}
               disabled={!isOwner}
-              className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
+              className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
             >
-              <Scale className="w-3.5 h-3.5" />
               <span>ขอโอน/เปลี่ยนแปลงงบ</span>
             </button>
 
@@ -402,9 +396,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               <button
                 onClick={() => onOpenBudgetReturn(project)}
                 disabled={!isOwner}
-                className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer shadow-xs"
+                className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer shadow-xs"
               >
-                <Coins className="w-3.5 h-3.5" />
                 <span>ส่งคืนงบเหลือจ่ายเข้าส่วนกลาง</span>
               </button>
             )}

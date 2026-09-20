@@ -52,8 +52,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       title: `แผนงานและโครงการ (ปีงบฯ ${fiscalYear})`,
       items: [
-        { id: 'project_catalog', label: 'ทะเบียนโครงการทั้งหมด', icon: FolderKanban },
         { id: 'word_import', label: 'นำเข้าแผนปฏิบัติการ (Word/AI)', icon: FileUp, highlight: true },
+        { id: 'project_catalog', label: 'ทะเบียนโครงการทั้งหมด', icon: FolderKanban },
         { id: 'strategic_projects', label: 'โครงการเชิงยุทธศาสตร์', icon: Target },
       ]
     },
@@ -155,11 +155,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Desktop Header */}
         <div className="p-3 flex items-center justify-between border-b border-emerald-800/40">
-          {!isSidebarCollapsed && (
-            <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wider">
-              เมนูการปฏิบัติงาน
-            </span>
-          )}
           <button
             onClick={toggleSidebar}
             title={isSidebarCollapsed ? 'ขยายเมนู' : 'ซ่อนเมนูหลัก'}

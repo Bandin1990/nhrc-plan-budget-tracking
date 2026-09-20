@@ -483,69 +483,69 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 overflow-x-auto text-xs font-bold scrollbar-none">
+        <div className="flex border-b border-emerald-800/60 bg-[#073b34] p-2 gap-1.5 overflow-x-auto text-xs sm:text-sm font-bold scrollbar-none shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab(1)}
-            className={`px-4 py-3 flex items-center gap-1.5 whitespace-nowrap border-b-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 1
-                ? 'border-[#0a4d44] text-[#0a4d44] dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
-            <Building2 className="w-4 h-4" />
+            <Building2 className="w-4 h-4 shrink-0" />
             <span>ส่วนที่ 1: ข้อมูลโครงการ</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(2)}
-            className={`px-4 py-3 flex items-center gap-1.5 whitespace-nowrap border-b-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 2
-                ? 'border-[#0a4d44] text-[#0a4d44] dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
-            <Target className="w-4 h-4" />
+            <Target className="w-4 h-4 shrink-0" />
             <span>ส่วนที่ 2: ยุทธศาสตร์ชาติ</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(3)}
-            className={`px-4 py-3 flex items-center gap-1.5 whitespace-nowrap border-b-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 3
-                ? 'border-[#0a4d44] text-[#0a4d44] dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 shrink-0" />
             <span>ส่วนที่ 3: รายละเอียดโครงการ</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(4)}
-            className={`px-4 py-3 flex items-center gap-1.5 whitespace-nowrap border-b-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 4
-                ? 'border-[#0a4d44] text-[#0a4d44] dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-4 h-4 shrink-0" />
             <span>ส่วนที่ 4: แผนรายเดือน & ครม.</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(5)}
-            className={`px-4 py-3 flex items-center gap-1.5 whitespace-nowrap border-b-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 5
-                ? 'border-[#0a4d44] text-[#0a4d44] dark:text-emerald-400 bg-white dark:bg-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
-            <Paperclip className="w-4 h-4" />
+            <Paperclip className="w-4 h-4 shrink-0" />
             <span>ส่วนที่ 5 & เอกสารแนบ</span>
           </button>
         </div>

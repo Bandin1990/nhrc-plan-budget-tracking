@@ -78,6 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate, o
   // Searchable System Pages / Workflows
   const SYSTEM_MENUS = [
     { tab: 'dashboard' as NavTab, label: 'หน้าหลัก & แดชบอร์ดสรุปผล', desc: 'ภาพรวมงบประมาณและสถานะโครงการทั้งหมด', icon: LayoutDashboard, category: 'ภาพรวม' },
+    { tab: 'word_import' as NavTab, label: 'นำเข้าแผนปฏิบัติการประจำปี (Word/AI)', desc: 'แปลงไฟล์เอกสารคำของบประมาณเข้าสู่ระบบและตั้งเป็นแผนประจำปี', icon: FileUp, category: 'แผนงาน' },
     { tab: 'project_catalog' as NavTab, label: 'ทะเบียนโครงการทั้งหมด', desc: 'ค้นหา กรอง และจัดการโครงการประจำปี', icon: FolderKanban, category: 'แผนงาน' },
     { tab: 'strategic_projects' as NavTab, label: 'โครงการเชิงยุทธศาสตร์', desc: 'โครงการสำคัญขับเคลื่อนยุทธศาสตร์สิทธิมนุษยชน', icon: Target, category: 'แผนงาน' },
     { tab: 'progress_reports' as NavTab, label: 'รายงานผลรอบ 2 เดือน (สนย.3)', desc: 'บันทึกผลการดำเนินงานและปัญหาอุปสรรค', icon: Clock, category: 'รายงานผล' },
@@ -90,7 +91,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate, o
     ...(currentUser.role === 'ADMIN' ? [
       { tab: 'user_permissions' as NavTab, label: 'จัดการสิทธิ์ผู้ใช้งาน (RBAC)', desc: 'กำหนดสิทธิ์โครงการและบทบาทผู้ใช้งาน', icon: Users, category: 'ระบบ' },
     ] : []),
-    { tab: 'word_import' as NavTab, label: 'นำเข้าแผนปฏิบัติการประจำปี (Word/AI)', desc: 'แปลงไฟล์เอกสารคำของบประมาณเข้าสู่ระบบและตั้งเป็นแผนประจำปี', icon: FileUp, category: 'แผนงาน' },
     { tab: 'user_manual' as NavTab, label: 'คู่มือการใช้งานระบบ (User Manual)', desc: 'ขั้นตอนการใช้งานระบบ การสกัดไฟล์ Word และคำถามที่พบบ่อย', icon: BookOpen, category: 'ช่วยเหลือ' },
   ];
 
