@@ -145,12 +145,14 @@ export async function parsePdfOperationalPlan(
     }
   }
 
-  // Check if Table 6 or Chapter 3.1 project list exists
+  // Check if Table 6, Chapter 3.1 project list, or FY 2570 Master Plan exists
+  const totalProjectMentions = allLines.filter(al => al.line.includes('โครงการ')).length;
   const isMasterPlan = allLines.some(al => 
     al.line.includes('ตารางที่ 6') || 
     al.line.includes('โครงการเชิงยุทธศาสตร์ตามแผนปฏิบัติการ') ||
-    (al.line.includes('โครงการ') && al.line.includes('ยุทธศาสตร์ที่'))
-  );
+    (al.line.includes('โครงการ') && al.line.includes('ยุทธศาสตร์ที่')) ||
+    /70[A-Z0-9]{2}-[0-9]{5}/.test(al.line)
+  ) || totalProjectMentions > 5;
 
   if (!isMasterPlan) {
     // Attempt single-project PDF extraction from text lines
@@ -252,17 +254,21 @@ export async function parsePdfOperationalPlan(
     };
   }
 
-  // Find Section 3.2 / Table 6 start
+  // Find table start index
   let startIdx = 0;
   for (let idx = 0; idx < allLines.length; idx++) {
     const l = allLines[idx].line;
-    if (l.includes('ยุทธศาสตร์ที่ 1') && allLines[idx].page >= 15) {
+    if (
+      (l.includes('ยุทธศาสตร์ที่ 1') && allLines[idx].page >= 15) || 
+      (allLines[idx].page >= 3 && /70[A-Z0-9]{2}-[0-9]{5}/.test(l)) ||
+      (allLines[idx].page >= 3 && l.includes('โครงการ') && !l.includes('แผนงาน'))
+    ) {
       startIdx = idx;
       break;
     }
   }
 
-  // Extract projects from Table 6 / Chapter 3
+  // Extract projects from Table 6 / Chapter 3 or Master Operational Table
   const projects: Partial<Project>[] = [];
   let currentPillar = 1;
   let currentProgramCode: ProgramCode = 'M_T';
@@ -272,12 +278,11 @@ export async function parsePdfOperationalPlan(
   while (i < allLines.length) {
     const { page, line } = allLines[i];
 
-    // Stop if table 6 grand total is reached or table ended
+    // Stop if table grand total is reached
     if (
-      line.includes('รวมทั้งสิ้น (บาท)') || 
       line.includes('แผนการใช้จ่ายงบประมาณ รวมทั้งสิ้น') ||
       (line.includes('รวมทั้งสิ้น') && line.includes('84,466,020')) ||
-      (page > 32 && projects.length >= 20)
+      (page > 34 && projects.length >= 35)
     ) {
       break;
     }
@@ -288,6 +293,17 @@ export async function parsePdfOperationalPlan(
       currentPillar = parseInt(mPillar[1], 10);
       i++;
       continue;
+    }
+
+    // Code-based program detection (e.g., 70O1-..., 70D2-..., 70M1-..., 70S1-...)
+    const mCodeProgram = line.match(/70([A-Z0-9]{1,2})-[0-9]{5}/);
+    if (mCodeProgram) {
+      const codeType = mCodeProgram[1];
+      if (codeType.startsWith('O')) currentProgramCode = 'O';
+      else if (codeType.startsWith('D')) currentProgramCode = 'D2';
+      else if (codeType.startsWith('S')) currentProgramCode = 'S1';
+      else if (codeType.startsWith('A')) currentProgramCode = 'A';
+      else if (codeType.startsWith('M') || codeType.startsWith('T')) currentProgramCode = 'M_T';
     }
 
     // Program code detection: strictly on lines declaring budget programs
@@ -309,22 +325,25 @@ export async function parsePdfOperationalPlan(
 
     // Skip grouping rows
     if (
-      line.includes('งบดำเนินงาน') || 
-      line.includes('งบดาเนินงาน') || 
-      line.includes('งบลงทุน') ||
-      line.includes('จำนวน') ||
-      line.includes('จ านวน') ||
-      line.includes('รวมทั้งสิ้น')
+      (line.includes('งบดำเนินงาน') && !line.includes('โครงการ')) || 
+      (line.includes('งบดาเนินงาน') && !line.includes('โครงการ')) || 
+      (line.includes('งบลงทุน') && !line.includes('โครงการ')) ||
+      (line.includes('จำนวน') && !line.includes('โครงการ')) ||
+      (line.includes('จ านวน') && !line.includes('โครงการ'))
     ) {
       i++;
       continue;
     }
 
-    // Project header detection: e.g. "1 โครงการ..." or "11 โครงการ..."
-    const mProj = line.match(/^(\d{1,2})\s+โครงการ(.+)$/);
-    if (mProj) {
-      const order = parseInt(mProj[1], 10);
-      const initialTitle = 'โครงการ' + mProj[2].trim();
+    // Project header detection: e.g. "1 โครงการ...", "14 โครงการ...", or "โครงการ..."
+    const isProjHeader = (line.includes('โครงการ') || line.includes('โครงกำร')) &&
+                         !line.startsWith('ค่าใช้จ่ายโครงการ') &&
+                         !line.startsWith('ค่ำใช้จ่ำยโครงกำร') &&
+                         !line.includes('ไม่มีโครงการรองรับ') &&
+                         line.length > 8;
+
+    if (isProjHeader) {
+      const initialTitle = line.replace(/^\d+\s*/, '').trim();
       
       const headerLines: string[] = [initialTitle];
       const activityLines: string[] = [];
