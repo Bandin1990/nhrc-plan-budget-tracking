@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Clock, CheckCircle2, Plus, Trash2 } from 'lucide-react';
-import { Project } from '../../types/project';
+import { Project, NHRC_UNITS, NHRCUnit } from '../../types/project';
 import { 
   ProgressReport, ReportRound, REPORT_ROUNDS, 
   ProgressActivityRow, ProgressActivityDetail, ProgressObjectiveRow,
@@ -57,6 +57,21 @@ export const ProgressReportFormModal: React.FC<ProgressReportFormModalProps> = (
     }
   ]);
 
+  // Section 6: Responsible Person / Reporter
+  const [respName, setRespName] = useState('');
+  const [respPosition, setRespPosition] = useState('');
+  const [respDivision, setRespDivision] = useState<NHRCUnit>('สนย.');
+  const [respSubDivision, setRespSubDivision] = useState('');
+  const [respPhone, setRespPhone] = useState('02 141 3857');
+  const [respEmail, setRespEmail] = useState('');
+
+  const getRpName = (rp: any) => (typeof rp === 'string' ? rp : rp?.name || '');
+  const getRpPos = (rp: any) => (typeof rp === 'object' ? rp?.position || '' : '');
+  const getRpDiv = (rp: any) => (typeof rp === 'object' ? rp?.division || '' : '');
+  const getRpSubDiv = (rp: any) => (typeof rp === 'object' ? rp?.subDivision || '' : '');
+  const getRpPhone = (rp: any) => (typeof rp === 'object' ? rp?.phone || '' : '');
+  const getRpEmail = (rp: any) => (typeof rp === 'object' ? rp?.email || '' : '');
+
   useEffect(() => {
     if (reportToEdit) {
       setRound(reportToEdit.round);
@@ -67,10 +82,23 @@ export const ProgressReportFormModal: React.FC<ProgressReportFormModalProps> = (
       setObjectives(reportToEdit.section2_3 || []);
       setPolicies(reportToEdit.section3 || []);
       setObstacles(reportToEdit.section4_5 || []);
+      setRespName(reportToEdit.section6?.name || getRpName(project?.responsiblePerson) || currentUser?.name || '');
+      setRespPosition(reportToEdit.section6?.position || getRpPos(project?.responsiblePerson) || currentUser?.position || 'นักวิชาการสิทธิมนุษยชนชำนาญการ');
+      setRespDivision((reportToEdit.section6?.division || getRpDiv(project?.responsiblePerson) || project?.division || currentUser?.division || 'สนย.') as NHRCUnit);
+      setRespSubDivision(reportToEdit.section6?.subDivision || getRpSubDiv(project?.responsiblePerson) || currentUser?.subDivision || '');
+      setRespPhone(reportToEdit.section6?.phone || getRpPhone(project?.responsiblePerson) || '02 141 3857');
+      setRespEmail(reportToEdit.section6?.email || getRpEmail(project?.responsiblePerson) || currentUser?.email || '');
     } else if (project) {
       setRound('round_6');
       setReportDate(new Date().toISOString().split('T')[0]);
       setAsOfDateText(`ณ วันที่ ${new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}`);
+
+      setRespName(getRpName(project.responsiblePerson) || currentUser?.name || '');
+      setRespPosition(getRpPos(project.responsiblePerson) || currentUser?.position || 'นักวิชาการสิทธิมนุษยชนชำนาญการ');
+      setRespDivision((getRpDiv(project.responsiblePerson) || project.division || currentUser?.division || 'สนย.') as NHRCUnit);
+      setRespSubDivision(getRpSubDiv(project.responsiblePerson) || currentUser?.subDivision || '');
+      setRespPhone(getRpPhone(project.responsiblePerson) || '02 141 3857');
+      setRespEmail(getRpEmail(project.responsiblePerson) || currentUser?.email || '');
 
       // Initialize activity rows from project
       setActivityRows(
@@ -147,12 +175,12 @@ export const ProgressReportFormModal: React.FC<ProgressReportFormModalProps> = (
       section3: policies,
       section4_5: obstacles,
       section6: {
-        name: currentUser.name,
-        position: currentUser.position,
-        division: currentUser.division,
-        subDivision: currentUser.subDivision,
-        phone: '02 141 3857',
-        email: currentUser.email,
+        name: respName || getRpName(project.responsiblePerson) || currentUser?.name || '',
+        position: respPosition || getRpPos(project.responsiblePerson) || currentUser?.position || 'นักวิชาการสิทธิมนุษยชนชำนาญการ',
+        division: respDivision || getRpDiv(project.responsiblePerson) || project.division || 'สนย.',
+        subDivision: respSubDivision || getRpSubDiv(project.responsiblePerson) || currentUser?.subDivision || '',
+        phone: respPhone || getRpPhone(project.responsiblePerson) || '02 141 3857',
+        email: respEmail || getRpEmail(project.responsiblePerson) || currentUser?.email || '',
       },
       status: 'approved',
       createdAt: reportToEdit ? reportToEdit.createdAt : new Date().toISOString(),
@@ -404,6 +432,83 @@ export const ProgressReportFormModal: React.FC<ProgressReportFormModalProps> = (
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Section 6: Responsible Person / Coordinator */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400 border-b pb-1 border-slate-200 dark:border-slate-800">
+              ส่วนที่ 6 : ผู้รับผิดชอบ/ผู้ประสานงานโครงการ
+            </h4>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">ชื่อ-นามสกุล (ผู้รับผิดชอบ/ผู้รายงาน)*</label>
+                <input
+                  type="text"
+                  required
+                  value={respName}
+                  onChange={(e) => setRespName(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">ตำแหน่ง*</label>
+                <input
+                  type="text"
+                  required
+                  value={respPosition}
+                  onChange={(e) => setRespPosition(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">สังกัดสำนัก/ส่วนราชการ*</label>
+                <select
+                  value={respDivision}
+                  onChange={(e) => setRespDivision(e.target.value as NHRCUnit)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                >
+                  {Object.keys(NHRC_UNITS).map((u) => (
+                    <option key={u} value={u}>
+                      {u} - {NHRC_UNITS[u as NHRCUnit].fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">กลุ่มงาน/ฝ่าย</label>
+                <input
+                  type="text"
+                  value={respSubDivision}
+                  onChange={(e) => setRespSubDivision(e.target.value)}
+                  placeholder="เช่น กลุ่มงานนโยบายและยุทธศาสตร์"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">เบอร์โทรศัพท์</label>
+                <input
+                  type="text"
+                  value={respPhone}
+                  onChange={(e) => setRespPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">อีเมล (E-mail)</label>
+                <input
+                  type="email"
+                  value={respEmail}
+                  onChange={(e) => setRespEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-medium"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Footer Buttons */}

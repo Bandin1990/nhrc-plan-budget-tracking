@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Printer, Download, ArrowLeft, ToggleLeft, ToggleRight, Building2, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { NHRC_UNITS, BUDGET_PROGRAMS, NHRCUnit, ProgramCode } from '../../types/project';
 import { toThaiNumerals, formatCurrency } from '../../utils/thaiNumber';
 
@@ -10,6 +11,7 @@ interface ExecutivePrintReportProps {
 
 export const ExecutivePrintReport: React.FC<ExecutivePrintReportProps> = ({ onBack }) => {
   const { projects, fiscalYear } = useProjects();
+  const { currentUser } = useAuth();
   const [useThaiNumerals, setUseThaiNumerals] = useState(false);
   const [filterScope, setFilterScope] = useState<'all' | 'strategic'>('all');
 
@@ -272,8 +274,8 @@ export const ExecutivePrintReport: React.FC<ExecutivePrintReportProps> = ({ onBa
         <div className="pt-8 text-center text-[13pt] flex justify-end">
           <div className="w-72">
             <div className="h-10"></div>
-            <p className="font-bold">(นางสาวสุกัญญา ตันสายเพชร)</p>
-            <p className="text-slate-700">ผู้อำนวยการสำนักนโยบายและยุทธศาสตร์</p>
+            <p className="font-bold">({currentUser?.name || 'นางสาวสุกัญญา ตันสายเพชร'})</p>
+            <p className="text-slate-700">{currentUser?.position || 'ผู้อำนวยการสำนักนโยบายและยุทธศาสตร์'}</p>
             <p className="text-slate-500">สำนักงานคณะกรรมการสิทธิมนุษยชนแห่งชาติ</p>
           </div>
         </div>
