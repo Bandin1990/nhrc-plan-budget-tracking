@@ -530,7 +530,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-6xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Header */}
         <div className="bg-[#0a4d44] text-white px-6 py-4 flex items-center justify-between">
           <div>
@@ -539,7 +539,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
               <span>{projectToEdit ? `แก้ไขโครงการ (${projectToEdit.code})` : 'สร้างแบบเสนอโครงการตามแผนปฏิบัติการ (สำนักงาน กสม.)'}</span>
             </h3>
             <p className="text-xs text-emerald-100/90 mt-0.5">
-              จัดเก็บข้อมูลตามโครงสร้าง 5 ส่วนหลัก และตรวจสอบเกณฑ์เร่งรัดเบิกจ่ายตามมติ ครม. (21 ต.ค. 2568)
+              จัดเก็บข้อมูลตามโครงสร้าง 6 ส่วนหลัก และตรวจสอบเกณฑ์เร่งรัดเบิกจ่ายตามมติ ครม. (21 ต.ค. 2568)
             </p>
           </div>
           <button
@@ -551,24 +551,24 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-emerald-800/60 bg-[#073b34] p-2 gap-1.5 overflow-x-auto text-xs sm:text-sm font-bold scrollbar-none shadow-inner">
+        <div className="flex border-b border-emerald-800/60 bg-[#073b34] p-2 gap-1.5 overflow-x-auto text-xs sm:text-sm font-bold shadow-inner scrollbar-thin">
           <button
             type="button"
             onClick={() => setActiveTab(1)}
-            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 1
                 ? 'bg-white text-[#073b34] shadow-md'
                 : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
             <Building2 className="w-4 h-4 shrink-0" />
-            <span>ส่วนที่ 1: ข้อมูลโครงการ</span>
+            <span>ส่วนที่ 1 : ข้อมูลโครงการ</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(2)}
-            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 2
                 ? 'bg-white text-[#073b34] shadow-md'
                 : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
@@ -581,20 +581,20 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab(3)}
-            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 3
                 ? 'bg-white text-[#073b34] shadow-md'
                 : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
             <FileText className="w-4 h-4 shrink-0" />
-            <span>ส่วนที่ 3: รายละเอียดโครงการ</span>
+            <span>ส่วนที่ 3 : รายละเอียดโครงการ</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab(4)}
-            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 4
                 ? 'bg-white text-[#073b34] shadow-md'
                 : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
@@ -607,14 +607,27 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab(5)}
-            className={`px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
               activeTab === 5
                 ? 'bg-white text-[#073b34] shadow-md'
                 : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
             }`}
           >
+            <UserCheck className="w-4 h-4 shrink-0" />
+            <span>ส่วนที่ 5 : ผู้รับผิดชอบ/ผู้ประสานงานโครงการ</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab(6)}
+            className={`px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap transition-all cursor-pointer shrink-0 font-bold ${
+              activeTab === 6
+                ? 'bg-white text-[#073b34] shadow-md'
+                : 'text-emerald-100/90 hover:bg-[#094c43] hover:text-white'
+            }`}
+          >
             <Paperclip className="w-4 h-4 shrink-0" />
-            <span>ส่วนที่ 5 & เอกสารแนบ</span>
+            <span>ส่วนที่ 6 : เอกสารแนบ</span>
           </button>
         </div>
 
@@ -1588,7 +1601,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             </div>
           )}
 
-          {/* TAB 5: ผู้รับผิดชอบ & เอกสารแนบ */}
+          {/* TAB 5: ผู้รับผิดชอบ/ผู้ประสานงานโครงการ */}
           {activeTab === 5 && (
             <div className="space-y-6 animate-fadeIn">
               {/* Officer Section */}
@@ -1641,13 +1654,17 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Attachments Section */}
-              <div className="space-y-3 pt-2">
+          {/* TAB 6: เอกสารแนบ */}
+          {activeTab === 6 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="space-y-3">
                 <div className="border-b pb-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400 flex items-center gap-1.5">
                     <Paperclip className="w-4 h-4" />
-                    <span>เอกสารแนบประกอบโครงการ (Attachments)</span>
+                    <span>ส่วนที่ 6 : เอกสารแนบประกอบโครงการ (Attachments)</span>
                   </h4>
                   <span className="text-[11px] text-slate-500 font-medium">แนบไฟล์ .docx, .pdf, .xlsx</span>
                 </div>
@@ -1757,7 +1774,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   ← ส่วนก่อนหน้า
                 </button>
               )}
-              {activeTab < 5 && (
+              {activeTab < 6 && (
                 <button
                   type="button"
                   onClick={() => setActiveTab(activeTab + 1)}

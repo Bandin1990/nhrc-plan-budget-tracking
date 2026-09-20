@@ -251,12 +251,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               </p>
             </div>
 
-            {/* Section 5 & Attachments */}
+            {/* Section 5 & Section 6 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Officer */}
+              {/* Section 5 */}
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1.5 text-xs">
                 <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400 mb-2">
-                  ส่วนที่ 5 : ผู้รับผิดชอบโครงการ
+                  ส่วนที่ 5 : ผู้รับผิดชอบ/ผู้ประสานงานโครงการ
                 </h4>
                 <p><span className="text-slate-400 font-medium">ชื่อ-นามสกุล:</span> <strong className="text-slate-800 dark:text-white">{project.responsiblePerson?.name}</strong></p>
                 <p><span className="text-slate-400 font-medium">ตำแหน่ง:</span> {project.responsiblePerson?.position}</p>
@@ -264,10 +264,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 <p><span className="text-slate-400 font-medium">อีเมล:</span> {project.responsiblePerson?.email}</p>
               </div>
 
-              {/* Attachments */}
+              {/* Section 6 */}
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
                 <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400">
-                  เอกสารแนบประกอบโครงการ
+                  ส่วนที่ 6 : เอกสารแนบประกอบโครงการ
                 </h4>
                 {project.attachments && project.attachments.length > 0 ? (
                   <div className="space-y-1.5 pt-1">
