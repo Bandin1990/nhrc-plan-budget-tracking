@@ -261,25 +261,24 @@ export async function parsePdfOperationalPlan(
     };
   }
 
-  // Find table start index
+  // Extract projects from Table 6 / Chapter 3 or Master Operational Table
+  const projects: Partial<Project>[] = [];
+  let currentPillar = 1;
+  let currentProgramCode: ProgramCode = 'M_T';
+  const timestamp = Date.now();
+
   let startIdx = 0;
   for (let idx = 0; idx < allLines.length; idx++) {
     const l = allLines[idx].line;
     if (
       l.includes('ยุทธศาสตร์ที่') || 
       (l.includes('โครงการ') && !l.includes('แผนงาน')) ||
-      /\d{2}[A-Z0-9]{1,2}-[0-9]{5}/.test(l)
+      /\d{2}[A-Z0-9]{1,2}\s*[-–—]\s*\d{5}/.test(l)
     ) {
       startIdx = idx;
       break;
     }
   }
-
-  // Extract projects from Table 6 / Chapter 3 or Master Operational Table
-  const projects: Partial<Project>[] = [];
-  let currentPillar = 1;
-  let currentProgramCode: ProgramCode = 'M_T';
-  const timestamp = Date.now();
 
   let i = startIdx;
   while (i < allLines.length) {
@@ -301,8 +300,8 @@ export async function parsePdfOperationalPlan(
       continue;
     }
 
-    // Code-based program detection (e.g., 70O1-..., 70D2-..., 70M1-..., 70S1-...)
-    const mCodeProgram = line.match(/70([A-Z0-9]{1,2})-[0-9]{5}/);
+    // Code-based program detection (e.g., 70O1-..., 70D2-..., 70M1-..., 70S1-..., 70P1-...)
+    const mCodeProgram = line.match(/70\s*([A-Z0-9]{1,2})\s*[-–—]\s*[0-9]{5}/);
     if (mCodeProgram) {
       const codeType = mCodeProgram[1];
       if (codeType.startsWith('O')) currentProgramCode = 'O';
@@ -314,7 +313,7 @@ export async function parsePdfOperationalPlan(
     }
 
     // Program code detection: strictly on lines declaring budget programs
-    if (line.includes('แผนงาน')) {
+    if (line.includes('แผนงาน') && !line.includes('โครงการ')) {
       if (/แผนงาน\s*พื้นฐาน/i.test(line)) {
         currentProgramCode = 'M_T';
       } else if (/พัฒนาบริการ|ประสิทธิภาพภาครัฐ/i.test(line)) {
@@ -332,24 +331,28 @@ export async function parsePdfOperationalPlan(
       continue;
     }
 
-    // Skip grouping rows
+    // Skip generic non-project grouping rows
     if (
-      (line.includes('งบดำเนินงาน') && !line.includes('โครงการ')) || 
-      (line.includes('งบดาเนินงาน') && !line.includes('โครงการ')) || 
-      (line.includes('งบลงทุน') && !line.includes('โครงการ')) ||
-      (line.includes('จำนวน') && !line.includes('โครงการ')) ||
-      (line.includes('จ านวน') && !line.includes('โครงการ'))
+      (line.includes('งบดำเนินงาน') && !line.includes('โครงการ') && !/\d{2}[A-Z0-9]{1,2}/.test(line)) || 
+      (line.includes('งบดาเนินงาน') && !line.includes('โครงการ') && !/\d{2}[A-Z0-9]{1,2}/.test(line)) || 
+      (line.includes('งบลงทุน') && !line.includes('โครงการ') && !/\d{2}[A-Z0-9]{1,2}/.test(line))
     ) {
       i++;
       continue;
     }
 
-    // Project header detection: e.g. "1 โครงการ...", "14 โครงการ...", or "โครงการ..."
-    const isProjHeader = (line.includes('โครงการ') || line.includes('โครงกำร')) &&
-                         !line.startsWith('ค่าใช้จ่ายโครงการ') &&
-                         !line.startsWith('ค่ำใช้จ่ำยโครงกำร') &&
-                         !line.includes('ไม่มีโครงการรองรับ') &&
-                         line.length > 5;
+    // Project header detection:
+    // 1. Matches code pattern like 70T4-71009, 70S1-13101, 70O1-11001
+    // 2. Contains "โครงการ" or "โครงกำร" or "ค่าใช้จ่ายในการ"
+    // 3. Starts with numbered item (e.g., 1 โครงการ...)
+    const hasCode = /\d{2}[A-Z0-9]{1,2}\s*[-–—]\s*\d{5}/.test(line);
+    const hasProjKeyword = (line.includes('โครงการ') || line.includes('โครงกำร') || line.includes('ค่าใช้จ่าย')) &&
+                          !line.startsWith('ค่าใช้จ่ายโครงการ') &&
+                          !line.startsWith('ค่ำใช้จ่ำยโครงกำร') &&
+                          !line.includes('ไม่มีโครงการรองรับ');
+    const isNumberedProj = /^\d{1,3}\s+(?:โครงการ|โครงกำร|ค่าใช้จ่าย|ค่ำใช้จ่ำย)/.test(line);
+
+    const isProjHeader = (hasCode || hasProjKeyword || isNumberedProj) && line.length > 5;
 
     if (isProjHeader) {
       const initialTitle = line.replace(/^\d+\s*/, '').trim();
@@ -367,11 +370,9 @@ export async function parsePdfOperationalPlan(
           nextLine.includes('กิจกรรม') ||
           nextLine.includes('แผนการใช้จ่ายงบประมาณ') ||
           /^\d{1,2}\s+โครงการ/.test(nextLine) ||
+          /\d{2}[A-Z0-9]{1,2}\s*[-–—]\s*\d{5}/.test(nextLine) ||
           /ยุทธศาสตร์ที่\s*[1-4]/.test(nextLine) ||
-          nextLine.includes('แผนงาน') ||
-          nextLine.includes('งบดำเนินงาน') ||
-          nextLine.includes('งบดาเนินงาน') ||
-          nextLine.includes('งบลงทุน') ||
+          (nextLine.includes('แผนงาน') && !nextLine.includes('โครงการ')) ||
           nextLine.includes('รวมทั้งสิ้น')
         ) {
           break;
@@ -394,11 +395,9 @@ export async function parsePdfOperationalPlan(
         if (
           /^\d{1,2}\s+โครงการ/.test(nextLine) ||
           (nextLine.includes('โครงการ') && !nextLine.includes('ค่าใช้จ่ายโครงการ')) ||
+          /\d{2}[A-Z0-9]{1,2}\s*[-–—]\s*\d{5}/.test(nextLine) ||
           /ยุทธศาสตร์ที่\s*[1-4]/.test(nextLine) ||
-          nextLine.includes('แผนงาน') ||
-          nextLine.includes('งบดำเนินงาน') ||
-          nextLine.includes('งบดาเนินงาน') ||
-          nextLine.includes('งบลงทุน') ||
+          (nextLine.includes('แผนงาน') && !nextLine.includes('โครงการ')) ||
           nextLine.includes('รวมทั้งสิ้น')
         ) {
           break;
@@ -417,11 +416,20 @@ export async function parsePdfOperationalPlan(
 
       const fullHeaderBlock = headerLines.join(' ');
 
+      // Extract official code if present (e.g. 70T4-71009)
+      const mCode = fullHeaderBlock.match(/(\d{2}[A-Z0-9]{1,2})\s*[-–—]\s*(\d{5})/);
+      let projectCode = '';
+      if (mCode) {
+        projectCode = `${mCode[1]}-${mCode[2]}`;
+      } else {
+        const year2Digits = String(detectedFiscalYear).slice(-2);
+        const projectIndex = projects.length + 1;
+        projectCode = `${year2Digits}${currentProgramCode}-${String(projectIndex).padStart(4, '0')}`;
+      }
+
       // Extract division
       let division: NHRCUnit = 'สนย.';
-      if (fullHeaderBlock.includes('บูรณาการ')) {
-        division = 'สนย.'; // map to primary or สนย.
-      } else if (fullHeaderBlock.includes('ภาคใต้') || fullHeaderBlock.includes('ภาค ใต้')) {
+      if (fullHeaderBlock.includes('ภาคใต้') || fullHeaderBlock.includes('ภาค ใต้')) {
         division = 'สนง.ภาคใต้';
       } else if (fullHeaderBlock.includes('ภาคอีสาน')) {
         division = 'สนง.ภาคอีสาน';
@@ -437,15 +445,17 @@ export async function parsePdfOperationalPlan(
         }
       }
 
-      // Extract budget from header block: take the last valid number
+      // Extract budget from header block
       let budget = 0;
       const budgetMatches = fullHeaderBlock.match(/[\d,]{4,}(?:\.\d+)?/g);
       if (budgetMatches) {
         const candidates: number[] = [];
+        const codeSuffixNum = mCode ? parseInt(mCode[2], 10) : -1;
         for (const bm of budgetMatches) {
           const bVal = parseSpacedNumber(bm);
           if (bVal >= 2560 && bVal <= 2575) continue; // skip years
-          if (bVal >= 50000 && bVal <= 50000000) {
+          if (Math.abs(bVal - codeSuffixNum) < 1) continue; // skip code suffix number!
+          if (bVal >= 50000 && bVal <= 500000000) {
             candidates.push(bVal);
           }
         }
@@ -454,8 +464,11 @@ export async function parsePdfOperationalPlan(
         }
       }
 
-      // Clean project title carefully (preserve region names in title, remove trailing agency acronyms)
+      // Clean title
       let cleanTitle = fullHeaderBlock;
+      if (mCode) {
+        cleanTitle = cleanTitle.replace(new RegExp(mCode[0].replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'g'), '');
+      }
       for (const u of NHRC_UNITS) {
         cleanTitle = cleanTitle.replace(new RegExp(u.replace('.', '\\.'), 'g'), '');
       }
@@ -473,7 +486,7 @@ export async function parsePdfOperationalPlan(
       if (budgetMatches) {
         for (const bm of budgetMatches) {
           const bVal = parseSpacedNumber(bm);
-          if (bVal !== 2569 && bVal !== 2568) {
+          if (bVal !== 2569 && bVal !== 2568 && bVal !== 2570) {
             cleanTitle = cleanTitle.replace(bm, '');
           }
         }
@@ -483,6 +496,10 @@ export async function parsePdfOperationalPlan(
         .replace(/\(บาท\)/g, '')
         .replace(/\s+/g, ' ')
         .trim();
+
+      if (!cleanTitle || cleanTitle.length < 3) {
+        cleanTitle = `โครงการ ${projectCode}`;
+      }
 
       // Parse sub-activities
       const activities: ProjectActivity[] = [];
@@ -550,13 +567,8 @@ export async function parsePdfOperationalPlan(
         });
       }
 
-      const year2Digits = String(detectedFiscalYear).slice(-2);
-      const projectIndex = projects.length + 1;
-      const codePrefix = `${year2Digits}${currentProgramCode}-`;
-      const projectCode = `${codePrefix}${String(projectIndex).padStart(4, '0')}`;
-
       projects.push({
-        id: `proj_pdf_${timestamp}_${projectIndex}`,
+        id: `proj_pdf_${timestamp}_${projects.length + 1}`,
         code: projectCode,
         name: cleanTitle,
         fiscalYear: detectedFiscalYear,
@@ -588,7 +600,7 @@ export async function parsePdfOperationalPlan(
         ],
         indicators: [
           {
-            id: `ind_pdf_${timestamp}_${projectIndex}_1`,
+            id: `ind_pdf_${timestamp}_${projects.length + 1}_1`,
             title: 'ร้อยละความสำเร็จตามแผนปฏิบัติการของโครงการ',
             target: '100%',
             actual: '0%',
@@ -605,13 +617,24 @@ export async function parsePdfOperationalPlan(
     i++;
   }
 
-  const totalBudget = projects.reduce((s, p) => s + (p.budgetAllocated || 0), 0);
+  // Deduplicate projects by code or title
+  const uniqueProjects: Partial<Project>[] = [];
+  const seenKeys = new Set<string>();
+  for (const p of projects) {
+    const key = (p.code || p.name || '').toLowerCase().trim();
+    if (key && !seenKeys.has(key)) {
+      seenKeys.add(key);
+      uniqueProjects.push(p);
+    }
+  }
+
+  const totalBudget = uniqueProjects.reduce((s, p) => s + (p.budgetAllocated || 0), 0);
 
   return {
-    isMultiProject: projects.length > 1,
+    isMultiProject: uniqueProjects.length > 1,
     planTitle: `แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. ${detectedFiscalYear}`,
     fiscalYear: detectedFiscalYear,
     totalBudget: totalBudget,
-    projects: projects
+    projects: uniqueProjects
   };
 }
