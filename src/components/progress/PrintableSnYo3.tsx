@@ -27,6 +27,171 @@ export const PrintableSnYo3: React.FC<PrintableSnYo3Props> = ({ report, onBack }
     window.print();
   };
 
+  const handleExportWord = () => {
+    const numFmt = (val: string | number | undefined | null) => {
+      if (val === null || val === undefined) return '';
+      const str = val.toString();
+      return useThaiNumerals ? toThaiNumerals(str) : fromThaiNumerals(str);
+    };
+
+    const currFmt = (val: number) => formatCurrency(val, useThaiNumerals);
+
+    const docHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>แบบ สนย.3 (${report.projectCode})</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
+        <style>
+          @page { size: 210mm 297mm; margin: 20mm 20mm 20mm 25mm; }
+          body { font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif; font-size: 15pt; line-height: 1.3; }
+          .title { text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 12pt; }
+          .header-right { text-align: right; font-size: 15pt; font-weight: bold; margin-bottom: 8pt; }
+          .section-title { font-size: 15pt; font-weight: bold; background-color: #f1f5f9; padding: 4pt; border-left: 4pt solid #0a4d44; margin-top: 12pt; margin-bottom: 6pt; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 12pt; font-size: 14pt; }
+          th, td { border: 1pt solid #000; padding: 4pt 6pt; vertical-align: top; }
+          th { background-color: #f8fafc; font-weight: bold; text-align: center; }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .bold { font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="header-right">แบบ สนย.${numFmt(3)}</div>
+        <div class="title">
+          <div>แบบรายงานผลการปฏิบัติงานและการใช้จ่ายงบประมาณ</div>
+          <div>โครงการเชิงยุทธศาสตร์และการดำเนินงานตามมติสมัชชาสิทธิมนุษยชน</div>
+          <div>ประจำปีงบประมาณ พ.ศ. ${numFmt(report.fiscalYear || 2569)}</div>
+          <div>${divisionName}</div>
+        </div>
+
+        <div class="section-title">ส่วนที่ ${numFmt(1)} : ข้อมูลพื้นฐานโครงการเชิงยุทธศาสตร์</div>
+        <p><b>${numFmt('1.1')} ชื่อโครงการ:</b> ${report.section1.projectName || report.projectName}</p>
+        <p><b>${numFmt('1.2')} รหัสกิจกรรม:</b> ${report.section1.activityCode || report.projectCode}</p>
+        <p><b>${numFmt('1.3')} งบประมาณที่ได้รับการจัดสรร:</b> ${currFmt(report.section1.allocatedBudget)} บาท</p>
+        <p><b>${numFmt('1.4')} ช่วงเวลาดำเนินงานที่กำหนดในแผน:</b> ${report.section1.timeframeText}</p>
+
+        <div class="section-title">ส่วนที่ ${numFmt(2)} : ผลสัมฤทธิ์จากการดำเนินงาน</div>
+        <p><b>${numFmt('2.1')} ผลการดำเนินงานและการใช้จ่ายงบประมาณ</b></p>
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:40%;">ขั้นตอน/กิจกรรม</th>
+              <th colspan="3">ผลการดำเนินงาน</th>
+              <th rowspan="2" style="width:18%;">แผนงบประมาณ (บาท)</th>
+              <th rowspan="2" style="width:18%;">เบิกจ่ายจริง (บาท)</th>
+            </tr>
+            <tr>
+              <th>แล้วเสร็จ</th>
+              <th>อยู่ระหว่าง</th>
+              <th>ยังไม่เริ่ม</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${report.section2_1.map(r => `
+              <tr>
+                <td>${r.name}</td>
+                <td class="text-center">${r.status === 'completed' ? '/' : ''}</td>
+                <td class="text-center">${r.status === 'in_progress' ? '/' : ''}</td>
+                <td class="text-center">${r.status === 'not_started' ? '/' : ''}</td>
+                <td class="text-right">${currFmt(r.plannedBudget)}</td>
+                <td class="text-right">${r.actualSpent > 0 ? currFmt(r.actualSpent) : '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <p><b>${numFmt('2.2')} ผลการดำเนินงานของแต่ละกิจกรรม:</b></p>
+        ${report.section2_2.map(act => `
+          <div style="margin-bottom:6pt;">
+            <p><b>${act.activityNumberText} ${act.activityTitle}</b></p>
+            <p style="text-indent: 1cm;">${act.detailDescription}</p>
+            <p style="text-indent: 1cm;">เป้าหมาย: แผน ${act.targetPlan} ผล ${act.targetActual}</p>
+          </div>
+        `).join('')}
+
+        <p><b>${numFmt('2.3')} ผลการดำเนินการตามวัตถุประสงค์ และผลสัมฤทธิ์:</b></p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:45%;">วัตถุประสงค์ / ตัวชี้วัด</th>
+              <th style="width:55%;">ความก้าวหน้าผลการดำเนินงาน</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${report.section2_3.map(o => `
+              <tr>
+                <td><b>${o.label}:</b><br/>${o.targetText}</td>
+                <td>${o.progressText}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="section-title">ส่วนที่ ${numFmt(3)} : การดำเนินงานตามนโยบายของ กสม.</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:45%;">นโยบาย กสม.</th>
+              <th style="width:55%;">ผลการดำเนินงาน</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${report.section3.map(p => `
+              <tr>
+                <td>${p.policyTitle}</td>
+                <td>${p.progressDescription}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="section-title">ส่วนที่ ${numFmt(4)} / ${numFmt(5)} : ปัญหาอุปสรรค และแนวทางแก้ไข</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50%;">ปัญหาอุปสรรค</th>
+              <th style="width:50%;">แนวทางแก้ไข</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${report.section4_5.map(obs => `
+              <tr>
+                <td>${obs.obstacle || '-'}</td>
+                <td>${obs.solution || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="section-title">ส่วนที่ ${numFmt(6)} : ผู้รับผิดชอบ/ผู้ประสานงาน</div>
+        <p><b>ชื่อ-นามสกุล:</b> ${report.section6.name}</p>
+        <p><b>ตำแหน่ง:</b> ${report.section6.position}</p>
+        <p><b>สังกัด:</b> ${report.section6.subDivision ? report.section6.subDivision + ' ' : ''}${divisionName}</p>
+        <p><b>โทรศัพท์:</b> ${numFmt(report.section6.phone)} | <b>E-mail:</b> ${report.section6.email}</p>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `แบบ_สนย3_${report.projectCode}_${report.round}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const divisionName = NHRC_UNITS[report.division]?.fullName || report.section1.divisionFullName || 'สำนักนโยบายและยุทธศาสตร์';
 
   const totalPlanned = report.section2_1.reduce((sum, a) => sum + (a.plannedBudget || 0), 0);
@@ -88,13 +253,23 @@ export const PrintableSnYo3: React.FC<PrintableSnYo3Props> = ({ report, onBack }
               </button>
             </div>
 
+            {/* Export Word Button */}
+            <button
+              onClick={handleExportWord}
+              className="flex items-center gap-1.5 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
+              title="ดาวน์โหลดเป็นไฟล์ Microsoft Word"
+            >
+              <Download className="w-4 h-4" />
+              <span>ดาวน์โหลด Word (.doc)</span>
+            </button>
+
             {/* Print Button */}
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#083b34] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
+              className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#083b34] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span>พิมพ์แบบรายงาน (Print / Save as PDF)</span>
+              <span>พิมพ์ / Save PDF</span>
             </button>
           </div>
         </div>
