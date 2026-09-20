@@ -261,158 +261,14 @@ export async function parsePdfOperationalPlan(
     };
   }
 
-  // Check if PDF contains official activity codes (e.g. 70M1-13101, 70S1-13101, 70A1-11001)
-  const hasOfficialCodes = allLines.some(al => /\d{2}[A-Z0-9]{1,2}-[0-9]{5}/.test(al.line));
-  if (hasOfficialCodes || isMasterPlan) {
-    const rawExtracted: Partial<Project>[] = [];
-    const timestamp = Date.now();
-
-    for (let idx = 0; idx < allLines.length; idx++) {
-      const { page, line } = allLines[idx];
-      const mCode = line.match(/(\d{2}[A-Z0-9]{1,2}-[0-9]{5})/);
-      if (mCode) {
-        const code = mCode[1];
-        const codePrefix = code.split('-')[0].substring(2);
-
-        let programCode: ProgramCode = 'O';
-        if (codePrefix.startsWith('P')) programCode = 'P1';
-        else if (codePrefix.startsWith('M') || codePrefix.startsWith('T')) programCode = 'M_T';
-        else if (codePrefix.startsWith('S')) programCode = 'S1';
-        else if (codePrefix.startsWith('A')) programCode = 'A';
-        else if (codePrefix.startsWith('D')) programCode = 'D2';
-        else if (codePrefix.startsWith('O')) programCode = 'O';
-
-        let pillar = 1;
-        if (programCode === 'S1') pillar = 2;
-        else if (programCode === 'D2' || programCode === 'P1') pillar = 4;
-        else if (codePrefix.startsWith('T4') || codePrefix.startsWith('T5')) pillar = 3;
-
-        const blockLines = allLines.slice(Math.max(0, idx - 1), Math.min(allLines.length, idx + 4)).map(al => al.line);
-        const fullBlock = blockLines.join(' ');
-
-        let budget = 0;
-        const codeSuffixNum = parseInt(code.split('-')[1], 10);
-        const bMatches = fullBlock.match(/[\d,]{4,}(?:\.\d{2})?/g) || [];
-        for (const bm of bMatches) {
-          const val = parseFloat(bm.replace(/,/g, ''));
-          if (val >= 2560 && val <= 2575) continue; // skip years
-          if (Math.abs(val - codeSuffixNum) < 1) continue; // skip code suffix number!
-          if (val > 1000) { budget = val; }
-        }
-
-        let div: NHRCUnit = 'สนย.';
-        if (fullBlock.includes('สบก')) div = 'สบก.';
-        else if (fullBlock.includes('สดส')) div = 'สดส.';
-        else if (fullBlock.includes('สสค')) div = 'สสค.';
-        else if (fullBlock.includes('สรส')) div = 'สรส.';
-        else if (fullBlock.includes('สคส . 1') || fullBlock.includes('สคส.1')) div = 'สคส.1';
-        else if (fullBlock.includes('สคส . 2') || fullBlock.includes('สคส.2')) div = 'สคส.2';
-        else if (fullBlock.includes('สฝป')) div = 'สฝป.';
-        else if (fullBlock.includes('สรป')) div = 'สรป.';
-        else if (fullBlock.includes('สกม')) div = 'สกม.';
-        else if (fullBlock.includes('สทบ')) div = 'สบค.';
-        else if (fullBlock.includes('ภาคใต้') || fullBlock.includes('พื้นที่ภาคใต้')) div = 'สนง.ภาคใต้';
-        else if (fullBlock.includes('ภาคอีสาน') || fullBlock.includes('พื้นที่ภาคอีสาน')) div = 'สนง.ภาคอีสาน';
-        else if (fullBlock.includes('ภาคเหนือ') || fullBlock.includes('พื้นที่ภาคเหนือ')) div = 'สนง.ภาคเหนือ';
-
-        let cleanName = line
-          .replace(/\d{2}[A-Z0-9]{1,2}-[0-9]{5}/g, '')
-          .replace(/^\d+\s*/, '')
-          .replace(/ส[สบดรคกฝน][กคสปมยเภทง].*/g, '')
-          .replace(/[\d,]{4,}(?:\.\d{2})?/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        if (!cleanName || cleanName.length < 3) {
-          cleanName = fullBlock
-            .replace(/\d{2}[A-Z0-9]{1,2}-[0-9]{5}/g, '')
-            .replace(/[\d,]{4,}(?:\.\d{2})?/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-        }
-
-        rawExtracted.push({
-          id: `proj_pdf_${code.replace('-', '_')}_${timestamp}`,
-          code: code,
-          name: cleanName || `โครงการ ${code}`,
-          fiscalYear: detectedFiscalYear,
-          programCode: programCode,
-          division: div,
-          subDivision: 'กลุ่มงานที่ได้รับมอบหมาย',
-          budgetAllocated: budget,
-          budgetSpent: 0,
-          progressPercent: 0,
-          status: 'NOT_STARTED',
-          isStrategic: true,
-          strategicPillar: pillar,
-          isBaselineLocked: true,
-          unlockedForEdit: false,
-          timeframeText: `ตุลาคม ${detectedFiscalYear - 1} ถึงกันยายน ${detectedFiscalYear}`,
-          responsiblePerson: {
-            name: `ผู้รับผิดชอบงานยุทธศาสตร์ (${div})`,
-            position: 'นักวิชาการสิทธิมนุษยชนชำนาญการพิเศษ',
-            division: div,
-            subDivision: 'กลุ่มงานที่ได้รับมอบหมาย',
-            phone: '02 141 3800',
-            email: 'contact@nhrc.or.th'
-          },
-          objectives: [`เพื่อดำเนินงานตามแผนปฏิบัติการประจำปีงบประมาณ พ.ศ. ${detectedFiscalYear}`],
-          expectedOutputs: [`ผลผลิตตามเป้าหมายของ ${cleanName || code}`],
-          expectedOutcomes: ['ส่งเสริมและคุ้มครองสิทธิมนุษยชนอย่างครบถ้วนตามแผน'],
-          indicators: [
-            {
-              id: `ind_pdf_${code.replace('-', '_')}_1`,
-              title: 'ร้อยละความสำเร็จตามแผนปฏิบัติการประจำปี',
-              target: '100%',
-              actual: '0%',
-              status: 'on_track'
-            }
-          ],
-          activities: [
-            {
-              id: `act_pdf_${code.replace('-', '_')}_1`,
-              code: code,
-              name: cleanName || `ดำเนินงานตาม ${code}`,
-              plannedBudget: budget,
-              timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
-              plannedPercent: 100,
-              actualSpent: 0,
-              status: 'not_started'
-            }
-          ]
-        });
-      }
-    }
-
-    const uniqueProjects: Partial<Project>[] = [];
-    const seenCodes = new Set<string>();
-    for (const p of rawExtracted) {
-      if (p.code && !seenCodes.has(p.code)) {
-        seenCodes.add(p.code);
-        uniqueProjects.push(p);
-      }
-    }
-
-    if (uniqueProjects.length > 0) {
-      const grandTotal = uniqueProjects.reduce((sum, p) => sum + (p.budgetAllocated || 0), 0);
-      return {
-        isMultiProject: uniqueProjects.length > 1,
-        planTitle: `แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. ${detectedFiscalYear}`,
-        fiscalYear: detectedFiscalYear,
-        totalBudget: grandTotal,
-        projects: uniqueProjects
-      };
-    }
-  }
-
   // Find table start index
   let startIdx = 0;
   for (let idx = 0; idx < allLines.length; idx++) {
     const l = allLines[idx].line;
     if (
-      (l.includes('ยุทธศาสตร์ที่ 1') && allLines[idx].page >= 15) || 
-      (allLines[idx].page >= 3 && /70[A-Z0-9]{2}-[0-9]{5}/.test(l)) ||
-      (allLines[idx].page >= 3 && l.includes('โครงการ') && !l.includes('แผนงาน'))
+      l.includes('ยุทธศาสตร์ที่') || 
+      (l.includes('โครงการ') && !l.includes('แผนงาน')) ||
+      /\d{2}[A-Z0-9]{1,2}-[0-9]{5}/.test(l)
     ) {
       startIdx = idx;
       break;
@@ -432,8 +288,7 @@ export async function parsePdfOperationalPlan(
     // Stop if table grand total is reached
     if (
       line.includes('แผนการใช้จ่ายงบประมาณ รวมทั้งสิ้น') ||
-      (line.includes('รวมทั้งสิ้น') && line.includes('84,466,020')) ||
-      (page > 34 && projects.length >= 35)
+      (line.includes('รวมทั้งสิ้น') && line.includes('84,466,020'))
     ) {
       break;
     }
@@ -455,6 +310,7 @@ export async function parsePdfOperationalPlan(
       else if (codeType.startsWith('S')) currentProgramCode = 'S1';
       else if (codeType.startsWith('A')) currentProgramCode = 'A';
       else if (codeType.startsWith('M') || codeType.startsWith('T')) currentProgramCode = 'M_T';
+      else if (codeType.startsWith('P')) currentProgramCode = 'P1';
     }
 
     // Program code detection: strictly on lines declaring budget programs
@@ -469,6 +325,8 @@ export async function parsePdfOperationalPlan(
         currentProgramCode = 'S1';
       } else if (/ความสัมพันธ์ระหว่างประเทศ/i.test(line)) {
         currentProgramCode = 'A';
+      } else if (/บุคลากร/i.test(line)) {
+        currentProgramCode = 'P1';
       }
       i++;
       continue;
@@ -491,7 +349,7 @@ export async function parsePdfOperationalPlan(
                          !line.startsWith('ค่าใช้จ่ายโครงการ') &&
                          !line.startsWith('ค่ำใช้จ่ำยโครงกำร') &&
                          !line.includes('ไม่มีโครงการรองรับ') &&
-                         line.length > 8;
+                         line.length > 5;
 
     if (isProjHeader) {
       const initialTitle = line.replace(/^\d+\s*/, '').trim();
@@ -506,6 +364,7 @@ export async function parsePdfOperationalPlan(
         if (
           /^\d{1,2}\.\d+/.test(nextLine) ||
           /^\(\d+\)/.test(nextLine) ||
+          nextLine.includes('กิจกรรม') ||
           nextLine.includes('แผนการใช้จ่ายงบประมาณ') ||
           /^\d{1,2}\s+โครงการ/.test(nextLine) ||
           /ยุทธศาสตร์ที่\s*[1-4]/.test(nextLine) ||
@@ -513,8 +372,7 @@ export async function parsePdfOperationalPlan(
           nextLine.includes('งบดำเนินงาน') ||
           nextLine.includes('งบดาเนินงาน') ||
           nextLine.includes('งบลงทุน') ||
-          nextLine.includes('รวมทั้งสิ้น') ||
-          (allLines[j].page > 32 && projects.length >= 20)
+          nextLine.includes('รวมทั้งสิ้น')
         ) {
           break;
         }
@@ -535,13 +393,13 @@ export async function parsePdfOperationalPlan(
         const nextLine = allLines[j].line;
         if (
           /^\d{1,2}\s+โครงการ/.test(nextLine) ||
+          (nextLine.includes('โครงการ') && !nextLine.includes('ค่าใช้จ่ายโครงการ')) ||
           /ยุทธศาสตร์ที่\s*[1-4]/.test(nextLine) ||
           nextLine.includes('แผนงาน') ||
           nextLine.includes('งบดำเนินงาน') ||
           nextLine.includes('งบดาเนินงาน') ||
           nextLine.includes('งบลงทุน') ||
-          nextLine.includes('รวมทั้งสิ้น') ||
-          (allLines[j].page > 32 && projects.length >= 20)
+          nextLine.includes('รวมทั้งสิ้น')
         ) {
           break;
         }
@@ -549,6 +407,7 @@ export async function parsePdfOperationalPlan(
         if (
           /^\d{1,2}\.\d+/.test(nextLine) || 
           /^\(\d+\)/.test(nextLine) ||
+          nextLine.includes('กิจกรรม') ||
           nextLine.includes('แผนการใช้จ่ายงบประมาณ')
         ) {
           activityLines.push(nextLine);

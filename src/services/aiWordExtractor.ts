@@ -1,6 +1,6 @@
 import { Project, ProjectActivity, NHRCUnit, ProgramCode } from '../types/project';
 import { fromThaiNumerals } from '../utils/thaiNumber';
-import { extractLinesFromPdf } from './pdfPlanExtractor';
+import { extractLinesFromPdf, fixThaiSpacedVowels } from './pdfPlanExtractor';
 
 export type AiProvider = 'gemini' | 'openai';
 
@@ -85,38 +85,52 @@ function buildExtractionPrompt(targetFiscalYear: number): string {
 [เป้าหมายปีงบประมาณที่ต้องการ]: พ.ศ. ${targetFiscalYear}
 
 [คำแนะนำสำคัญสำหรับการสกัดข้อมูล]:
-1. หากเอกสารนี้เป็น "เล่มแผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2570":
-   - ยอดวงเงินงบประมาณรวมทั้งแผนจะต้องเท่ากับ 355,223,000 บาท (สามร้อยห้าสิบห้าล้านสองแสนสองหมื่นสามพันบาทถ้วน)
-   - ประกอบด้วย 6 แผนงานหลัก ได้แก่ แผนงานบุคลากรภาครัฐ (P1 = 218,533,300 บาท), แผนงานพื้นฐานด้านการปรับสมดุล (M/T = 73,375,100 บาท), แผนงานยุทธศาสตร์ความมั่นคง (S1 = 2,600,000 บาท), แผนงานยุทธศาสตร์ต่างประเทศ (A = 14,886,600 บาท), แผนงานยุทธศาสตร์พัฒนาบริการประชาชน (D2 = 9,534,000 บาท), แผนงานยุทธศาสตร์สร้างหลักประกันทางสังคม (O = 36,294,000 บาท)
-   - ห้ามตัดทอนงบบุคลากรหรืองบดำเนินงานพื้นฐานออกเด็ดขาด ยอดรวมของทุกโครงการใน Array "projects" จะต้องรวมกันได้ 355,223,000 บาทถ้วน
-   - ตั้งค่า "isMultiProject": true และ "totalBudget": 355223000
-2. หากเอกสารนี้เป็น "แบบข้อเสนอโครงการเดี่ยว (1 โครงการ)":
-   - ให้ส่งกลับ Array "projects" ที่มี 1 โครงการ และตั้งค่า "isMultiProject": false
+1. การแยกแยะระดับข้อมูล (ระดับแผนงาน vs ระดับโครงการ vs ระดับกิจกรรมย่อย):
+   - "แผนงาน" (Program / Strategic Plan) เช่น แผนงานบุคลากรภาครัฐ (P1), แผนงานพื้นฐาน (M/T), แผนงานยุทธศาสตร์สร้างหลักประกันทางสังคม (O), แผนงานยุทธศาสตร์พัฒนาบริการประชาชน (D2), แผนงานยุทธศาสตร์ต่างประเทศ (A), แผนงานยุทธศาสตร์ความมั่นคง (S1) เป็นหมวดหมู่ใหญ่ของงบประมาณ
+   - **ห้าม** ดึงเฉพาะชื่อ "แผนงาน" มาเป็นรายการโครงการเด็ดขาด!
+   - คุณต้องสกัด "โครงการ" (Individual Projects) ทุกโครงการที่อยู่ภายใต้แผนงานเหล่านั้นออกมาเป็นแต่ละ Object ใน Array "projects"
+   - สำหรับแต่ละ "โครงการ" คุณต้องสกัด "กิจกรรมย่อย" (Sub-activities เช่น กิจกรรมที่ 1.1, กิจกรรมที่ 1.2 หรือ กิจกรรมที่ 1...) ที่สังกัดในโครงการนั้น ใส่ลงใน Array "activities" ของโครงการนั้นด้วยเสมอ
 
-[ข้อกำหนดฟิลด์สำหรับแต่ละโครงการ]:
-- name: ชื่อโครงการ/แผนงาน/กิจกรรมหลัก
-- code: รหัสโครงการ เช่น '${String(targetFiscalYear).substring(2)}O1-00001'
-- fiscalYear: ${targetFiscalYear}
-- division: หนึ่งใน 14 สำนักของ กสม. ('สสค.', 'สดส.', 'สฝป.', 'สรส.', 'สคส.1', 'สคส.2', 'สรป.', 'สกม.', 'สนย.', 'สบก.', 'สบค.', 'สนง.ภาคใต้', 'สนง.ภาคอีสาน', 'สนง.ภาคเหนือ')
-- budgetAllocated: วงเงินงบประมาณรวมของโครงการ (ตัวเลขจำนวนเต็มหรือทศนิยม)
-- isStrategic: true
-- strategicPillar: เสาหลักยุทธศาสตร์ (1, 2, 3 หรือ 4)
-- activities: รายการกิจกรรมย่อย Array of { id, code, name, plannedBudget, timeframe, plannedPercent, actualSpent: 0, status: 'not_started' }
+2. รายละเอียดฟิลด์สำหรับแต่ละโครงการใน Array "projects":
+   - name: ชื่อโครงการจริง (เช่น "โครงการส่งเสริมวัฒนธรรมสิทธิมนุษยชน...", "โครงการเฝ้าระวัง...")
+   - code: รหัสโครงการ เช่น '${String(targetFiscalYear).substring(2)}O1-00001' หรือรหัสประจำโครงการที่ระบุในเอกสาร
+   - fiscalYear: ${targetFiscalYear}
+   - programCode: รหัสแผนงาน ('P1', 'M_T', 'S1', 'A', 'D2', 'O')
+   - division: สำนัก/หน่วยงานที่รับผิดชอบหลัก เลือกจาก ('สสค.', 'สดส.', 'สฝป.', 'สรส.', 'สคส.1', 'สคส.2', 'สรป.', 'สกม.', 'สนย.', 'สบก.', 'สบค.', 'สนง.ภาคใต้', 'สนง.ภาคอีสาน', 'สนง.ภาคเหนือ')
+   - budgetAllocated: วงเงินงบประมาณรวมของโครงการนี้ (ตัวเลขจำนวนเต็มหรือทศนิยม)
+   - isStrategic: true
+   - strategicPillar: เสาหลักยุทธศาสตร์ (1, 2, 3 หรือ 4)
+   - activities: Array ของกิจกรรมย่อย ภายใต้โครงการนี้:
+     [
+       {
+         "id": "act_1_1",
+         "code": "1.1",
+         "name": "ชื่อกิจกรรมย่อย...",
+         "plannedBudget": 150000,
+         "timeframe": "ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}",
+         "plannedPercent": 100,
+         "actualSpent": 0,
+         "status": "not_started"
+       }
+     ]
+
+3. หากเอกสารนี้เป็น "แบบข้อเสนอโครงการเดี่ยว (1 โครงการ)":
+   - ให้ส่งกลับ Array "projects" ที่มี 1 โครงการ พร้อมกิจกรรมย่อยทั้งหมดของโครงการนั้น และตั้งค่า "isMultiProject": false
 
 ตอบกลับด้วย JSON object รูปแบบนี้เท่านั้น ห้ามใส่ markdown หรือข้อความอื่น:
 {
   "isMultiProject": true,
   "planTitle": "แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. ${targetFiscalYear}",
-  "totalBudget": 355223000,
+  "totalBudget": 0,
   "projects": [
     {
-      "name": "...",
+      "name": "โครงการ...",
       "code": "${String(targetFiscalYear).substring(2)}O1-00001",
       "fiscalYear": ${targetFiscalYear},
       "programCode": "O",
       "division": "สนย.",
       "subDivision": "กลุ่มงาน...",
-      "budgetAllocated": 0,
+      "budgetAllocated": 450000,
       "timeframeText": "ตุลาคม ${targetFiscalYear - 1} ถึงกันยายน ${targetFiscalYear}",
       "responsiblePerson": {
         "name": "ผู้รับผิดชอบโครงการ",
@@ -128,20 +142,30 @@ function buildExtractionPrompt(targetFiscalYear: number): string {
       },
       "isStrategic": true,
       "strategicPillar": 1,
-      "objectives": ["..."],
-      "expectedOutputs": ["..."],
-      "expectedOutcomes": ["..."],
+      "objectives": ["เพื่อขับเคลื่อนภารกิจตามแผนปฏิบัติการ"],
+      "expectedOutputs": ["ผลผลิตตามเป้าหมายของโครงการ"],
+      "expectedOutcomes": ["ผลลัพธ์ตามเป้าหมายของสำนักงาน กสม."],
       "indicators": [
         { "id": "ind_1", "title": "ร้อยละความสำเร็จตามแผน", "target": "100%", "actual": "0%", "status": "on_track" }
       ],
       "activities": [
         {
-          "id": "act_1",
-          "code": "1",
-          "name": "...",
-          "plannedBudget": 0,
-          "timeframe": "...",
-          "plannedPercent": 100,
+          "id": "act_1_1",
+          "code": "1.1",
+          "name": "กิจกรรมย่อยที่ 1...",
+          "plannedBudget": 250000,
+          "timeframe": "ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}",
+          "plannedPercent": 55,
+          "actualSpent": 0,
+          "status": "not_started"
+        },
+        {
+          "id": "act_1_2",
+          "code": "1.2",
+          "name": "กิจกรรมย่อยที่ 2...",
+          "plannedBudget": 200000,
+          "timeframe": "ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}",
+          "plannedPercent": 45,
           "actualSpent": 0,
           "status": "not_started"
         }
@@ -173,10 +197,13 @@ export function sanitizeAndValidateAiProject(
             cleanCode = mClean[1];
           }
         }
+        let actName = String(a.name || `กิจกรรมที่ ${cleanCode}`);
+        actName = fixThaiSpacedVowels(actName);
+
         return {
           id: a.id || `act_ai_${timestamp}_${idx + 1}`,
           code: cleanCode,
-          name: String(a.name || `กิจกรรมที่ ${cleanCode}`),
+          name: actName,
           plannedBudget: Number(a.plannedBudget) || 0,
           timeframe: String(a.timeframe || `ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}`),
           plannedPercent: Number(a.plannedPercent) || 0,
@@ -189,10 +216,13 @@ export function sanitizeAndValidateAiProject(
   const actTotalBudget = validatedActivities.reduce((s, a) => s + a.plannedBudget, 0);
   const finalAllocated = Number(parsed.budgetAllocated) || actTotalBudget || 200000;
 
+  let rawProjName = parsed.name || 'โครงการนำเข้าผ่าน AI';
+  rawProjName = fixThaiSpacedVowels(rawProjName);
+
   const validatedProject: Partial<Project> = {
     id: `proj_ai_${timestamp}`,
     code: parsed.code || `${String(targetFiscalYear).substring(2)}O1-${Math.floor(10000 + Math.random() * 90000)}`,
-    name: parsed.name || 'โครงการนำเข้าผ่าน AI',
+    name: rawProjName,
     fiscalYear: targetFiscalYear,
     programCode: (parsed.programCode as ProgramCode) || 'O',
     division: (parsed.division as NHRCUnit) || 'สนย.',
@@ -215,13 +245,13 @@ export function sanitizeAndValidateAiProject(
     endDate: `${targetFiscalYear - 543}-09-30`,
     timeframeText: parsed.timeframeText || `ตุลาคม ${targetFiscalYear - 1} ถึงกันยายน ${targetFiscalYear}`,
     objectives: Array.isArray(parsed.objectives) && parsed.objectives.length > 0
-      ? parsed.objectives
+      ? parsed.objectives.map((o: any) => fixThaiSpacedVowels(String(o)))
       : ['เพื่อขับเคลื่อนภารกิจตามแผนปฏิบัติการ กสม.'],
     expectedOutputs: Array.isArray(parsed.expectedOutputs) && parsed.expectedOutputs.length > 0
-      ? parsed.expectedOutputs
+      ? parsed.expectedOutputs.map((o: any) => fixThaiSpacedVowels(String(o)))
       : ['ผลผลิตตามรายละเอียดโครงการ'],
     expectedOutcomes: Array.isArray(parsed.expectedOutcomes) && parsed.expectedOutcomes.length > 0
-      ? parsed.expectedOutcomes
+      ? parsed.expectedOutcomes.map((o: any) => fixThaiSpacedVowels(String(o)))
       : ['ผลลัพธ์ตามเป้าหมายของสำนักงาน กสม.'],
     indicators: Array.isArray(parsed.indicators) && parsed.indicators.length > 0
       ? parsed.indicators
@@ -238,7 +268,7 @@ export function sanitizeAndValidateAiProject(
       {
         id: `act_ai_${timestamp}_1`,
         code: '1',
-        name: `ดำเนินงานตาม ${parsed.name || 'โครงการ'}`,
+        name: `ดำเนินงานตาม ${rawProjName}`,
         plannedBudget: finalAllocated,
         timeframe: `ต.ค. ${targetFiscalYear - 1} - ก.ย. ${targetFiscalYear}`,
         plannedPercent: 100,
