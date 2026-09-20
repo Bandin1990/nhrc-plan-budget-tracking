@@ -102,8 +102,7 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
       // Try local plan parser first
       try {
         const planRes = await parsePdfOperationalPlan(file, selectedFiscalYear);
-        if (planRes.isMultiProject && planRes.projects.length > 0) {
-          // If master plan with 27 projects is uploaded in modal, pick the first project or all
+        if (planRes.projects && planRes.projects.length > 0) {
           const firstProj = planRes.projects[0];
           setParsedData({
             project: {
@@ -112,7 +111,7 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
               isBaselineLocked: isBaselineLocked
             },
             projects: planRes.projects,
-            isMultiProject: true,
+            isMultiProject: planRes.isMultiProject,
             planTitle: planRes.planTitle,
             extractedActivities: firstProj.activities || [],
             rawText: '',
@@ -608,16 +607,6 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
                   >
                     เลือกไฟล์เอกสารโครงการ (.docx / .pdf)
                   </label>
-
-                  <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
-                    <button
-                      type="button"
-                      onClick={handleLoadSample}
-                      className="text-slate-500 hover:text-[#0a4d44] dark:hover:text-emerald-400 text-xs underline cursor-pointer"
-                    >
-                      หรือทดลองโหลดตัวอย่างเอกสารโครงการ (TQA กสม. ปี {selectedFiscalYear})
-                    </button>
-                  </div>
                 </div>
               )}
             </div>

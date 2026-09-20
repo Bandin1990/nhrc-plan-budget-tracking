@@ -151,22 +151,37 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
     if (isPdf) {
       setParsingStepText('กำลังสแกนโครงสร้างเอกสาร PDF (ค้นหาตารางแผนปฏิบัติการและบัญชีโครงการ)...');
 
-      // Step 1: Run Local High-Speed PDF Plan Parser (handles Table 6 / Chapter 3 master plan offline instantly)
+      // Step 1: Run Local High-Speed PDF Plan Parser (handles master plan or single project PDF offline instantly)
       try {
         const planRes = await parsePdfOperationalPlan(file, selectedFiscalYear);
-        if (planRes.isMultiProject && planRes.projects.length > 0) {
-          setMultiProjects(planRes.projects);
-          setSelectedProjectIds(new Set(planRes.projects.map(p => p.id || p.code || '')));
-          setSelectedFiscalYear(planRes.fiscalYear);
-          setParsedData({
-            isMultiProject: true,
-            planTitle: planRes.planTitle,
-            totalBudget: planRes.totalBudget,
-            projects: planRes.projects,
-            extractedActivities: [],
-            rawText: '',
-            sourceType: 'pdf_plan'
-          });
+        if (planRes.projects && planRes.projects.length > 0) {
+          if (planRes.isMultiProject) {
+            setMultiProjects(planRes.projects);
+            setSelectedProjectIds(new Set(planRes.projects.map(p => p.id || p.code || '')));
+            setSelectedFiscalYear(planRes.fiscalYear);
+            setParsedData({
+              isMultiProject: true,
+              planTitle: planRes.planTitle,
+              totalBudget: planRes.totalBudget,
+              projects: planRes.projects,
+              extractedActivities: [],
+              rawText: '',
+              sourceType: 'pdf_plan'
+            });
+          } else {
+            const singleProj = planRes.projects[0];
+            setParsedData({
+              project: {
+                ...singleProj,
+                fiscalYear: selectedFiscalYear,
+                isBaselineLocked: isBaselineLocked
+              },
+              extractedActivities: singleProj.activities || [],
+              rawText: '',
+              sourceType: 'pdf_plan'
+            });
+            initEditFields(singleProj);
+          }
           setAiSuccessBadge(true);
           setIsParsing(false);
           setParsingStepText('');
@@ -812,16 +827,6 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
                   <Upload className="w-4 h-4" />
                   <span>เลือกไฟล์เอกสารโครงการ (.docx / .pdf)</span>
                 </label>
-              </div>
-
-              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={handleLoadSample}
-                  className="text-slate-500 hover:text-[#0a4d44] dark:hover:text-emerald-400 text-xs font-semibold underline cursor-pointer"
-                >
-                  หรือทดลองโหลดตัวอย่างเอกสารโครงการ (TQA กสม. ปี {selectedFiscalYear})
-                </button>
               </div>
             </div>
           )}

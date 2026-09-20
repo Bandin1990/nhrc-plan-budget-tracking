@@ -153,12 +153,102 @@ export async function parsePdfOperationalPlan(
   );
 
   if (!isMasterPlan) {
+    // Attempt single-project PDF extraction from text lines
+    let singleProjectName = '';
+    let singleDivision: NHRCUnit = 'สนย.';
+    let singleSubDivision = 'กลุ่มงานนโยบายและยุทธศาสตร์';
+    let singleBudget = 0;
+    const activities: ProjectActivity[] = [];
+    const timestamp = Date.now();
+
+    for (const al of allLines) {
+      const l = al.line;
+      if (!singleProjectName && l.includes('โครงการ') && l.length > 5 && l.length < 200) {
+        singleProjectName = l.replace(/^.*?(โครงการ)/, '$1').trim();
+      }
+      if (l.includes('สำนัก') || l.includes('ส่วนราชการ')) {
+        if (l.includes('สบก')) singleDivision = 'สบก.';
+        else if (l.includes('สบค')) singleDivision = 'สบค.';
+        else if (l.includes('สสค')) singleDivision = 'สสค.';
+        else if (l.includes('สรส')) singleDivision = 'สรส.';
+        else if (l.includes('สคส.1')) singleDivision = 'สคส.1';
+        else if (l.includes('สคส.2')) singleDivision = 'สคส.2';
+        else if (l.includes('สฝป')) singleDivision = 'สฝป.';
+        else if (l.includes('สรป')) singleDivision = 'สรป.';
+        else if (l.includes('สกม')) singleDivision = 'สกม.';
+        else if (l.includes('สดส')) singleDivision = 'สดส.';
+      }
+      if (singleBudget === 0 && (l.includes('งบประมาณ') || l.includes('บาท')) && /\d+/.test(l)) {
+        const val = parseSpacedNumber(l);
+        if (val > 1000) singleBudget = val;
+      }
+      if (l.includes('กิจกรรม') && l.length > 5 && l.length < 150) {
+        activities.push({
+          id: `act_pdf_${timestamp}_${activities.length + 1}`,
+          code: `${activities.length + 1}`,
+          name: l.trim(),
+          plannedPercent: 100,
+          timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
+          plannedBudget: 0,
+          actualSpent: 0,
+          status: 'not_started'
+        });
+      }
+    }
+
+    if (!singleProjectName) {
+      singleProjectName = file.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ');
+    }
+
+    const singleProj: Partial<Project> = {
+      id: `proj_pdf_${timestamp}`,
+      code: `${String(detectedFiscalYear).substring(2)}O1-${Math.floor(10000 + Math.random() * 90000)}`,
+      name: singleProjectName,
+      fiscalYear: detectedFiscalYear,
+      programCode: 'O',
+      division: singleDivision,
+      subDivision: singleSubDivision,
+      budgetAllocated: singleBudget || 250000,
+      budgetSpent: 0,
+      progressPercent: 0,
+      status: 'NOT_STARTED',
+      isStrategic: true,
+      strategicPillar: 1,
+      responsiblePerson: {
+        name: 'เจ้าหน้าที่ผู้รับผิดชอบ',
+        position: 'นักวิชาการสิทธิมนุษยชน',
+        division: singleDivision,
+        subDivision: singleSubDivision,
+        phone: '02 141 3800',
+        email: 'contact@nhrc.or.th'
+      },
+      timeframeText: `ตุลาคม ${detectedFiscalYear - 1} ถึงกันยายน ${detectedFiscalYear}`,
+      objectives: ['เพื่อดำเนินงานตามแผนปฏิบัติการประจำปี'],
+      expectedOutputs: ['ผลผลิตตามที่กำหนดในเอกสารโครงการ'],
+      expectedOutcomes: ['ผลลัพธ์ตามเป้าหมายยุทธศาสตร์'],
+      indicators: [],
+      activities: activities.length > 0 ? activities : [
+        {
+          id: `act_pdf_${timestamp}_1`,
+          code: '1',
+          name: `กิจกรรมหลักของ ${singleProjectName}`,
+          plannedPercent: 100,
+          timeframe: `ต.ค. ${detectedFiscalYear - 1} - ก.ย. ${detectedFiscalYear}`,
+          plannedBudget: singleBudget || 250000,
+          actualSpent: 0,
+          status: 'not_started'
+        }
+      ],
+      isBaselineLocked: true,
+      unlockedForEdit: false
+    };
+
     return {
       isMultiProject: false,
-      planTitle: file.name.replace(/\.pdf$/i, ''),
+      planTitle: singleProjectName,
       fiscalYear: detectedFiscalYear,
-      totalBudget: 0,
-      projects: []
+      totalBudget: singleBudget,
+      projects: [singleProj]
     };
   }
 
