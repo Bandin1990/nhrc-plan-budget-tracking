@@ -26,10 +26,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   const { currentUser } = useAuth();
   const [isAnnualExportModalOpen, setIsAnnualExportModalOpen] = useState(false);
 
-  // Interactive Chart View Mode State (category: หมวดงบประมาณ, program: 6 แผนงาน)
+  // Chart View Perspective State ('category' | 'program')
   const [activeChartTab, setActiveChartTab] = useState<'category' | 'program'>('category');
 
-  // Interactive Drill-Down Popup Modal State
+  // Drill-Down Popup Modal State
   const [selectedDrillDown, setSelectedDrillDown] = useState<{
     type: 'category' | 'program' | 'unit';
     title: string;
@@ -49,7 +49,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   const remainingBudget = totalAllocated - totalSpent;
   const spentRate = totalAllocated > 0 ? ((totalSpent / totalAllocated) * 100).toFixed(1) : '0.0';
 
-  // Returned Budget Calculation for this fiscalYear
+  // Returned Budget Calculation
   const returnedMemos = memos ? memos.filter(m => 
     ((m.fiscalYear || 2569) === fiscalYear) &&
     (m.subject?.includes('ส่งคืนงบประมาณ') || m.id?.startsWith('memo_return_'))
@@ -70,47 +70,46 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   const inProgressProjects = yearProjects.filter(p => p.status === 'IN_PROGRESS').length;
   const delayedProjects = yearProjects.filter(p => p.status === 'DELAYED' || (p.progressPercent < 40 && p.status === 'IN_PROGRESS')).length;
 
-  // 1. Breakdown by 5 Budget Categories (งบประมาณจำแนกตามประเภทงบ)
+  // 1. Breakdown by 5 Budget Categories (ประเภทงบประมาณ)
   const BUDGET_CATEGORIES = [
-    { key: 'งบดำเนินงาน', color: 'bg-emerald-500', barBg: 'bg-emerald-500', border: 'border-emerald-300 dark:border-emerald-800' },
-    { key: 'งบลงทุน', color: 'bg-[#0a4d44]', barBg: 'bg-[#0a4d44]', border: 'border-teal-300 dark:border-teal-800' },
-    { key: 'งบอุดหนุน', color: 'bg-purple-500', barBg: 'bg-purple-500', border: 'border-purple-300 dark:border-purple-800' },
-    { key: 'งบบุคลากร', color: 'bg-amber-500', barBg: 'bg-amber-500', border: 'border-amber-300 dark:border-amber-800' },
-    { key: 'งบรายจ่ายอื่น', color: 'bg-sky-500', barBg: 'bg-sky-500', border: 'border-sky-300 dark:border-sky-800' },
+    { key: 'งบดำเนินงาน', color: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800' },
+    { key: 'งบลงทุน', color: 'bg-teal-600', text: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50 dark:bg-teal-950/60 border-teal-200 dark:border-teal-800' },
+    { key: 'งบอุดหนุน', color: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/60 border-purple-200 dark:border-purple-800' },
+    { key: 'งบบุคลากร', color: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800' },
+    { key: 'งบรายจ่ายอื่น', color: 'bg-sky-600', text: 'text-sky-700 dark:text-sky-300', bg: 'bg-sky-50 dark:bg-sky-950/60 border-sky-200 dark:border-sky-800' },
   ] as const;
 
   const categoryStats = BUDGET_CATEGORIES.map((cat) => {
     const catProjects = yearProjects.filter(p => (p.budgetCategory || 'งบดำเนินงาน') === cat.key);
     const allocated = catProjects.reduce((sum, p) => sum + (p.budgetAllocated || 0), 0);
     const spent = catProjects.reduce((sum, p) => sum + (p.budgetSpent || 0), 0);
+    const remaining = allocated - spent;
     const percent = allocated > 0 ? (spent / allocated) * 100 : 0;
     const sharePercent = totalAllocated > 0 ? (allocated / totalAllocated) * 100 : 0;
     return {
       name: cat.key,
       color: cat.color,
-      barBg: cat.barBg,
-      border: cat.border,
+      text: cat.text,
+      bg: cat.bg,
       projectCount: catProjects.length,
       allocated,
       spent,
+      remaining,
       percent,
       sharePercent,
       projects: catProjects,
     };
   }).sort((a, b) => b.allocated - a.allocated);
 
-  // Highest Allocated Category Amount for Bar Height Scaling
-  const maxCategoryAllocated = Math.max(...categoryStats.map(c => c.allocated), 1);
-
-  // 2. Breakdown by 6 Budget Programs (งบประมาณจำแนกตามแผนงาน)
+  // 2. Breakdown by 6 Budget Programs (6 แผนงานงบประมาณ)
   const programKeys = Object.keys(BUDGET_PROGRAMS) as ProgramCode[];
   const PROGRAM_COLORS: Record<ProgramCode, { bar: string; text: string; bg: string }> = {
-    P1: { bar: 'bg-indigo-500', text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/50' },
-    M_T: { bar: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50' },
-    S1: { bar: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/50' },
-    A: { bar: 'bg-purple-500', text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/50' },
-    D2: { bar: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/50' },
-    O: { bar: 'bg-rose-500', text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-950/50' },
+    P1: { bar: 'bg-indigo-600', text: 'text-indigo-700 dark:text-indigo-300', bg: 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800' },
+    M_T: { bar: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800' },
+    S1: { bar: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800' },
+    A: { bar: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-800' },
+    D2: { bar: 'bg-blue-600', text: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800' },
+    O: { bar: 'bg-rose-600', text: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800' },
   };
 
   const programStats = programKeys.map((pCode) => {
@@ -118,6 +117,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     const progProjects = yearProjects.filter(p => p.programCode === pCode);
     const allocated = progProjects.reduce((sum, p) => sum + (p.budgetAllocated || 0), 0);
     const spent = progProjects.reduce((sum, p) => sum + (p.budgetSpent || 0), 0);
+    const remaining = allocated - spent;
     const percent = allocated > 0 ? (spent / allocated) * 100 : 0;
     const sharePercent = totalAllocated > 0 ? (allocated / totalAllocated) * 100 : 0;
     return {
@@ -127,15 +127,13 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       projectCount: progProjects.length,
       allocated,
       spent,
+      remaining,
       percent,
       sharePercent,
       projects: progProjects,
-      style: PROGRAM_COLORS[pCode] || { bar: 'bg-slate-500', text: 'text-slate-600', bg: 'bg-slate-50' },
+      style: PROGRAM_COLORS[pCode] || { bar: 'bg-slate-500', text: 'text-slate-600', bg: 'bg-slate-50 border-slate-200' },
     };
   }).sort((a, b) => b.allocated - a.allocated);
-
-  // Highest Allocated Program Amount for Bar Height Scaling
-  const maxProgramAllocated = Math.max(...programStats.map(p => p.allocated), 1);
 
   // 3. Breakdown by NHRC 14 Units
   const unitKeys = Object.keys(NHRC_UNITS) as NHRCUnit[];
@@ -171,7 +169,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs text-emerald-200/90 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                สถานะ: สรุปภาพรวมอินเทอร์แอคทีฟ (Interactive Dashboard)
+                สถานะ: สรุปภาพรวมระดับสำนักงาน กสม.
               </span>
             </div>
 
@@ -469,20 +467,20 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 3: INTERACTIVE VISUAL BAR CHARTS PANEL (กราฟแท่งเปรียบเทียบงบ) */}
+      {/* SECTION 3: USER-FRIENDLY BUDGET BREAKDOWN CARDS */}
       {/* ========================================================================= */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
-        {/* Interactive Bar Chart Header */}
+        {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
               <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white">
-                กราฟแท่งแสดงงบประมาณจัดสรร vs เบิกจ่ายจริง (Interactive Bar Charts)
+                สรุปสัดส่วนงบประมาณและการเบิกจ่าย
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              คลิกบนแท่งกราฟเพื่อเปิดหน้าต่างเจาะลึกดูายชื่อโครงการและรายละเอียดเบิกจ่ายสะสม (Drill-Down)
+              เปรียบเทียบวงเงินจัดสรรกับยอดเบิกจ่ายจริง จำแนกตามประเภทงบประมาณและแผนงาน
             </p>
           </div>
 
@@ -498,7 +496,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-emerald-500" />
-              <span>1. กราฟแท่งจำแนกตามประเภทงบ</span>
+              <span>1. จำแนกตามประเภทงบประมาณ</span>
             </button>
 
             <button
@@ -511,174 +509,149 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               }`}
             >
               <Target className="w-3.5 h-3.5 text-indigo-500" />
-              <span>2. กราฟแท่งจำแนกตาม 6 แผนงาน</span>
+              <span>2. จำแนกตาม 6 แผนงาน</span>
             </button>
           </div>
         </div>
 
-        {/* 1. VISUAL BAR CHART: BUDGET CATEGORIES (หมวดงบประมาณ) */}
+        {/* PERSPECTIVE 1: USER-FRIENDLY CATEGORY CARDS */}
         {activeChartTab === 'category' && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Chart Legend */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
-                  <span className="w-3 h-3 rounded-sm bg-[#0a4d44] inline-block"></span>
-                  <span>วงเงินที่ได้รับจัดสรร (100%)</span>
-                </span>
-                <span className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
-                  <span>เบิกจ่ายจริงสะสม</span>
-                </span>
-              </div>
-              <span className="text-slate-400 text-[11px]">
-                คลิกแท่งกราฟหมวดใดก็ได้ เพื่อดูโครงการในหมวดนั้น
-              </span>
-            </div>
-
-            {/* Horizontal Bar Chart Rows */}
-            <div className="space-y-4">
-              {categoryStats.map((cat) => {
-                const allocatedRatio = Math.max(8, (cat.allocated / maxCategoryAllocated) * 100);
-                const spentRatio = cat.allocated > 0 ? (cat.spent / cat.allocated) * 100 : 0;
-
-                return (
-                  <div
-                    key={cat.name}
-                    onClick={() => setSelectedDrillDown({
-                      type: 'category',
-                      title: `หมวดงบประมาณ: ${cat.name}`,
-                      subtitle: `รวม ${cat.projectCount} โครงการ • สัดส่วน ${cat.sharePercent.toFixed(1)}% ของงบจัดสรรทั้งหมด`,
-                      projects: cat.projects,
-                      totalAllocated: cat.allocated,
-                      totalSpent: cat.spent
-                    })}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50/70 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer group space-y-2 hover:shadow-md"
-                  >
-                    {/* Category Label & Amount Stats */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400">
-                          {cat.name}
-                        </span>
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                          {cat.projectCount} โครงการ
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-xs">
-                        <span>งบจัดสรร: <strong className="text-slate-800 dark:text-slate-100 font-mono">{formatCurrency(cat.allocated)}</strong> บ.</span>
-                        <span>เบิกจ่าย: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">{formatCurrency(cat.spent)}</strong> บ.</span>
-                        <span className="font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-                          {cat.percent.toFixed(1)}%
-                        </span>
-                      </div>
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categoryStats.map((cat) => (
+                <div
+                  key={cat.name}
+                  onClick={() => setSelectedDrillDown({
+                    type: 'category',
+                    title: `หมวดงบประมาณ: ${cat.name}`,
+                    subtitle: `รวม ${cat.projectCount} โครงการ • สัดส่วน ${cat.sharePercent.toFixed(1)}% ของงบจัดสรรทั้งหมด`,
+                    projects: cat.projects,
+                    totalAllocated: cat.allocated,
+                    totalSpent: cat.spent
+                  })}
+                  className={`p-4 rounded-2xl ${cat.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 ${cat.text} shadow-2xs`}>
+                        {cat.name}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
+                        <span>{cat.projectCount} โครงการ</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
 
-                    {/* Dual Comparative Visual Bars */}
-                    <div className="space-y-1 pt-1">
-                      {/* Allocated Bar */}
-                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden relative">
-                        <div 
-                          className="bg-[#0a4d44] dark:bg-emerald-600 h-3 rounded-full transition-all duration-700 flex items-center justify-end pr-2 text-[9px] text-white font-bold"
-                          style={{ width: `${allocatedRatio}%` }}
-                        >
-                          {allocatedRatio > 25 && `${cat.sharePercent.toFixed(1)}% ของงบรวม`}
-                        </div>
+                    <div className="space-y-2 mt-1">
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-500 dark:text-slate-400">วงเงินจัดสรร:</span>
+                        <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">
+                          {formatCurrency(cat.allocated)} บาท
+                        </span>
                       </div>
 
-                      {/* Spent Bar */}
-                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden relative">
-                        <div 
-                          className="bg-emerald-500 h-2.5 rounded-full transition-all duration-700"
-                          style={{ width: `${(allocatedRatio * Math.min(100, spentRatio)) / 100}%` }}
-                        />
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-500 dark:text-slate-400">เบิกจ่ายจริง:</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-sm">
+                          {formatCurrency(cat.spent)} บาท
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-500 dark:text-slate-400">คงเหลือ:</span>
+                        <span className="font-semibold text-slate-600 dark:text-slate-300 font-mono text-xs">
+                          {formatCurrency(cat.remaining)} บาท
+                        </span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800">
+                    <div className="flex justify-between text-xs mb-1.5 font-bold">
+                      <span className="text-slate-600 dark:text-slate-300">ความก้าวหน้าเบิกจ่าย:</span>
+                      <span className={cat.percent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
+                        {cat.percent.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-slate-200/80 dark:bg-slate-700/80 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className={`h-2.5 rounded-full ${cat.color} transition-all duration-700`}
+                        style={{ width: `${Math.min(100, cat.percent)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* 2. VISUAL BAR CHART: 6 BUDGET PROGRAMS (แผนงานงบประมาณ) */}
+        {/* PERSPECTIVE 2: USER-FRIENDLY PROGRAM CARDS */}
         {activeChartTab === 'program' && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Chart Legend */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                เปรียบเทียบวงเงินงบประมาณจัดสรร vs เบิกจ่ายจริง จำแนกตาม 6 แผนงาน
-              </span>
-              <span className="text-slate-400 text-[11px]">
-                คลิกแท่งกราฟแผนงานใดก็ได้ เพื่อดูรายการโครงการ
-              </span>
-            </div>
-
-            {/* Horizontal Bar Chart Rows */}
-            <div className="space-y-4">
-              {programStats.map((prog) => {
-                const allocatedRatio = Math.max(8, (prog.allocated / maxProgramAllocated) * 100);
-                const spentRatio = prog.allocated > 0 ? (prog.spent / prog.allocated) * 100 : 0;
-
-                return (
-                  <div
-                    key={prog.code}
-                    onClick={() => setSelectedDrillDown({
-                      type: 'program',
-                      title: `แผนงาน (${prog.code}): ${prog.name}`,
-                      subtitle: `รวม ${prog.projectCount} โครงการ • ยอดจัดสรร ${formatCurrency(prog.allocated)} บาท`,
-                      projects: prog.projects,
-                      totalAllocated: prog.allocated,
-                      totalSpent: prog.spent
-                    })}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50/70 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer group space-y-2 hover:shadow-md"
-                  >
-                    {/* Program Code Header & Title */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-lg border border-current ${prog.style.text} ${prog.style.bg}`}>
-                          แผนงาน {prog.code}
-                        </span>
-                        <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400">
-                          {prog.name}
-                        </h4>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-xs">
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {programStats.map((prog) => (
+                <div
+                  key={prog.code}
+                  onClick={() => setSelectedDrillDown({
+                    type: 'program',
+                    title: `แผนงาน (${prog.code}): ${prog.name}`,
+                    subtitle: `รวม ${prog.projectCount} โครงการ • ยอดจัดสรร ${formatCurrency(prog.allocated)} บาท`,
+                    projects: prog.projects,
+                    totalAllocated: prog.allocated,
+                    totalSpent: prog.spent
+                  })}
+                  className={`p-4 rounded-2xl ${prog.style.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 ${prog.style.text} shadow-2xs`}>
+                        แผนงาน {prog.code}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
                         <span>{prog.projectCount} โครงการ</span>
-                        <span>•</span>
-                        <span>จัดสรร: <strong className="text-slate-800 dark:text-slate-100 font-mono">{formatCurrency(prog.allocated)}</strong> บ.</span>
-                        <span>เบิกจ่าย: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">{formatCurrency(prog.spent)}</strong> บ.</span>
-                        <span className="font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-                          {prog.percent.toFixed(1)}%
-                        </span>
-                      </div>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
 
-                    {/* Dual Comparative Visual Bars */}
-                    <div className="space-y-1 pt-1">
-                      {/* Allocated Bar */}
-                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden relative">
-                        <div 
-                          className={`h-3 rounded-full ${prog.style.bar} transition-all duration-700 flex items-center justify-end pr-2 text-[9px] text-white font-bold`}
-                          style={{ width: `${allocatedRatio}%` }}
-                        >
-                          {allocatedRatio > 25 && `${prog.sharePercent.toFixed(1)}% ของงบรวม`}
-                        </div>
-                      </div>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mt-1">
+                      {prog.name}
+                    </h4>
 
-                      {/* Spent Bar */}
-                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden relative">
-                        <div 
-                          className="bg-emerald-500 h-2.5 rounded-full transition-all duration-700"
-                          style={{ width: `${(allocatedRatio * Math.min(100, spentRatio)) / 100}%` }}
-                        />
+                    <div className="space-y-1.5 mt-3 text-xs">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-slate-500 dark:text-slate-400">วงเงินจัดสรร:</span>
+                        <span className="font-bold text-slate-900 dark:text-white font-mono">
+                          {formatCurrency(prog.allocated)} บ.
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-slate-500 dark:text-slate-400">เบิกจ่ายจริง:</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                          {formatCurrency(prog.spent)} บ.
+                        </span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800">
+                    <div className="flex justify-between text-xs mb-1.5 font-bold">
+                      <span className="text-slate-600 dark:text-slate-300">ความก้าวหน้าเบิกจ่าย:</span>
+                      <span className={prog.percent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
+                        {prog.percent.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-slate-200/80 dark:bg-slate-700/80 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className={`h-2.5 rounded-full ${prog.style.bar} transition-all duration-700`}
+                        style={{ width: `${Math.min(100, prog.percent)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -692,7 +665,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Building2 className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
-              <span>กราฟแท่งแสดงงบประมาณจำแนกตามสำนัก / ส่วนราชการ (14 สำนัก)</span>
+              <span>งบประมาณจำแนกตามสำนัก / ส่วนราชการ (14 สำนัก)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               เปรียบเทียบวงเงินที่ได้รับจัดสรร (100%) กับ ยอดเบิกจ่ายจริงจำแนกตามรายหน่วยงาน
