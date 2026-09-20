@@ -165,7 +165,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                 <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-xs text-[#0a4d44] dark:text-emerald-400">
                   <Scale className="w-4 h-4 text-[#0a4d44]" />
-                  <span>ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 - 2.7)</span>
+                  <span>ส่วนที่ 2 : ความเชื่อมโยงกับยุทธศาสตร์ชาติ (2.1 - 2.7)</span>
                 </h4>
                 <div className="space-y-1.5 text-slate-600 dark:text-slate-300 pt-1 text-xs">
                   <p><span className="text-slate-400 font-semibold">2.1 ยุทธศาสตร์ชาติ:</span> {project.strategicSection2?.nationalStrategyPillar || project.nationalStrategy} (ประเด็น: {project.strategicSection2?.nationalStrategyIssue || '-'}, เป้าหมาย: {project.strategicSection2?.nationalStrategyTarget || '-'})</p>

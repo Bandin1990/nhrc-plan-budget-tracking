@@ -263,6 +263,14 @@ export interface StrategicSection2 {
   relatedLaws?: string; // กฎหมายที่เกี่ยวข้อง (เช่น พ.ร.ป. กสม. พ.ศ. 2560)
 }
 
+export interface ExpenseBreakdownItem {
+  id: string;
+  itemNo: number;
+  title: string;
+  detail: string;
+  amount: number;
+}
+
 export interface Project {
   id: string;
   code: string; // e.g. '68O1-13314'
@@ -298,6 +306,7 @@ export interface Project {
   activities: ProjectActivity[];
 
   // ส่วนที่ 4: แผนการดำเนินงานและการใช้จ่ายงบประมาณ (มาตรการเร่งรัด มติ ครม. 21 ต.ค. 2568)
+  expenseDetails?: ExpenseBreakdownItem[]; // 4.2 รายละเอียดค่าใช้จ่าย
   monthlyBudgetPlan?: MonthlyBudgetPlan[]; // แผนรายเดือน (Q1=38%, Q2=61%, Q3=81%, Q4=100%)
   investmentCommitmentQ1?: number; // แผนก่อหนี้ผูกพันงบลงทุนในไตรมาสที่ 1
   

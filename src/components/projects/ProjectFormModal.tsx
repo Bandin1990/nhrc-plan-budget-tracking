@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2, Building2, Target, FileText, Calendar, Paperclip, UserCheck, AlertCircle, Upload, CheckCircle2 } from 'lucide-react';
-import { Project, ProjectActivity, ProjectIndicator, NHRC_UNITS, BUDGET_PROGRAMS, NHRCUnit, ProgramCode, MonthlyBudgetPlan, ProjectAttachment } from '../../types/project';
+import { X, Save, Plus, Trash2, Building2, Target, FileText, Calendar, Paperclip, UserCheck, AlertCircle, Upload, CheckCircle2, Sparkles } from 'lucide-react';
+import { Project, ProjectActivity, ProjectIndicator, NHRC_UNITS, BUDGET_PROGRAMS, NHRCUnit, ProgramCode, MonthlyBudgetPlan, ProjectAttachment, ExpenseBreakdownItem } from '../../types/project';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { fromThaiNumerals, formatCurrency } from '../../utils/thaiNumber';
@@ -95,7 +95,12 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   ]);
   const [activities, setActivities] = useState<ProjectActivity[]>([]);
 
-  // ส่วนที่ 4: แผนรายเดือน & มาตรการเร่งรัด มติ ครม. 21 ต.ค. 2568
+  // ส่วนที่ 4: แผนการดำเนินงานและการใช้จ่ายงบประมาณ
+  const [expenseDetails, setExpenseDetails] = useState<ExpenseBreakdownItem[]>([
+    { id: 'exp_1', itemNo: 1, title: 'ค่าตอบแทน ใช้สอยและวัสดุ', detail: 'ค่าจัดประชุม/สัมมนา ค่าอาหาร เครื่องดื่ม และวัสดุสำนักงาน', amount: 0 },
+    { id: 'exp_2', itemNo: 2, title: 'ค่าใช้จ่ายในการเดินทางไปราชการ', detail: 'ค่าเบี้ยเลี้ยง ค่าที่พัก และค่าพาหนะเดินทางไปราชการ', amount: 0 },
+    { id: 'exp_3', itemNo: 3, title: 'ค่าจ้างเหมาบริการและอื่นๆ', detail: 'ค่าจ้างเหมาบริการจัดทำเอกสาร สื่อ และดำเนินงานโครงการ', amount: 0 },
+  ]);
   const [monthlyPlan, setMonthlyPlan] = useState<MonthlyBudgetPlan[]>([]);
   const [investmentCommitmentQ1, setInvestmentCommitmentQ1] = useState<number>(0);
 
@@ -148,6 +153,17 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       setExpectedBenefits(projectToEdit.expectedBenefits?.length ? projectToEdit.expectedBenefits : ['']);
       setIndicators(projectToEdit.indicators || []);
       setActivities(projectToEdit.activities || []);
+
+      if (projectToEdit.expenseDetails && projectToEdit.expenseDetails.length > 0) {
+        setExpenseDetails(projectToEdit.expenseDetails);
+      } else {
+        const bAlloc = projectToEdit.budgetAllocated || 200000;
+        setExpenseDetails([
+          { id: 'exp_1', itemNo: 1, title: 'ค่าตอบแทน ใช้สอยและวัสดุ', detail: 'ค่าจัดประชุม/สัมมนา ค่าอาหาร เครื่องดื่ม และวัสดุสำนักงาน', amount: Math.round(bAlloc * 0.5) },
+          { id: 'exp_2', itemNo: 2, title: 'ค่าใช้จ่ายในการเดินทางไปราชการ', detail: 'ค่าเบี้ยเลี้ยง ค่าที่พัก และค่าพาหนะเดินทางไปราชการ', amount: Math.round(bAlloc * 0.3) },
+          { id: 'exp_3', itemNo: 3, title: 'ค่าจ้างเหมาบริการและอื่นๆ', detail: 'ค่าจ้างเหมาบริการจัดทำเอกสาร สื่อ และดำเนินงานโครงการ', amount: Math.round(bAlloc * 0.2) },
+        ]);
+      }
 
       setRespName(projectToEdit.responsiblePerson?.name || '');
       setRespPosition(projectToEdit.responsiblePerson?.position || '');
@@ -359,6 +375,57 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
     setActivities(prev => prev.map(a => a.id === id ? { ...a, [field]: val } : a));
   };
 
+  const handleAddExpenseDetail = () => {
+    setExpenseDetails(prev => [
+      ...prev,
+      {
+        id: `exp_${Date.now()}`,
+        itemNo: prev.length + 1,
+        title: '',
+        detail: '',
+        amount: 0
+      }
+    ]);
+  };
+
+  const handleRemoveExpenseDetail = (id: string) => {
+    setExpenseDetails(prev => prev.filter(i => i.id !== id).map((item, idx) => ({ ...item, itemNo: idx + 1 })));
+  };
+
+  const handleExpenseDetailChange = (id: string, field: keyof ExpenseBreakdownItem, val: any) => {
+    setExpenseDetails(prev => prev.map(i => i.id === id ? { ...i, [field]: val } : i));
+  };
+
+  const handleAutoCalculateMonthlyFromActivities = () => {
+    if (!activities || activities.length === 0) return;
+    const totalActBudget = activities.reduce((sum, a) => sum + (Number(a.plannedBudget) || 0), 0);
+    if (totalActBudget <= 0) return;
+
+    const q1Spent = totalActBudget * 0.38;
+    const q2Spent = totalActBudget * 0.23;
+    const q3Spent = totalActBudget * 0.20;
+    const q4Spent = totalActBudget * 0.19;
+
+    const newPlan = monthlyPlan.map((m) => {
+      let monthlyVal = 0;
+      if (m.quarter === 1) monthlyVal = Math.round(q1Spent / 3);
+      else if (m.quarter === 2) monthlyVal = Math.round(q2Spent / 3);
+      else if (m.quarter === 3) monthlyVal = Math.round(q3Spent / 3);
+      else monthlyVal = Math.round(q4Spent / 3);
+
+      const matchingActs = activities.filter(a => a.timeframe && a.timeframe.includes(m.monthName));
+      const milestoneText = matchingActs.map(a => a.name).join(', ') || m.operationMilestone || 'ดำเนินกิจกรรมตามแผนงาน';
+
+      return {
+        ...m,
+        plannedSpent: monthlyVal,
+        operationMilestone: milestoneText,
+      };
+    });
+
+    setMonthlyPlan(newPlan);
+  };
+
   const handleAddFileUpload = (type: 'BUDGET_REQUEST_FORM' | 'STRATEGIC_PROPOSAL_FORM') => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -445,6 +512,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       expectedBenefits: expectedBenefits.filter(o => o.trim().length > 0),
       indicators,
       activities,
+      expenseDetails,
       monthlyBudgetPlan: monthlyPlan,
       investmentCommitmentQ1,
       attachments,
@@ -507,7 +575,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             }`}
           >
             <Target className="w-4 h-4 shrink-0" />
-            <span>ส่วนที่ 2: ยุทธศาสตร์ชาติ</span>
+            <span>ส่วนที่ 2 : ความเชื่อมโยงกับยุทธศาสตร์ชาติ</span>
           </button>
 
           <button
@@ -533,7 +601,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             }`}
           >
             <Calendar className="w-4 h-4 shrink-0" />
-            <span>ส่วนที่ 4: แผนรายเดือน & ครม.</span>
+            <span>ส่วนที่ 4 : แผนการดำเนินงานและการใช้จ่ายงบประมาณ</span>
           </button>
 
           <button
@@ -1027,287 +1095,495 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 </div>
               </div>
 
-              {/* Activities List */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between border-b pb-1 border-slate-200 dark:border-slate-800">
-                  <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
-                    รายการกิจกรรมและงบประมาณย่อย
+              {/* Indicators */}
+              <div className="space-y-2">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">ตัวชี้วัดความสำเร็จของโครงการ (KPIs)</label>
+                {indicators.map((ind, idx) => (
+                  <div key={ind.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <input
+                      type="text"
+                      value={ind.title}
+                      onChange={(e) => {
+                        const newInds = [...indicators];
+                        newInds[idx].title = e.target.value;
+                        setIndicators(newInds);
+                      }}
+                      placeholder={`ตัวชี้วัดที่ ${idx + 1}`}
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={ind.target}
+                        onChange={(e) => {
+                          const newInds = [...indicators];
+                          newInds[idx].target = e.target.value;
+                          setIndicators(newInds);
+                        }}
+                        placeholder="ค่าเป้าหมาย (เช่น ร้อยละ 100)"
+                        className="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                      />
+                      {indicators.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setIndicators(indicators.filter((_, i) => i !== idx))}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setIndicators([...indicators, { id: `ind_${Date.now()}`, title: '', target: '', status: 'on_track' }])}
+                  className="text-xs font-bold text-[#0a4d44] dark:text-emerald-400 hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" /> เพิ่มตัวชี้วัด
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: แผนการดำเนินงานและการใช้จ่ายงบประมาณ */}
+          {activeTab === 4 && (
+            <div className="space-y-5 animate-fadeIn text-xs">
+              <div className="border-b pb-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
+                    ส่วนที่ 4 : แผนการดำเนินงานและการใช้จ่ายงบประมาณ
+                  </h4>
+                  <p className="text-slate-500 text-[11px] mt-0.5">
+                    วงเงินงบประมาณจัดสรร รายละเอียดค่าใช้จ่าย กิจกรรมตามแผนงาน และแผนเบิกจ่ายรายเดือนตามมติ ครม. (21 ต.ค. 2568)
+                  </p>
+                </div>
+                <span className="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold text-[11px] px-2.5 py-1 rounded-full border border-amber-300 shrink-0">
+                  มติ ครม. 21 ต.ค. 2568
+                </span>
+              </div>
+
+              {/* 4.1 งบประมาณที่ขอรับจัดสรร */}
+              <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-2xl border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between">
+                <div>
+                  <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-300">
+                    4.1 งบประมาณที่ขอรับจัดสรร
                   </h5>
+                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    วงเงินงบประมาณรวมทั้งโครงการตามแบบเสนอขอรับการจัดสรร ประจำปีงบประมาณ พ.ศ. {fiscalYear}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-slate-500 block font-semibold">จำนวนเงินรวมทั้งสิ้น:</span>
+                  <strong className="text-base sm:text-lg font-mono font-extrabold text-[#0a4d44] dark:text-emerald-300">
+                    {totalCalculatedBudget.toLocaleString()} บาท
+                  </strong>
+                </div>
+              </div>
+
+              {/* 4.2 รายละเอียดค่าใช้จ่าย */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
+                  <div>
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      4.2 รายละเอียดค่าใช้จ่าย
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      แจกแจงรายการค่าใช้จ่าย คำนวณเบี้ยเลี้ยง ที่พัก พาหนะ และค่าจัดกิจกรรม
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddExpenseDetail}
+                    className="flex items-center gap-1 text-xs font-bold text-[#0a4d44] dark:text-emerald-300 hover:underline cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>เพิ่มรายการค่าใช้จ่าย</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                        <th className="p-2 w-14 text-center">ลำดับที่</th>
+                        <th className="p-2 w-48">รายการ</th>
+                        <th className="p-2">รายละเอียดค่าใช้จ่าย</th>
+                        <th className="p-2 w-36 text-right">จำนวนเงิน (บาท)</th>
+                        <th className="p-2 w-10 text-center"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60">
+                      {expenseDetails.map((item, idx) => (
+                        <tr key={item.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-800/40">
+                          <td className="p-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={item.title}
+                              onChange={(e) => handleExpenseDetailChange(item.id, 'title', e.target.value)}
+                              placeholder="เช่น ค่าตอบแทน ใช้สอยและวัสดุ"
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium"
+                            />
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={item.detail}
+                              onChange={(e) => handleExpenseDetailChange(item.id, 'detail', e.target.value)}
+                              placeholder="เช่น ค่าเบี้ยเลี้ยง 10 คน x 3 วัน, ค่าพาหนะเดินทาง"
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                            />
+                          </td>
+                          <td className="p-2 text-right">
+                            <input
+                              type="number"
+                              value={item.amount || ''}
+                              onChange={(e) => handleExpenseDetailChange(item.id, 'amount', Number(e.target.value))}
+                              placeholder="0"
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-right font-mono font-bold text-[#0a4d44] dark:text-emerald-400"
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            {expenseDetails.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveExpenseDetail(item.id)}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
+                                title="ลบรายการ"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-emerald-50/60 dark:bg-emerald-950/40 font-bold border-t border-emerald-200 dark:border-emerald-800">
+                        <td colSpan={3} className="p-2.5 text-right text-[#0a4d44] dark:text-emerald-300">
+                          รวมเงินรายละเอียดค่าใช้จ่ายทั้งสิ้น:
+                        </td>
+                        <td className="p-2.5 text-right font-mono text-sm text-[#0a4d44] dark:text-emerald-300">
+                          {expenseDetails.reduce((sum, i) => sum + (Number(i.amount) || 0), 0).toLocaleString()} บาท
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              {/* 4.3 แผนการดำเนินงานและการใช้จ่ายงบประมาณ (ดึงมาจากส่วนที่ 3 เดิม) */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
+                  <div>
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      4.3 แผนการดำเนินงานและการใช้จ่ายงบประมาณ
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      กำหนดกิจกรรมดำเนินงาน สัดส่วนร้อยละของแผน ช่วงเวลา (เดือน) และประมาณการงบประมาณที่จะใช้
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={handleAddActivity}
-                    className="flex items-center gap-1 text-xs font-bold text-[#0a4d44] dark:text-emerald-300 hover:underline"
+                    className="flex items-center gap-1 text-xs font-bold text-[#0a4d44] dark:text-emerald-300 hover:underline cursor-pointer shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>เพิ่มกิจกรรม</span>
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                  {activities.map((act, index) => (
-                    <div key={act.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <input
-                          type="text"
-                          value={act.name}
-                          onChange={(e) => handleActivityChange(act.id, 'name', e.target.value)}
-                          placeholder={`กิจกรรมที่ ${index + 1}`}
-                          className="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg font-medium text-xs"
-                          required
-                        />
-                        {activities.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveActivity(act.id)}
-                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 text-[11px]">
-                        <div>
-                          <span className="text-slate-400 block mb-0.5">ช่วงเวลา:</span>
-                          <input
-                            type="text"
-                            value={act.timeframe}
-                            onChange={(e) => handleActivityChange(act.id, 'timeframe', e.target.value)}
-                            placeholder="เช่น ม.ค. - มิ.ย. 69"
-                            className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg"
-                          />
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block mb-0.5">สัดส่วนแผน (%):</span>
-                          <input
-                            type="number"
-                            value={act.plannedPercent || 0}
-                            onChange={(e) => handleActivityChange(act.id, 'plannedPercent', Number(e.target.value))}
-                            className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg"
-                          />
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block mb-0.5">งบกิจกรรม (บาท):</span>
-                          <input
-                            type="number"
-                            value={act.plannedBudget || 0}
-                            onChange={(e) => handleActivityChange(act.id, 'plannedBudget', Number(e.target.value))}
-                            className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg font-mono font-bold text-[#0a4d44]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl flex items-center justify-between font-bold text-xs">
-                  <span className="text-[#0a4d44] dark:text-emerald-300">งบประมาณรวมทั้งโครงการ:</span>
-                  <span className="text-sm font-mono text-[#0a4d44] dark:text-emerald-300">
-                    {totalCalculatedBudget.toLocaleString()} บาท
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: แผนรายเดือน & มาตรการเร่งรัด ครม. */}
-          {activeTab === 4 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="border-b pb-2 border-slate-200 dark:border-slate-800">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
-                    ส่วนที่ 2 : รายละเอียดแผนการใช้จ่ายงบประมาณ (มติ ครม. 21 ต.ค. 2568)
-                  </h4>
-                  <span className="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold text-[11px] px-2.5 py-1 rounded-full border border-amber-300">
-                    มติ ครม. 21 ต.ค. 2568
-                  </span>
-                </div>
-                <p className="text-slate-500 text-[11px] mt-1">
-                  วางแผนการเบิกจ่ายให้เป็นไปตามมาตรการเร่งรัดการเบิกจ่ายงบประมาณประจำปี (สะสม: Q1 38%, Q2 61%, Q3 81%, Q4 100%)
-                </p>
-              </div>
-
-              {/* Cabinet Targets KPI Summary Bar (2.1) */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[1, 2, 3, 4].map((qNum) => {
-                  const qVal = qNum as 1 | 2 | 3 | 4;
-                  const currentRate = getQuarterCumulativePercent(qVal);
-                  const targetRate = CABINET_QUARTER_TARGETS[qVal];
-                  const isPass = currentRate >= targetRate;
-
-                  return (
-                    <div
-                      key={qNum}
-                      className={`p-3 rounded-xl border ${
-                        isPass
-                          ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 text-emerald-900 dark:text-emerald-200'
-                          : 'bg-amber-50/70 dark:bg-amber-950/40 border-amber-300 text-amber-900 dark:text-amber-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-[11px] font-bold mb-1">
-                        <span>ไตรมาสที่ {qNum}</span>
-                        <span>เป้าหมาย {targetRate}%</span>
-                      </div>
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-base font-bold font-mono">{currentRate}%</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isPass ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800'}`}>
-                          {isPass ? '✓ ตามเป้า' : '⚠️ ต่ำกว่าเป้า'}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Automated Tools Toolbar for 2.1, 2.2, 2.3 */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span>เครื่องมือจัดทำแผนงบประมาณอัตโนมัติ (สอดคล้อง มติ ครม. 21 ต.ค. 2568)</span>
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                  {/* 2.1 Auto Cabinet targets */}
-                  <button
-                    type="button"
-                    onClick={handleApplyCabinetTargets}
-                    className="p-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
-                  >
-                    <span className="flex items-center gap-1 text-[#0a4d44] dark:text-emerald-300 font-bold">
-                      <span>2.1 คำนวณแผนตาม มติ ครม.</span>
-                    </span>
-                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">
-                      ปรับรายเดือนอัตโนมัติให้เข้าเกณฑ์ Q1 38% | Q2 61% | Q3 81% | Q4 100%
-                    </span>
-                  </button>
-
-                  {/* 2.2 Q1 Investment commitment */}
-                  <button
-                    type="button"
-                    onClick={handleApplyInvestmentQ1Commitment}
-                    className="p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
-                  >
-                    <span className="flex items-center gap-1 text-blue-900 dark:text-blue-300 font-bold">
-                      <span>2.2 งบลงทุน: วางแผนก่อหนี้ Q1</span>
-                    </span>
-                    <span className="text-[10px] text-blue-700 dark:text-blue-400 font-normal">
-                      ตั้งวงเงินสัญญาผูกพัน PO เต็มวงเงินในไตรมาสที่ 1 (ต.ค. - ธ.ค.)
-                    </span>
-                  </button>
-
-                  {/* 2.3 Contract month spending */}
-                  <div className="p-2.5 bg-purple-50 dark:bg-purple-950/50 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-xl text-xs flex flex-col justify-between gap-1 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[11px]">2.3 เลือกเดือนสัญญาจัดจ้าง:</span>
-                      <select
-                        value={contractSigningMonth}
-                        onChange={(e) => setContractSigningMonth(Number(e.target.value))}
-                        className="px-1.5 py-0.5 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 rounded font-bold text-[10px] text-purple-900 dark:text-purple-200 outline-none"
-                      >
-                        {FISCAL_MONTHS.map(m => (
-                          <option key={m.month} value={m.month}>
-                            {m.name} (Q{m.quarter})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleApplyContractSigningMonthPlan}
-                      className="w-full mt-0.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-[10px] transition-colors cursor-pointer"
-                    >
-                      วางแผนเต็มวงเงินในเดือนสัญญา
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Investment Commitment Alert */}
-              {budgetCategory === 'งบลงทุน' && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800 rounded-xl text-blue-900 dark:text-blue-200 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <div className="text-[11px] leading-relaxed">
-                    <p className="font-bold text-xs mb-0.5">ข้อกำหนดงบประมาณรายจ่ายลงทุน (มติ ครม.)</p>
-                    <p>งบประมาณรายจ่ายลงทุน ต้องวางแผนการใช้จ่ายและจัดทำแผนก่อหนี้ผูกพัน (PO/สัญญา) ให้เสร็จสิ้นภายใน <b>ไตรมาสที่ 1 (ต.ค. - ธ.ค. 2568)</b></p>
-                  </div>
-                </div>
-              )}
-
-              {/* Monthly Plan Grid */}
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                <table className="w-full text-left border-collapse text-[11px]">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200">
-                      <th className="p-2">เดือน</th>
-                      <th className="p-2">ไตรมาส</th>
-                      <th className="p-2">แผนการดำเนินงานรายเดือน</th>
-                      <th className="p-2 text-right">แผนใช้จ่ายจริง (บาท)</th>
-                      {budgetCategory === 'งบลงทุน' && <th className="p-2 text-right">แผนก่อหนี้ PO (บาท)</th>}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                    {monthlyPlan.map((m, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                        <td className="p-2 font-bold text-slate-800 dark:text-white whitespace-nowrap">
-                          {m.monthName}
-                        </td>
-                        <td className="p-2">
-                          <span className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px] font-bold">
-                            Q{m.quarter}
-                          </span>
-                        </td>
-                        <td className="p-2">
-                          <input
-                            type="text"
-                            value={m.operationMilestone || ''}
-                            onChange={(e) => {
-                              const updated = [...monthlyPlan];
-                              updated[idx].operationMilestone = e.target.value;
-                              setMonthlyPlan(updated);
-                            }}
-                            placeholder="รายละเอียดกิจกรรมในเดือนนี้"
-                            className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded"
-                          />
-                        </td>
-                        <td className="p-2 text-right">
-                          <input
-                            type="number"
-                            value={m.plannedSpent}
-                            onChange={(e) => {
-                              const updated = [...monthlyPlan];
-                              updated[idx].plannedSpent = Number(e.target.value);
-                              setMonthlyPlan(updated);
-                            }}
-                            className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-right font-mono font-bold text-[#0a4d44]"
-                          />
-                        </td>
-                        {budgetCategory === 'งบลงทุน' && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                        <th className="p-2">กิจกรรม</th>
+                        <th className="p-2 w-28 text-center">ร้อยละของแผน (%)</th>
+                        <th className="p-2 w-44">ช่วงเวลาดำเนินงาน (ระบุเดือน)</th>
+                        <th className="p-2 w-36 text-right">งบประมาณที่จะใช้ (จำนวนเงิน)</th>
+                        <th className="p-2 w-10 text-center"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60">
+                      {activities.map((act, index) => (
+                        <tr key={act.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-800/40">
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={act.name}
+                              onChange={(e) => handleActivityChange(act.id, 'name', e.target.value)}
+                              placeholder={`กิจกรรมที่ ${index + 1}`}
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium"
+                              required
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <input
+                              type="number"
+                              value={act.plannedPercent || 0}
+                              onChange={(e) => handleActivityChange(act.id, 'plannedPercent', Number(e.target.value))}
+                              placeholder="0"
+                              className="w-20 px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-center font-bold"
+                            />
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={act.timeframe}
+                              onChange={(e) => handleActivityChange(act.id, 'timeframe', e.target.value)}
+                              placeholder="เช่น ต.ค. - ธ.ค. 68"
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                            />
+                          </td>
                           <td className="p-2 text-right">
                             <input
                               type="number"
-                              value={m.plannedCommitted || 0}
-                              onChange={(e) => {
-                                const updated = [...monthlyPlan];
-                                updated[idx].plannedCommitted = Number(e.target.value);
-                                setMonthlyPlan(updated);
-                              }}
-                              className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-right font-mono text-blue-700 font-bold"
+                              value={act.plannedBudget || 0}
+                              onChange={(e) => handleActivityChange(act.id, 'plannedBudget', Number(e.target.value))}
+                              placeholder="0"
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-right font-mono font-bold text-[#0a4d44] dark:text-emerald-400"
                             />
                           </td>
-                        )}
+                          <td className="p-2 text-center">
+                            {activities.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveActivity(act.id)}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
+                                title="ลบกิจกรรม"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-emerald-50/60 dark:bg-emerald-950/40 font-bold border-t border-emerald-200 dark:border-emerald-800">
+                        <td className="p-2.5 text-right text-[#0a4d44] dark:text-emerald-300">
+                          รวมงบประมาณกิจกรรมทั้งสิ้น:
+                        </td>
+                        <td className="p-2.5 text-center text-[#0a4d44] dark:text-emerald-300 font-bold">
+                          {activities.reduce((sum, a) => sum + (Number(a.plannedPercent) || 0), 0)}%
+                        </td>
+                        <td></td>
+                        <td className="p-2.5 text-right font-mono text-sm text-[#0a4d44] dark:text-emerald-300">
+                          {totalCalculatedBudget.toLocaleString()} บาท
+                        </td>
+                        <td></td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
 
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-between font-bold text-xs">
-                <span>รวมแผนใช้จ่ายรายเดือน 12 เดือน:</span>
-                <span className="font-mono text-sm text-[#0a4d44] dark:text-emerald-400">
-                  {totalMonthlyPlannedSpent.toLocaleString()} บาท (งบจัดสรรรวม {totalCalculatedBudget.toLocaleString()} บาท)
-                </span>
+              {/* 4.4 รายละเอียดแผนการใช้จ่ายงบประมาณ (มติ ครม. 21 ต.ค. 2568) */}
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
+                  <div>
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      4.4 รายละเอียดแผนการใช้จ่ายงบประมาณ (มติ ครม. 21 ต.ค. 2568)
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      แผนเบิกจ่ายรายเดือนสอดคล้องเป้าหมายสะสม (Q1 38% | Q2 61% | Q3 81% | Q4 100%) คำนวณอัตโนมัติจากกิจกรรมในข้อ 4.3
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAutoCalculateMonthlyFromActivities}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0a4d44] hover:bg-[#073b34] text-white rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer shrink-0"
+                    title="คำนวณแผนรายเดือนอัตโนมัติจากสัดส่วนและช่วงเวลากิจกรรมในข้อ 4.3"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>คำนวณแผนรายเดือนจากข้อ 4.3 อัตโนมัติ</span>
+                  </button>
+                </div>
+
+                {/* Cabinet Targets KPI Summary Bar */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[1, 2, 3, 4].map((qNum) => {
+                    const qVal = qNum as 1 | 2 | 3 | 4;
+                    const currentRate = getQuarterCumulativePercent(qVal);
+                    const targetRate = CABINET_QUARTER_TARGETS[qVal];
+                    const isPass = currentRate >= targetRate;
+
+                    return (
+                      <div
+                        key={qNum}
+                        className={`p-3 rounded-xl border ${
+                          isPass
+                            ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 text-emerald-900 dark:text-emerald-200'
+                            : 'bg-amber-50/70 dark:bg-amber-950/40 border-amber-300 text-amber-900 dark:text-amber-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                          <span>ไตรมาสที่ {qNum}</span>
+                          <span>เป้าหมาย {targetRate}%</span>
+                        </div>
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-base font-bold font-mono">{currentRate}%</span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isPass ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800'}`}>
+                            {isPass ? '✓ ตามเป้า' : '⚠️ ต่ำกว่าเป้า'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Automated Tools Toolbar for 4.4 */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>เครื่องมือจัดทำแผนงบประมาณอัตโนมัติ (สอดคล้อง มติ ครม. 21 ต.ค. 2568)</span>
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                    {/* Auto Cabinet targets */}
+                    <button
+                      type="button"
+                      onClick={handleApplyCabinetTargets}
+                      className="p-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
+                    >
+                      <span className="flex items-center gap-1 text-[#0a4d44] dark:text-emerald-300 font-bold">
+                        <span>คำนวณแผนตาม มติ ครม.</span>
+                      </span>
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">
+                        ปรับรายเดือนอัตโนมัติให้เข้าเกณฑ์ Q1 38% | Q2 61% | Q3 81% | Q4 100%
+                      </span>
+                    </button>
+
+                    {/* Q1 Investment commitment */}
+                    <button
+                      type="button"
+                      onClick={handleApplyInvestmentQ1Commitment}
+                      className="p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-xl font-bold text-xs text-left transition-all cursor-pointer flex flex-col justify-between gap-1 shadow-xs"
+                    >
+                      <span className="flex items-center gap-1 text-blue-900 dark:text-blue-300 font-bold">
+                        <span>งบลงทุน: วางแผนก่อหนี้ Q1</span>
+                      </span>
+                      <span className="text-[10px] text-blue-700 dark:text-blue-400 font-normal">
+                        ตั้งวงเงินสัญญาผูกพัน PO เต็มวงเงินในไตรมาสที่ 1 (ต.ค. - ธ.ค.)
+                      </span>
+                    </button>
+
+                    {/* Contract month spending */}
+                    <div className="p-2.5 bg-purple-50 dark:bg-purple-950/50 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-xl text-xs flex flex-col justify-between gap-1 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[11px]">เลือกเดือนสัญญาจัดจ้าง:</span>
+                        <select
+                          value={contractSigningMonth}
+                          onChange={(e) => setContractSigningMonth(Number(e.target.value))}
+                          className="px-1.5 py-0.5 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 rounded font-bold text-[10px] text-purple-900 dark:text-purple-200 outline-none"
+                        >
+                          {FISCAL_MONTHS.map(m => (
+                            <option key={m.month} value={m.month}>
+                              {m.name} (Q{m.quarter})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyContractSigningMonthPlan}
+                        className="w-full mt-0.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-[10px] transition-colors cursor-pointer"
+                      >
+                        วางแผนเต็มวงเงินในเดือนสัญญา
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Investment Commitment Alert */}
+                {budgetCategory === 'งบลงทุน' && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800 rounded-xl text-blue-900 dark:text-blue-200 flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                    <div className="text-[11px] leading-relaxed">
+                      <p className="font-bold text-xs mb-0.5">ข้อกำหนดงบประมาณรายจ่ายลงทุน (มติ ครม.)</p>
+                      <p>งบประมาณรายจ่ายลงทุน ต้องวางแผนการใช้จ่ายและจัดทำแผนก่อหนี้ผูกพัน (PO/สัญญา) ให้เสร็จสิ้นภายใน <b>ไตรมาสที่ 1 (ต.ค. - ธ.ค. 2568)</b></p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Monthly Plan Grid */}
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200">
+                        <th className="p-2">เดือน</th>
+                        <th className="p-2">ไตรมาส</th>
+                        <th className="p-2">แผนการดำเนินงานรายเดือน</th>
+                        <th className="p-2 text-right">แผนใช้จ่ายจริง (บาท)</th>
+                        {budgetCategory === 'งบลงทุน' && <th className="p-2 text-right">แผนก่อหนี้ PO (บาท)</th>}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {monthlyPlan.map((m, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                          <td className="p-2 font-bold text-slate-800 dark:text-white whitespace-nowrap">
+                            {m.monthName}
+                          </td>
+                          <td className="p-2">
+                            <span className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px] font-bold">
+                              Q{m.quarter}
+                            </span>
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={m.operationMilestone || ''}
+                              onChange={(e) => {
+                                const updated = [...monthlyPlan];
+                                updated[idx].operationMilestone = e.target.value;
+                                setMonthlyPlan(updated);
+                              }}
+                              placeholder="รายละเอียดกิจกรรมในเดือนนี้"
+                              className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded"
+                            />
+                          </td>
+                          <td className="p-2 text-right">
+                            <input
+                              type="number"
+                              value={m.plannedSpent}
+                              onChange={(e) => {
+                                const updated = [...monthlyPlan];
+                                updated[idx].plannedSpent = Number(e.target.value);
+                                setMonthlyPlan(updated);
+                              }}
+                              className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-right font-mono font-bold text-[#0a4d44]"
+                            />
+                          </td>
+                          {budgetCategory === 'งบลงทุน' && (
+                            <td className="p-2 text-right">
+                              <input
+                                type="number"
+                                value={m.plannedCommitted || 0}
+                                onChange={(e) => {
+                                  const updated = [...monthlyPlan];
+                                  updated[idx].plannedCommitted = Number(e.target.value);
+                                  setMonthlyPlan(updated);
+                                }}
+                                className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-right font-mono text-blue-700 font-bold"
+                              />
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-between font-bold text-xs">
+                  <span>รวมแผนใช้จ่ายรายเดือน 12 เดือน:</span>
+                  <span className="font-mono text-sm text-[#0a4d44] dark:text-emerald-400">
+                    {totalMonthlyPlannedSpent.toLocaleString()} บาท (งบจัดสรรรวม {totalCalculatedBudget.toLocaleString()} บาท)
+                  </span>
+                </div>
               </div>
             </div>
           )}
