@@ -6,10 +6,15 @@ import {
 } from 'lucide-react';
 import { parseProjectWordFile, ParsedProjectResult } from '../../services/wordParser';
 import { 
-  extractProjectWithGemini, 
-  extractProjectFromPdfWithGemini, 
+  extractProjectWithAi, 
+  extractProjectFromPdfWithAi, 
   getStoredGeminiApiKey, 
-  setStoredGeminiApiKey 
+  setStoredGeminiApiKey,
+  getStoredOpenAiApiKey,
+  setStoredOpenAiApiKey,
+  getStoredAiProvider,
+  setStoredAiProvider,
+  AiProvider
 } from '../../services/aiWordExtractor';
 import { parsePdfOperationalPlan, STRATEGIC_PILLARS } from '../../services/pdfPlanExtractor';
 import { Project, NHRC_UNITS, NHRCUnit, BUDGET_PROGRAMS, ProgramCode } from '../../types/project';
@@ -50,8 +55,12 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
   const [subActivitiesModalProject, setSubActivitiesModalProject] = useState<Partial<Project> | null>(null);
 
   // AI Configuration State
-  const [apiKey, setApiKey] = useState<string>(getStoredGeminiApiKey());
-  const [isAiEnabled, setIsAiEnabled] = useState<boolean>(() => Boolean(getStoredGeminiApiKey()));
+  const [aiProvider, setAiProvider] = useState<AiProvider>(getStoredAiProvider());
+  const [apiKey, setApiKey] = useState<string>(() => {
+    const p = getStoredAiProvider();
+    return p === 'openai' ? (getStoredOpenAiApiKey() || getStoredGeminiApiKey()) : (getStoredGeminiApiKey() || getStoredOpenAiApiKey());
+  });
+  const [isAiEnabled, setIsAiEnabled] = useState<boolean>(() => Boolean(getStoredOpenAiApiKey() || getStoredGeminiApiKey()));
   const [showApiKeyInput, setShowApiKeyInput] = useState<boolean>(false);
 
   // Editable Preview State (for single project)
@@ -64,12 +73,22 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
   const [editRespPhone, setEditRespPhone] = useState<string>('');
   const [editRespEmail, setEditRespEmail] = useState<string>('');
 
-  const handleSaveApiKey = (key: string) => {
-    setApiKey(key);
-    setStoredGeminiApiKey(key);
-    if (key.trim()) {
+  const handleSaveApiKey = (keyToSave: string, providerToSave: AiProvider = aiProvider) => {
+    const cleanKey = keyToSave.trim();
+    setApiKey(cleanKey);
+    if (cleanKey.startsWith('sk-') || providerToSave === 'openai') {
+      setStoredOpenAiApiKey(cleanKey);
+      setStoredAiProvider('openai');
+      setAiProvider('openai');
+    } else {
+      setStoredGeminiApiKey(cleanKey);
+      setStoredAiProvider('gemini');
+      setAiProvider('gemini');
+    }
+    if (cleanKey) {
       setIsAiEnabled(true);
       setShowApiKeyInput(false);
+      setErrorMsg(null);
     }
   };
 
@@ -191,18 +210,18 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
         console.warn('Local PDF plan parser skipped or error:', localErr);
       }
 
-      // Step 2: If not detected by local parser, try Gemini AI
+      // Step 2: If not detected by local parser, try AI
       if (!apiKey.trim()) {
         setShowApiKeyInput(true);
-        setErrorMsg('ไม่พบตารางแผนปฏิบัติการอัตโนมัติในเอกสาร หากต้องการให้ AI สกัดข้อมูล กรุณาระบุ Google Gemini API Key ด้านล่าง');
+        setErrorMsg('ไม่พบตารางแผนปฏิบัติการอัตโนมัติในเอกสาร หากต้องการให้ AI สกัดข้อมูล กรุณาระบุ OpenAI หรือ Google Gemini API Key ด้านล่าง');
         setIsParsing(false);
         setParsingStepText('');
         return;
       }
 
-      setParsingStepText('กำลังส่งไฟล์ PDF ให้ AI (Google Gemini) วิเคราะห์โครงสร้างโครงการทั้งหมด...');
+      setParsingStepText(`กำลังส่งไฟล์ PDF ให้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างโครงการทั้งหมด...`);
       try {
-        const aiRes = await extractProjectFromPdfWithGemini(file, selectedFiscalYear, apiKey);
+        const aiRes = await extractProjectFromPdfWithAi(file, selectedFiscalYear, apiKey);
         if (aiRes.success) {
           if (aiRes.isMultiProject && aiRes.projects && aiRes.projects.length > 0) {
             setMultiProjects(aiRes.projects);
@@ -257,10 +276,10 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
       // Step 1: Client-side docx parsing via mammoth
       const offlineResult = await parseProjectWordFile(file, selectedFiscalYear);
       
-      // Step 2: If AI is enabled and API Key is set, try Gemini Smart Extraction
+      // Step 2: If AI is enabled and API Key is set, try Smart Extraction
       if (isAiEnabled && apiKey.trim() && offlineResult.rawText && offlineResult.rawText.length > 50) {
-        setParsingStepText('กำลังใช้ AI (Google Gemini) วิเคราะห์โครงสร้างโครงการและตารางกิจกรรม...');
-        const aiRes = await extractProjectWithGemini(offlineResult.rawText, selectedFiscalYear, apiKey);
+        setParsingStepText(`กำลังใช้ AI (${aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'}) วิเคราะห์โครงสร้างโครงการและตารางกิจกรรม...`);
+        const aiRes = await extractProjectWithAi(offlineResult.rawText, selectedFiscalYear, apiKey);
         
         if (aiRes.success && aiRes.project) {
           setParsedData({
@@ -661,12 +680,12 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
           </div>
           <div>
             <p className="font-bold text-sm text-purple-950 dark:text-purple-200">
-              ระบบสกัดข้อมูลอัจฉริยะด้วย AI (Google Gemini)
+              ระบบสกัดข้อมูลอัจฉริยะด้วย AI ({aiProvider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'})
             </p>
             <p className="text-xs text-purple-700/80 dark:text-purple-300/80 mt-0.5">
               {apiKey.trim() 
-                ? 'เชื่อมต่อ Gemini API เรียบร้อยแล้ว (สกัดตารางกิจกรรม, งบประมาณแต่ละขั้น, วัตถุประสงค์ และผู้รับผิดชอบอัตโนมัติ)'
-                : 'ระบุ Gemini API Key เพื่อให้ AI อ่านตารางกิจกรรมและฟิลด์ทั้งหมดได้อย่างแม่นยำ 100%'}
+                ? `เชื่อมต่อ ${aiProvider === 'openai' ? 'OpenAI API' : 'Gemini API'} เรียบร้อยแล้ว (สกัดตารางกิจกรรม, งบประมาณแต่ละขั้น, วัตถุประสงค์ และผู้รับผิดชอบอัตโนมัติ)`
+                : 'ระบุ OpenAI (sk-...) หรือ Gemini API Key เพื่อให้ AI อ่านตารางกิจกรรมและฟิลด์ทั้งหมดได้อย่างแม่นยำ 100%'}
             </p>
           </div>
         </div>
@@ -678,7 +697,7 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 shadow-xs hover:bg-purple-50 transition-colors cursor-pointer"
           >
             <Key className="w-3.5 h-3.5" />
-            <span>{apiKey.trim() ? 'เปลี่ยน API Key' : 'ตั้งค่า API Key'}</span>
+            <span>{apiKey.trim() ? 'เปลี่ยน API Key' : 'ตั้งค่า API Key / เลือกรุ่น AI'}</span>
           </button>
 
           <label className="flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-200 cursor-pointer bg-white/60 dark:bg-slate-800/60 px-3 py-2 rounded-xl border border-purple-200 dark:border-purple-700">
@@ -698,21 +717,59 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
         </div>
       </div>
 
-      {/* Gemini API Key Configuration Box */}
+      {/* AI Key & Provider Configuration Box */}
       {showApiKeyInput && (
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 space-y-3 animate-in fade-in shadow-sm">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 space-y-4 animate-in fade-in shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <Key className="w-4 h-4 text-purple-600" />
+              <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">เลือกผู้ให้บริการ AI:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAiProvider('openai');
+                  const k = getStoredOpenAiApiKey();
+                  setApiKey(k);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  aiProvider === 'openai' 
+                    ? 'bg-emerald-600 text-white shadow-xs' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                OpenAI (GPT-4o / GPT-4o-mini)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAiProvider('gemini');
+                  const k = getStoredGeminiApiKey();
+                  setApiKey(k);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  aiProvider === 'gemini' 
+                    ? 'bg-purple-600 text-white shadow-xs' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                Google Gemini (2.0 / 1.5)
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 text-xs">
-              <Key className="w-4 h-4 text-purple-600" />
-              <span>Google Gemini API Key:</span>
+              <span>{aiProvider === 'openai' ? 'OpenAI API Key (sk-...):' : 'Google Gemini API Key:'}</span>
             </label>
             <a
-              href="https://aistudio.google.com/app/apikey"
+              href={aiProvider === 'openai' ? 'https://platform.openai.com/api-keys' : 'https://aistudio.google.com/app/apikey'}
               target="_blank"
               rel="noreferrer"
               className="text-xs text-purple-600 hover:underline font-bold"
             >
-              รับ API Key ฟรี &rarr;
+              {aiProvider === 'openai' ? 'รับ OpenAI Key &rarr;' : 'รับ Gemini Key ฟรี &rarr;'}
             </a>
           </div>
           <div className="flex items-center gap-3">
@@ -720,12 +777,12 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="วางคีย์ AIzaSy..."
+              placeholder={aiProvider === 'openai' ? 'วางคีย์ sk-...' : 'วางคีย์ AIzaSy...'}
               className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-mono outline-hidden focus:ring-2 focus:ring-purple-500"
             />
             <button
               type="button"
-              onClick={() => handleSaveApiKey(apiKey)}
+              onClick={() => handleSaveApiKey(apiKey, aiProvider)}
               className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer"
             >
               บันทึกคีย์

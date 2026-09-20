@@ -1,7 +1,12 @@
 import { Project, ProjectActivity, NHRCUnit, ProgramCode } from '../types/project';
 import { fromThaiNumerals } from '../utils/thaiNumber';
+import { extractLinesFromPdf } from './pdfPlanExtractor';
+
+export type AiProvider = 'gemini' | 'openai';
 
 const GEMINI_API_KEY_STORAGE_KEY = 'nhrc_gemini_api_key';
+const OPENAI_API_KEY_STORAGE_KEY = 'nhrc_openai_api_key';
+const AI_PROVIDER_STORAGE_KEY = 'nhrc_ai_provider';
 
 export function getStoredGeminiApiKey(): string {
   return localStorage.getItem(GEMINI_API_KEY_STORAGE_KEY) || import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -15,6 +20,30 @@ export function setStoredGeminiApiKey(apiKey: string): void {
   }
 }
 
+export function getStoredOpenAiApiKey(): string {
+  return localStorage.getItem(OPENAI_API_KEY_STORAGE_KEY) || import.meta.env.VITE_OPENAI_API_KEY || '';
+}
+
+export function setStoredOpenAiApiKey(apiKey: string): void {
+  if (apiKey.trim()) {
+    localStorage.setItem(OPENAI_API_KEY_STORAGE_KEY, apiKey.trim());
+  } else {
+    localStorage.removeItem(OPENAI_API_KEY_STORAGE_KEY);
+  }
+}
+
+export function getStoredAiProvider(): AiProvider {
+  const provider = localStorage.getItem(AI_PROVIDER_STORAGE_KEY);
+  if (provider === 'openai' || provider === 'gemini') return provider;
+  const openAiKey = getStoredOpenAiApiKey();
+  if (openAiKey.startsWith('sk-')) return 'openai';
+  return 'gemini';
+}
+
+export function setStoredAiProvider(provider: AiProvider): void {
+  localStorage.setItem(AI_PROVIDER_STORAGE_KEY, provider);
+}
+
 export interface AiExtractionResponse {
   success: boolean;
   isMultiProject?: boolean;
@@ -24,6 +53,8 @@ export interface AiExtractionResponse {
   totalBudget?: number;
   extractedActivities?: ProjectActivity[];
   rawAiOutput?: string;
+  usedProvider?: string;
+  usedModel?: string;
   error?: string;
 }
 
@@ -470,7 +501,9 @@ export async function extractProjectFromPdfWithGemini(
       isMultiProject: false,
       project,
       extractedActivities: activities,
-      rawAiOutput: cleanJsonStr
+      rawAiOutput: cleanJsonStr,
+      usedProvider: 'Google Gemini',
+      usedModel: usedModel
     };
   } catch (err: any) {
     console.error('Gemini PDF extraction error:', err);
@@ -478,5 +511,176 @@ export async function extractProjectFromPdfWithGemini(
       success: false,
       error: `เกิดข้อผิดพลาดในการประมวลผลไฟล์ PDF ด้วย AI: ${err.message}`
     };
+  }
+}
+
+/**
+ * Calls OpenAI API (gpt-4o / gpt-4o-mini) to extract Thai NHRC project data from text
+ */
+export async function extractProjectWithOpenAI(
+  documentText: string,
+  targetFiscalYear: number = 2570,
+  customApiKey?: string,
+  model: string = 'gpt-4o-mini'
+): Promise<AiExtractionResponse> {
+  const apiKey = customApiKey?.trim() || getStoredOpenAiApiKey();
+
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'กรุณาระบุ OpenAI API Key (เริ่มต้นด้วย sk-...) เพื่อใช้ AI ในการสกัดข้อมูล'
+    };
+  }
+
+  const prompt = `${buildExtractionPrompt(targetFiscalYear)}
+
+[เนื้อหาเอกสารโครงการ]:
+"""
+${documentText.substring(0, 100000)}
+"""`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model || 'gpt-4o-mini',
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.1
+      })
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => null);
+      const errMsg = errJson?.error?.message || `HTTP ${response.status} ${response.statusText}`;
+      throw new Error(errMsg);
+    }
+
+    const data = await response.json();
+    const candidate = data?.choices?.[0]?.message?.content;
+    if (!candidate) {
+      throw new Error('ไม่ได้รับข้อความตอบกลับจาก OpenAI');
+    }
+
+    const cleanJsonStr = candidate.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+    const parsed = JSON.parse(cleanJsonStr);
+
+    if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+      const validatedList: Partial<Project>[] = [];
+      for (const p of parsed.projects) {
+        const { project } = sanitizeAndValidateAiProject(p, targetFiscalYear);
+        validatedList.push(project);
+      }
+      return {
+        success: true,
+        isMultiProject: true,
+        planTitle: parsed.planTitle || `แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. ${targetFiscalYear}`,
+        projects: validatedList,
+        totalBudget: validatedList.reduce((s, p) => s + (p.budgetAllocated || 0), 0),
+        rawAiOutput: cleanJsonStr,
+        usedProvider: 'OpenAI',
+        usedModel: model
+      };
+    }
+
+    const { project, activities } = sanitizeAndValidateAiProject(parsed, targetFiscalYear);
+
+    return {
+      success: true,
+      isMultiProject: false,
+      project,
+      extractedActivities: activities,
+      rawAiOutput: cleanJsonStr,
+      usedProvider: 'OpenAI',
+      usedModel: model
+    };
+  } catch (err: any) {
+    console.error('OpenAI Word extraction error:', err);
+    return {
+      success: false,
+      error: `เกิดข้อผิดพลาดในการประมวลผลด้วย OpenAI: ${err.message}`
+    };
+  }
+}
+
+/**
+ * Calls OpenAI API (gpt-4o / gpt-4o-mini) to extract Thai NHRC project data from PDF text lines
+ */
+export async function extractProjectFromPdfWithOpenAI(
+  pdfFile: File,
+  targetFiscalYear: number = 2570,
+  customApiKey?: string,
+  model: string = 'gpt-4o-mini'
+): Promise<AiExtractionResponse> {
+  const apiKey = customApiKey?.trim() || getStoredOpenAiApiKey();
+
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'กรุณาระบุ OpenAI API Key (เริ่มต้นด้วย sk-...) เพื่อใช้ AI ในการสกัดข้อมูล'
+    };
+  }
+
+  try {
+    const pageData = await extractLinesFromPdf(pdfFile);
+    const pdfTextLines: string[] = [];
+    for (const p of pageData) {
+      pdfTextLines.push(`--- หน้า ${p.page} ---`);
+      pdfTextLines.push(...p.lines);
+    }
+    const fullPdfText = pdfTextLines.join('\n');
+
+    return await extractProjectWithOpenAI(fullPdfText, targetFiscalYear, apiKey, model);
+  } catch (err: any) {
+    console.error('OpenAI PDF extraction error:', err);
+    return {
+      success: false,
+      error: `เกิดข้อผิดพลาดในการอ่านและประมวลผลไฟล์ PDF ด้วย OpenAI: ${err.message}`
+    };
+  }
+}
+
+/**
+ * Unified AI project extractor (dispatches to OpenAI or Google Gemini based on Key prefix or settings)
+ */
+export async function extractProjectWithAi(
+  documentText: string,
+  targetFiscalYear: number = 2570,
+  customApiKey?: string
+): Promise<AiExtractionResponse> {
+  const key = customApiKey?.trim() || getStoredOpenAiApiKey() || getStoredGeminiApiKey();
+  const provider = getStoredAiProvider();
+
+  if (key.startsWith('sk-') || provider === 'openai') {
+    return extractProjectWithOpenAI(documentText, targetFiscalYear, key);
+  } else {
+    return extractProjectWithGemini(documentText, targetFiscalYear, key);
+  }
+}
+
+/**
+ * Unified AI PDF project extractor (dispatches to OpenAI or Google Gemini based on Key prefix or settings)
+ */
+export async function extractProjectFromPdfWithAi(
+  pdfFile: File,
+  targetFiscalYear: number = 2570,
+  customApiKey?: string
+): Promise<AiExtractionResponse> {
+  const key = customApiKey?.trim() || getStoredOpenAiApiKey() || getStoredGeminiApiKey();
+  const provider = getStoredAiProvider();
+
+  if (key.startsWith('sk-') || provider === 'openai') {
+    return extractProjectFromPdfWithOpenAI(pdfFile, targetFiscalYear, key);
+  } else {
+    return extractProjectFromPdfWithGemini(pdfFile, targetFiscalYear, key);
   }
 }
