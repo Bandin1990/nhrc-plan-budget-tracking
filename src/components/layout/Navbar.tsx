@@ -308,25 +308,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate, o
             />
           </div>
 
-          {/* Quick Import Plan Button */}
-          <button
-            onClick={() => onNavigate && onNavigate('word_import' as NavTab)}
-            className="hidden lg:flex items-center gap-1.5 text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 px-3 py-1.5 rounded-xl border border-amber-300/60 transition-all shadow-xs cursor-pointer"
-            title="นำเข้าแผนปฏิบัติการประจำปี (Word/AI)"
-          >
-            <FileUp className="w-3.5 h-3.5 text-slate-900" />
-            <span>นำเข้าแผนปฏิบัติการ</span>
-          </button>
-
-          {/* Supabase Database Status */}
-          <button
-            title={`Supabase: ${supabaseStatus === 'connected' ? 'เชื่อมต่อฐานข้อมูลคลาวด์แล้ว (Online)' : supabaseStatus === 'missing_tables' ? 'เชื่อมต่อได้ แต่ยังไม่ได้รัน SQL Schema' : 'สถานะ: ' + supabaseStatus}`}
-            onClick={() => onNavigate && onNavigate('system_settings' as NavTab)}
-            className="p-2 rounded-xl bg-[#073b34] hover:bg-[#052c27] border border-emerald-600/40 transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
-          >
-            <Database className={`w-4 h-4 ${supabaseStatus === 'connected' ? 'text-emerald-300' : supabaseStatus === 'missing_tables' ? 'text-amber-300 animate-pulse' : 'text-slate-300/70'}`} />
-          </button>
-
           {/* Current User Profile Button */}
           <div className="relative ml-1">
             <button
