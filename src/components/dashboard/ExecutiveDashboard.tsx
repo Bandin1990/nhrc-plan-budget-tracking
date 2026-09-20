@@ -469,20 +469,20 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 3: EXECUTIVE 3-METRIC FINANCIAL CARDS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
+      {/* SECTION 3: EXECUTIVE 3-METRIC FINANCIAL CARDS (จัดสรร vs เบิกจ่าย vs คงเหลือ) */}
       {/* ========================================================================= */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
-        {/* Header Title & Legend for Executives */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-5">
+        {/* Header Title & Switcher */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <Wallet className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
               <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white">
-                รายงานสัดส่วนทางการเงินสำหรับผู้บริหาร (จัดสรร vs เบิกจ่าย vs คงเหลือ)
+                รายงานสรุปงบประมาณสำหรับผู้บริหาร
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              แสดงการเปรียบเทียบวงเงินจัดสรร ยอดเบิกจ่ายจริง และวงเงินคงเหลือสุทธิอย่างชัดเจน
+              แสดงการเปรียบเทียบวงเงินจัดสรร ยอดเบิกจ่ายจริง และวงเงินคงเหลือสุทธิ (คลิกบนการ์ดเพื่อดูรายละเอียดรายโครงการ)
             </p>
           </div>
 
@@ -491,48 +491,52 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             <button
               type="button"
               onClick={() => setActiveChartTab('category')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
                 activeChartTab === 'category'
-                  ? 'bg-white dark:bg-slate-900 text-[#0a4d44] dark:text-emerald-400 shadow-sm'
+                  ? 'bg-white dark:bg-slate-900 text-[#0a4d44] dark:text-emerald-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              <Layers className="w-3.5 h-3.5 text-emerald-500" />
-              <span>1. จำแนกตามประเภทงบประมาณ</span>
+              <Layers className="w-3.5 h-3.5 text-emerald-600" />
+              <span>1. จำแนกตามประเภทงบ</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveChartTab('program')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
                 activeChartTab === 'program'
-                  ? 'bg-white dark:bg-slate-900 text-[#0a4d44] dark:text-emerald-400 shadow-sm'
+                  ? 'bg-white dark:bg-slate-900 text-[#0a4d44] dark:text-emerald-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              <Target className="w-3.5 h-3.5 text-indigo-500" />
+              <Target className="w-3.5 h-3.5 text-indigo-600" />
               <span>2. จำแนกตาม 6 แผนงาน</span>
             </button>
           </div>
         </div>
 
-        {/* Legend for 3 Colors */}
-        <div className="flex flex-wrap items-center gap-4 text-xs bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
-          <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
-            <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
+        {/* Clear & Simple Color Legend */}
+        <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+          <span className="font-bold text-slate-600 dark:text-slate-300">คำอธิบายแถบสี:</span>
+          
+          <div className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400">
+            <div className="w-3.5 h-3.5 rounded bg-blue-600"></div>
             <span>🔵 วงเงินจัดสรร (Allocated)</span>
-          </span>
-          <span className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+          </div>
+
+          <div className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-400">
+            <div className="w-3.5 h-3.5 rounded bg-emerald-500"></div>
             <span>🟢 เบิกจ่ายจริง (Spent)</span>
-          </span>
-          <span className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400">
-            <span className="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+          </div>
+
+          <div className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400">
+            <div className="w-3.5 h-3.5 rounded bg-amber-500"></div>
             <span>🟠 งบประมาณคงเหลือ (Remaining)</span>
-          </span>
+          </div>
         </div>
 
-        {/* PERSPECTIVE 1: CATEGORY CARDS WITH 3 METRICS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
+        {/* PERSPECTIVE 1: CATEGORY CARDS WITH MATCHING BARS */}
         {activeChartTab === 'category' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -547,80 +551,68 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: cat.allocated,
                     totalSpent: cat.spent
                   })}
-                  className={`p-5 rounded-3xl ${cat.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                  className="p-5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-4"
                 >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
-                      <span className={`text-xs font-bold px-3 py-1 rounded-xl bg-white dark:bg-slate-800 ${cat.text} shadow-2xs`}>
-                        {cat.name}
-                      </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
-                        <span>{cat.projectCount} โครงการ</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-
-                    {/* 3 Executive Metrics */}
-                    <div className="space-y-2.5">
-                      {/* Metric 1: Allocated */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-blue-100 dark:border-blue-900/40">
-                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                          <span>จัดสรรไป:</span>
-                        </span>
-                        <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm">
-                          {formatCurrency(cat.allocated)} <span className="text-[10px] text-slate-400">บ.</span>
-                        </span>
-                      </div>
-
-                      {/* Metric 2: Spent */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60">
-                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                          <span>เบิกจ่ายไป:</span>
-                        </span>
-                        <div className="text-right">
-                          <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono text-xs sm:text-sm">
-                            {formatCurrency(cat.spent)} <span className="text-[10px] text-emerald-500">บ.</span>
-                          </span>
-                          <span className="text-[10px] font-extrabold text-emerald-600 ml-1.5 bg-emerald-100 dark:bg-emerald-900 px-1.5 py-0.5 rounded">
-                            {cat.percent.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Metric 3: Remaining */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800/60">
-                        <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                          <span>คงเหลือ:</span>
-                        </span>
-                        <div className="text-right">
-                          <span className="font-bold text-amber-800 dark:text-amber-300 font-mono text-xs sm:text-sm">
-                            {formatCurrency(cat.remaining)} <span className="text-[10px] text-amber-600">บ.</span>
-                          </span>
-                          <span className="text-[10px] font-extrabold text-amber-700 ml-1.5 bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded">
-                            {cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                    <h4 className="text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
+                      {cat.name}
+                    </h4>
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-xl flex items-center gap-1">
+                      <span>{cat.projectCount} โครงการ</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
 
-                  {/* Multi-Segment Visual Progress Bar (Spent vs Remaining) */}
-                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-1">
-                    <div className="flex justify-between text-[11px] font-semibold text-slate-500">
-                      <span>เบิกจ่ายแล้ว {cat.percent.toFixed(1)}%</span>
-                      <span>คงเหลือ {cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%</span>
+                  {/* 3 Metric Rows with Matching Color Bars */}
+                  <div className="space-y-3 text-xs">
+                    {/* 1. Allocated (Blue) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-blue-700 dark:text-blue-400">🔵 จัดสรร</span>
+                        <span className="font-mono text-slate-900 dark:text-white">
+                          {formatCurrency(cat.allocated)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-600 h-2.5 rounded-full w-full" />
+                      </div>
                     </div>
 
-                    <div className="w-full bg-amber-400 dark:bg-amber-600 rounded-full h-3 overflow-hidden flex shadow-inner">
-                      <div 
-                        className="bg-emerald-500 h-3 rounded-l-full transition-all duration-700"
-                        style={{ width: `${Math.min(100, cat.percent)}%` }}
-                        title={`เบิกจ่ายแล้ว ${formatCurrency(cat.spent)} บาท`}
-                      />
+                    {/* 2. Spent (Green) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-emerald-700 dark:text-emerald-400">
+                          🟢 เบิกจ่าย ({cat.percent.toFixed(1)}%)
+                        </span>
+                        <span className="font-mono text-emerald-700 dark:text-emerald-400">
+                          {formatCurrency(cat.spent)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" 
+                          style={{ width: `${Math.min(100, cat.percent)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 3. Remaining (Orange) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-amber-700 dark:text-amber-400">
+                          🟠 คงเหลือ ({cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%)
+                        </span>
+                        <span className="font-mono text-amber-700 dark:text-amber-400">
+                          {formatCurrency(cat.remaining)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-amber-500 h-2.5 rounded-full transition-all duration-500" 
+                          style={{ width: `${Math.min(100, cat.allocated > 0 ? (cat.remaining / cat.allocated) * 100 : 0)}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -629,7 +621,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
         )}
 
-        {/* PERSPECTIVE 2: PROGRAM CARDS WITH 3 METRICS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
+        {/* PERSPECTIVE 2: PROGRAM CARDS WITH MATCHING BARS */}
         {activeChartTab === 'program' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -644,84 +636,73 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: prog.allocated,
                     totalSpent: prog.spent
                   })}
-                  className={`p-5 rounded-3xl ${prog.style.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                  className="p-5 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-md transition-all cursor-pointer group space-y-4"
                 >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
-                      <span className={`text-xs font-extrabold px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 ${prog.style.text} shadow-2xs`}>
-                        แผนงาน {prog.code}
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                    <div>
+                      <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
+                        {prog.code}
                       </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
-                        <span>{prog.projectCount} โครงการ</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
+                      <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white mt-1.5 line-clamp-1 group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
+                        {prog.name}
+                      </h4>
                     </div>
-
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mt-1">
-                      {prog.name}
-                    </h4>
-
-                    {/* 3 Executive Metrics */}
-                    <div className="space-y-2 mt-3">
-                      {/* Metric 1: Allocated */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-blue-100 dark:border-blue-900/40">
-                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                          <span>จัดสรรไป:</span>
-                        </span>
-                        <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm">
-                          {formatCurrency(prog.allocated)} <span className="text-[10px] text-slate-400">บ.</span>
-                        </span>
-                      </div>
-
-                      {/* Metric 2: Spent */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60">
-                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                          <span>เบิกจ่ายไป:</span>
-                        </span>
-                        <div className="text-right">
-                          <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono text-xs sm:text-sm">
-                            {formatCurrency(prog.spent)} <span className="text-[10px] text-emerald-500">บ.</span>
-                          </span>
-                          <span className="text-[10px] font-extrabold text-emerald-600 ml-1.5 bg-emerald-100 dark:bg-emerald-900 px-1.5 py-0.5 rounded">
-                            {prog.percent.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Metric 3: Remaining */}
-                      <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800/60">
-                        <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                          <span>คงเหลือ:</span>
-                        </span>
-                        <div className="text-right">
-                          <span className="font-bold text-amber-800 dark:text-amber-300 font-mono text-xs sm:text-sm">
-                            {formatCurrency(prog.remaining)} <span className="text-[10px] text-amber-600">บ.</span>
-                          </span>
-                          <span className="text-[10px] font-extrabold text-amber-700 ml-1.5 bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded">
-                            {prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-xl flex items-center gap-1 shrink-0 ml-2">
+                      <span>{prog.projectCount} โครงการ</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
 
-                  {/* Multi-Segment Visual Progress Bar */}
-                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-1">
-                    <div className="flex justify-between text-[11px] font-semibold text-slate-500">
-                      <span>เบิกจ่ายแล้ว {prog.percent.toFixed(1)}%</span>
-                      <span>คงเหลือ {prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%</span>
+                  {/* 3 Metric Rows with Matching Color Bars */}
+                  <div className="space-y-3 text-xs">
+                    {/* 1. Allocated (Blue) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-blue-700 dark:text-blue-400">🔵 จัดสรร</span>
+                        <span className="font-mono text-slate-900 dark:text-white">
+                          {formatCurrency(prog.allocated)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-600 h-2.5 rounded-full w-full" />
+                      </div>
                     </div>
 
-                    <div className="w-full bg-amber-400 dark:bg-amber-600 rounded-full h-3 overflow-hidden flex shadow-inner">
-                      <div 
-                        className="bg-emerald-500 h-3 rounded-l-full transition-all duration-700"
-                        style={{ width: `${Math.min(100, prog.percent)}%` }}
-                        title={`เบิกจ่ายแล้ว ${formatCurrency(prog.spent)} บาท`}
-                      />
+                    {/* 2. Spent (Green) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-emerald-700 dark:text-emerald-400">
+                          🟢 เบิกจ่าย ({prog.percent.toFixed(1)}%)
+                        </span>
+                        <span className="font-mono text-emerald-700 dark:text-emerald-400">
+                          {formatCurrency(prog.spent)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" 
+                          style={{ width: `${Math.min(100, prog.percent)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 3. Remaining (Orange) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between font-bold">
+                        <span className="text-amber-700 dark:text-amber-400">
+                          🟠 คงเหลือ ({prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%)
+                        </span>
+                        <span className="font-mono text-amber-700 dark:text-amber-400">
+                          {formatCurrency(prog.remaining)} บาท
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-amber-500 h-2.5 rounded-full transition-all duration-500" 
+                          style={{ width: `${Math.min(100, prog.allocated > 0 ? (prog.remaining / prog.allocated) * 100 : 0)}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -732,9 +713,9 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 4: MAIN DEPARTMENT BREAKDOWN WITH 3 METRICS (14 สำนัก) */}
+      {/* SECTION 4: MAIN DEPARTMENT BREAKDOWN WITH SIMPLE MATCHING BARS (14 สำนัก) */}
       {/* ========================================================================= */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -742,7 +723,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span>งบประมาณจำแนกตามสำนัก / ส่วนราชการ (14 สำนัก)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              สรุปวงเงินจัดสรร ยอดเบิกจ่ายจริง และวงเงินคงเหลือสุทธิจำแนกตามรายสำนัก
+              สรุปงบประมาณจัดสรร เบิกจ่าย และคงเหลือสุทธิจำแนกรายสำนัก
             </p>
           </div>
 
@@ -755,7 +736,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {unitStats.map((u) => (
             <div 
               key={u.code} 
@@ -767,33 +748,55 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                 totalAllocated: u.allocated,
                 totalSpent: u.spent
               })}
-              className="group cursor-pointer p-3.5 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-slate-800/80 border border-slate-100 dark:border-slate-800/80 hover:border-emerald-200 dark:hover:border-emerald-800/60 transition-all space-y-2"
+              className="group cursor-pointer p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all space-y-3"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="font-extrabold text-white bg-[#0a4d44] px-2.5 py-0.5 rounded-md text-[11px] shrink-0">
+              {/* Unit Header & Metrics */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-extrabold text-white bg-[#0a4d44] px-2.5 py-1 rounded-lg text-xs shrink-0">
                     {u.code}
                   </span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400">
+                  <span className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400 transition-colors">
                     {u.name} ({u.projectCount} โครงการ)
                   </span>
                 </div>
 
-                {/* 3 Metrics Badge Row */}
-                <div className="flex flex-wrap items-center gap-3 shrink-0 text-[11px]">
-                  <span>🔵 จัดสรร: <strong className="font-mono text-slate-800 dark:text-slate-200">{formatCurrency(u.allocated)}</strong> บ.</span>
-                  <span>🟢 เบิกจ่าย: <strong className="font-mono text-emerald-600 dark:text-emerald-400">{formatCurrency(u.spent)}</strong> บ. ({u.percent.toFixed(1)}%)</span>
-                  <span>🟠 คงเหลือ: <strong className="font-mono text-amber-700 dark:text-amber-300">{formatCurrency(u.remaining)}</strong> บ.</span>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-bold shrink-0">
+                  <span className="text-blue-700 dark:text-blue-400">
+                    🔵 จัดสรร: <strong className="font-mono text-slate-900 dark:text-white">{formatCurrency(u.allocated)}</strong> บ.
+                  </span>
+                  <span className="text-emerald-700 dark:text-emerald-400">
+                    🟢 เบิกจ่าย: <strong className="font-mono">{formatCurrency(u.spent)}</strong> บ. ({u.percent.toFixed(1)}%)
+                  </span>
+                  <span className="text-amber-700 dark:text-amber-400">
+                    🟠 คงเหลือ: <strong className="font-mono">{formatCurrency(u.remaining)}</strong> บ. ({u.allocated > 0 ? ((u.remaining / u.allocated) * 100).toFixed(1) : '0.0'}%)
+                  </span>
                 </div>
               </div>
 
-              {/* Progress Bar (Spent vs Remaining) */}
-              <div className="w-full bg-amber-300 dark:bg-amber-700 rounded-full h-3 overflow-hidden flex shadow-inner">
-                <div
-                  className="bg-[#0a4d44] dark:bg-emerald-500 h-3 rounded-l-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, u.percent)}%` }}
-                  title={`เบิกจ่ายแล้ว ${formatCurrency(u.spent)} บ. | คงเหลือ ${formatCurrency(u.remaining)} บ.`}
-                />
+              {/* Clean 3-Bar Comparison Line */}
+              <div className="space-y-1 text-[11px]">
+                {/* 1. Spent Bar (Green) */}
+                <div className="flex items-center gap-2">
+                  <span className="w-14 font-semibold text-slate-500 shrink-0">เบิกจ่าย:</span>
+                  <div className="flex-1 bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, u.percent)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Remaining Bar (Orange) */}
+                <div className="flex items-center gap-2">
+                  <span className="w-14 font-semibold text-slate-500 shrink-0">คงเหลือ:</span>
+                  <div className="flex-1 bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-amber-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, u.allocated > 0 ? (u.remaining / u.allocated) * 100 : 0)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -801,13 +804,13 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
         <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#0a4d44]"></span>
-              <span>เบิกจ่ายแล้ว (% เทียบงบจัดสรร)</span>
+            <span className="flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
+              <span>🟢 เบิกจ่ายจริง</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span>งบประมาณคงเหลือ</span>
+            <span className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
+              <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
+              <span>🟠 งบประมาณคงเหลือ</span>
             </span>
           </div>
           <button
