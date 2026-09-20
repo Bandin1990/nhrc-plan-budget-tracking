@@ -250,15 +250,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Project owner check
     if (currentUser.role === 'PROJECT_OWNER') {
-      // If project baseline is locked, owner cannot edit directly unless unlocked by Admin
+      const isAssigned = 
+        currentUser.assignedProjectIds.includes('all') ||
+        currentUser.assignedProjectIds.includes(project.id) ||
+        currentUser.assignedProjectIds.includes(project.code) ||
+        (project.responsiblePerson && project.responsiblePerson.name === currentUser.name) ||
+        project.division === currentUser.division;
+
+      if (!isAssigned) return false;
+
+      // 1. Explicit per-project unlock by Admin ALWAYS allows editing regardless of window or baseline lock
+      if (project.unlockedForEdit) {
+        return true;
+      }
+
+      // 2. Admin Global Edit Time Window Check
+      const editWindowEnabled = localStorage.getItem('nhrc_edit_window_enabled') === 'true';
+      if (editWindowEnabled) {
+        const start = localStorage.getItem('nhrc_edit_window_start') || '2026-01-01';
+        const end = localStorage.getItem('nhrc_edit_window_end') || '2026-12-31';
+        const today = new Date().toISOString().split('T')[0];
+        if (today < start || today > end) {
+          return false; // Outside allowed editing window
+        }
+      }
+
+      // 3. Baseline lock check
       if (project.isBaselineLocked && !project.unlockedForEdit) {
         return false;
       }
 
-      if (currentUser.assignedProjectIds.includes('all')) return true;
-      if (currentUser.assignedProjectIds.includes(project.id) || currentUser.assignedProjectIds.includes(project.code)) return true;
-      if (project.responsiblePerson && project.responsiblePerson.name === currentUser.name) return true;
-      if (project.division === currentUser.division) return true;
+      return true;
     }
     return false;
   };
@@ -271,10 +293,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (currentUser.role === 'ADMIN') return true;
     if (currentUser.role === 'VIEWER' || currentUser.role === 'EXECUTIVE') return false;
     if (currentUser.role === 'PROJECT_OWNER') {
-      if (currentUser.assignedProjectIds.includes('all')) return true;
-      if (currentUser.assignedProjectIds.includes(project.id) || currentUser.assignedProjectIds.includes(project.code)) return true;
-      if (project.responsiblePerson && project.responsiblePerson.name === currentUser.name) return true;
-      if (project.division === currentUser.division) return true;
+      const isAssigned = 
+        currentUser.assignedProjectIds.includes('all') ||
+        currentUser.assignedProjectIds.includes(project.id) ||
+        currentUser.assignedProjectIds.includes(project.code) ||
+        (project.responsiblePerson && project.responsiblePerson.name === currentUser.name) ||
+        project.division === currentUser.division;
+
+      if (!isAssigned) return false;
+
+      // Per-project unlock by Admin allows reporting
+      if (project.unlockedForEdit) {
+        return true;
+      }
+
+      // Admin Global Edit Time Window Check
+      const editWindowEnabled = localStorage.getItem('nhrc_edit_window_enabled') === 'true';
+      if (editWindowEnabled) {
+        const start = localStorage.getItem('nhrc_edit_window_start') || '2026-01-01';
+        const end = localStorage.getItem('nhrc_edit_window_end') || '2026-12-31';
+        const today = new Date().toISOString().split('T')[0];
+        if (today < start || today > end) {
+          return false;
+        }
+      }
+
+      return true;
     }
     return false;
   };
