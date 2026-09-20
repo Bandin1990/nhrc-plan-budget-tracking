@@ -600,17 +600,9 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
             <FileUp className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white">
-                นำเข้าแผนปฏิบัติการประจำปี (Word / PDF / AI)
-              </h2>
-              {aiSuccessBadge && (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold flex items-center gap-1 shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  AI Extracted
-                </span>
-              )}
-            </div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white">
+              นำเข้าแผนปฏิบัติการประจำปี (Word / PDF / AI)
+            </h2>
           </div>
         </div>
 

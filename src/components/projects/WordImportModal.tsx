@@ -410,12 +410,6 @@ export const WordImportModal: React.FC<WordImportModalProps> = ({
             <div>
               <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                 <span>นำเข้าแผนปฏิบัติการจากไฟล์ Word / PDF</span>
-                {aiSuccessBadge && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold flex items-center gap-1 shadow-xs">
-                    <Sparkles className="w-3 h-3" />
-                    AI Extracted
-                  </span>
-                )}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 รองรับไฟล์ข้อเสนอโครงการ (.docx / .doc) และไฟล์เล่มแผน (.pdf) ด้วย AI
