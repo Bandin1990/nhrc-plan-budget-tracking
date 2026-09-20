@@ -34,7 +34,7 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">ADMIN</span>
               <h4 className="font-bold text-slate-900 dark:text-white mt-1">ผู้ดูแลระบบ / เจ้าหน้าที่ สนย.</h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                สิทธิ์สูงสุดในการนำเข้าแผนปฏิบัติการ, ล็อกแผนตั้งต้นประจำปี (Baseline Lock), อนุมัติปลดล็อกแก้ไขโครงการ และจัดส่งอีเมลแจ้งเตือนผู้รับผิดชอบโครงการทุกสำนัก
+                สิทธิ์สูงสุดในการนำเข้าแผนปฏิบัติการ, ล็อกแผนตั้งต้นประจำปี (Baseline Lock), กำหนดช่วงเวลาเปิด-ปิดสิทธิ์ให้แก้ไขโครงการและรายงานผล สนย.3, อนุมัติปลดล็อกสิทธิ์แก้ไขรายโครงการ (Per-Project Unlock), มอบหมายโครงการตามปีงบประมาณ และจัดส่งอีเมลแจ้งเตือน
               </p>
             </div>
 
@@ -42,7 +42,7 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">PROJECT_OWNER</span>
               <h4 className="font-bold text-slate-900 dark:text-white mt-1">ผู้รับผิดชอบโครงการประจำสำนัก</h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                สิทธิ์เพิ่ม/แก้ไขโครงการในสำนักของตนเอง, บันทึกแบบรายงานผล สนย.3 และยื่นคำขอโอน/เปลี่ยนแปลงงบประมาณ
+                สิทธิ์เพิ่ม/แก้ไขโครงการในสำนักที่ได้รับมอบหมาย, บันทึกรายละเอียดค่าใช้จ่ายและแผนการเบิกจ่ายรายเดือน, บันทึกแบบรายงานผล สนย.3 (ดึงผู้รับผิดชอบอัตโนมัติ) และยื่นคำขอโอน/เปลี่ยนแปลงงบประมาณ
               </p>
             </div>
 
@@ -163,28 +163,34 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
     },
     {
       id: 'proposal_form',
-      title: '4. แบบเสนอโครงการและรายละเอียดแผนปฏิบัติงาน (5 ส่วน)',
+      title: '4. แบบฟอร์มเสนอโครงการและรายละเอียดโครงการ (6 ส่วนมาตรฐาน)',
       icon: FileText,
       color: 'bg-emerald-600 text-white',
-      badge: 'เอกสาร 5 ส่วน',
+      badge: 'เอกสาร 6 ส่วน',
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
           <p className="leading-relaxed">
-            ระบบสร้างและจัดพิมพ์ <strong>แบบเสนอโครงการและรายละเอียดแผนปฏิบัติงานและการใช้จ่ายงบประมาณ</strong> ครบถ้วน 5 ส่วนตามรูปแบบมาตรฐานของ สำนักงาน กสม.
+            ระบบสร้างและจัดพิมพ์ <strong>แบบเสนอโครงการและรายละเอียดแผนปฏิบัติงานและการใช้จ่ายงบประมาณ</strong> ครบถ้วน 6 ส่วนมาตรฐาน ปรับปรุงรองรับการแสดงผล Responsive บนทุกอุปกรณ์:
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <strong className="text-emerald-900 dark:text-emerald-300">ส่วนที่ 1 ข้อมูลโครงการ</strong>: ชื่อโครงการ, วิธีดำเนินงาน, ประเภทงบประมาณ, แหล่งงบประมาณ
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 1 : ข้อมูลโครงการ</strong> ชื่อโครงการ, วิธีการดำเนินงาน, ประเภทงบประมาณ, แหล่งงบประมาณ
             </div>
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <strong className="text-emerald-900 dark:text-emerald-300">ส่วนที่ 2 ยุทธศาสตร์</strong>: ยุทธศาสตร์ชาติ 6 ด้าน, แผนแม่บท 23 ประเด็น, แผนปฏิรูป 13 ด้าน, หมุดหมาย 13, ยุทธศาสตร์ กสม. 4 ด้าน
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 2 : ความเชื่อมโยงกับยุทธศาสตร์ชาติ</strong> ยุทธศาสตร์ชาติ 6 ด้าน, แผนแม่บท 23 ประเด็น, แผนปฏิรูป 13 ด้าน, หมุดหมาย 13, ยุทธศาสตร์ กสม. 4 ด้าน
             </div>
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <strong className="text-emerald-900 dark:text-emerald-300">ส่วนที่ 3 รายละเอียดโครงการ</strong>: หลักการเหตุผล, วัตถุประสงค์, ผลผลิต/ผลลัพธ์, กลุ่มเป้าหมาย/พื้นที่, ตัวชี้วัด
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 3 : รายละเอียดโครงการ</strong> หลักการเหตุผล, วัตถุประสงค์, ผลผลิต/ผลลัพธ์, กลุ่มเป้าหมาย/พื้นที่, ตัวชี้วัดความสำเร็จ
             </div>
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <strong className="text-emerald-900 dark:text-emerald-300">ส่วนที่ 4 แผนปฏิบัติงาน & งบประมาณ</strong>: ตารางประมาณการค่าใช้จ่าย และตารางแผนรายเดือน
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 4 : แผนการดำเนินงานและงบประมาณ</strong> 4.1 งบขอรับจัดสรรรวม, 4.2 ตารางจำแนกค่าใช้จ่ายรายหมวด, 4.3 แผนเบิกจ่ายรายเดือน 12 เดือน
+            </div>
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 5 : ผู้รับผิดชอบ/ผู้ประสานงานโครงการ</strong> รายนามผู้เสนอ, ผู้รายงาน, ตำแหน่ง, สังกัดสำนัก, เบอร์โทรศัพท์ และอีเมล
+            </div>
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+              <strong className="text-emerald-900 dark:text-emerald-300 block mb-0.5">ส่วนที่ 6 : เอกสารแนบโครงการ</strong> เอกสารแนบและไฟล์ประกอบโครงการ (เช่น ไฟล์ Word/PDF/Excel)
             </div>
           </div>
 
@@ -199,7 +205,7 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
     },
     {
       id: 'reports',
-      title: '5. การรายงานผลรอบ 2 เดือน (แบบ สนย.3)',
+      title: '5. การรายงานผลรอบ 2 เดือน (แบบ สนย.3 & เชื่อมโยงผู้รับผิดชอบ)',
       icon: Clock,
       color: 'bg-teal-600 text-white',
       badge: 'แบบ สนย.3',
@@ -209,12 +215,19 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
             ขั้นตอนการบันทึกรายงานผลการปฏิบัติงานและการใช้จ่ายงบประมาณ (แบบ สนย.3) ตามรอบระยะเวลาทุก 2 เดือน (รอบ 2, 4, 6, 8, 10, 12 เดือน)
           </p>
 
+          <div className="p-3.5 bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 rounded-xl text-xs space-y-1">
+            <strong className="text-teal-900 dark:text-teal-300 block font-bold">✦ การเชื่อมโยงข้อมูลผู้รับผิดชอบโครงการอัตโนมัติ (Section 6 Data Binding)</strong>
+            <p className="text-teal-950 dark:text-teal-200/90 leading-relaxed">
+              เมื่อกดบันทึกรายงานผล สนย.3 ระบบจะดึงข้อมูลผู้รับผิดชอบโครงการประจำโครงการนั้นๆ (เช่น นายบัณฑิต หอมเกษ) มาแสดงใน <strong>ส่วนที่ 6</strong> โดยอัตโนมัติ พร้อมมีช่องให้ตรวจสอบและปรับแก้ไขชื่อผู้รายงาน ตำแหน่ง สังกัด เบอร์โทรศัพท์ และอีเมลได้ก่อนกดบันทึก
+            </p>
+          </div>
+
           <ol className="list-decimal list-inside space-y-2 text-xs bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
             <li>เข้าเมนู <strong>"รายงานผลรอบ 2 เดือน (สนย.3)"</strong></li>
             <li>กดปุ่ม <strong>"+ บันทึกรายงานผล สนย.3"</strong> ในโครงการที่ต้องการรายงาน</li>
             <li>ระบุงวดรอบการรายงาน และกรอกผลการดำเนินงานรายกิจกรรม พร้อมยอดเบิกจ่ายจริง</li>
-            <li>บันทึกปัญหา/อุปสรรค แนวทางแก้ไข และข้อเสนอแนะ</li>
-            <li>กด <strong>"บันทึกรายงานผล"</strong> เพื่อส่งรายงานเข้าสู่ระบบ</li>
+            <li>ตรวจสอบข้อมูลผู้รับผิดชอบ/ผู้รายงานในส่วนที่ 6 (ดึงข้อมูลอัตโนมัติ)</li>
+            <li>บันทึกปัญหา/อุปสรรค แนวทางแก้ไข และกด <strong>"บันทึกแบบรายงาน สนย.3"</strong></li>
           </ol>
 
           {onNavigate && (
@@ -275,8 +288,45 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
       )
     },
     {
+      id: 'permissions',
+      title: '7. การจัดการสิทธิ์ การมอบหมายโครงการ และช่วงเวลาแก้ไข',
+      icon: UserCheck,
+      color: 'bg-purple-600 text-white',
+      badge: 'Admin Controls',
+      content: (
+        <div className="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+          <p className="leading-relaxed">
+            ระบบจัดการสิทธิ์ผู้ใช้งานและการควบคุมการแก้ไขโครงการสำหรับ ผู้ดูแลระบบ (Admin / สนย.)
+          </p>
+
+          <div className="space-y-3">
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+              <strong className="text-purple-700 dark:text-purple-300 font-bold block text-xs">1. การกรองมอบหมายโครงการตามปีงบประมาณ</strong>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                สามารถสลับดูรายการโครงการเพื่อมอบหมายผู้รับผิดชอบจำแนกตามปีงบประมาณ (2568, 2569, 2570) ได้อย่างสะดวก
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+              <strong className="text-purple-700 dark:text-purple-300 font-bold block text-xs">2. การกำหนดช่วงเวลาเปิด-ปิดสิทธิ์แก้ไข (Admin Window Control)</strong>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Admin สามารถระบุวันเริ่มต้นและวันสิ้นสุดสำหรับการเปิดสิทธิ์ให้เจ้าหน้าที่แก้ไขโครงการหรือรายงานผล สนย.3 ได้ตามประกาศ
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+              <strong className="text-purple-700 dark:text-purple-300 font-bold block text-xs">3. การอนุญาตปลดล็อกสิทธิ์แก้ไขรายโครงการ (Per-Project Unlock)</strong>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                หากหมดช่วงเวลาเปิดสิทธิ์ หรือโครงการถูกล็อกตั้งต้นไว้ Admin สามารถคลิกอนุญาตปลดล็อกสิทธิ์แก้ไขให้แก่บางโครงการเป็นรายกรณีได้
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
       id: 'faq',
-      title: '7. คำถามที่พบบ่อย (FAQ & Troubleshooting)',
+      title: '8. คำถามที่พบบ่อย (FAQ & Troubleshooting)',
       icon: HelpCircle,
       color: 'bg-indigo-500 text-white',
       badge: 'FAQ',
@@ -284,8 +334,12 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
         <div className="space-y-3">
           {[
             {
-              q: 'หากต้องการแก้ไขข้อมูลโครงการที่ตั้งต้นไว้แล้ว แต่กดแก้ไขไม่ได้ ต้องทำอย่างไร?',
-              a: 'หากโครงการถูกล็อกแผนตั้งต้นไว้ (Baseline Locked) ให้ติดต่อ Admin (สนย.) เพื่ออนุมัติปลดล็อกสิทธิ์แก้ไข เมื่อ Admin อนุมัติแล้ว จะปรากฏสัญลักษณ์ "ปลดล็อกแก้ไขได้" จึงจะสามารถแก้ไขข้อมูลได้'
+              q: 'หากต้องการแก้ไขข้อมูลโครงการที่ตั้งต้นไว้แล้ว แต่ระบบแจ้งว่าปิดสิทธิ์การแก้ไข ต้องทำอย่างไร?',
+              a: 'ให้ผู้รับผิดชอบโครงการแจ้ง Admin (สนย.) เพื่อยื่นขอเปิดสิทธิ์ โดย Admin สามารถเลือกกำหนดช่วงเวลาเปิดแก้ไขส่วนกลาง หรือคลิกอนุญาตปลดล็อกสิทธิ์แก้ไขเป็นรายโครงการ (Per-Project Unlock) ในหน้าจัดการสิทธิ์ได้'
+            },
+            {
+              q: 'ทำไมเปิดฟอร์มบันทึกแบบรายงาน สนย.3 แล้วชื่อผู้รับผิดชอบเดิมเป็น Admin?',
+              a: 'ระบบปัจจุบันได้รับการอัปเดตให้เชื่อมโยงข้อมูลส่วนที่ 6 : ผู้รับผิดชอบ/ผู้ประสานงาน กับผู้รับผิดชอบโครงการประจำโครงการนั้นๆ (เช่น นายบัณฑิต หอมเกษ) อัตโนมัติแล้ว โดยคุณสามารถตรวจสอบหรือแก้ไขข้อมูลชื่อ ตำแหน่ง และเบอร์โทรศัพท์ในส่วนที่ 6 ก่อนกดบันทึกได้ทันที'
             },
             {
               q: 'เมื่อพิมพ์เอกสารแล้ว เส้นตารางหรือสีหัวข้อไม่แสดงผล แก้ไขอย่างไร?',
@@ -293,7 +347,7 @@ export const UserManualView: React.FC<UserManualViewProps> = ({ onNavigate }) =>
             },
             {
               q: 'สามารถดาวน์โหลดเอกสารไปเปิดแก้ไขต่อบน Microsoft Word ได้หรือไม่?',
-              a: 'ได้ครับ เอกสารทุกประเภทในระบบ (แบบเสนอโครงการ 5 ส่วน, แบบรายงาน สนย.3, และบันทึกข้อความตราครุฑ) มีปุ่ม "ส่งออกเป็น MS Word (.doc)" ซึ่งสามารถกดดาวน์โหลดและเปิดแก้ไขต่อบน MS Word ได้ทันที'
+              a: 'ได้ครับ เอกสารทุกประเภทในระบบ (แบบเสนอโครงการ 6 ส่วน, แบบรายงาน สนย.3, และบันทึกข้อความตราครุฑ) มีปุ่ม "ส่งออกเป็น MS Word (.doc)" ซึ่งสามารถกดดาวน์โหลดและเปิดแก้ไขต่อบน MS Word ได้ทันที'
             },
             {
               q: 'การส่งคืนเงินงบประมาณเหลือจ่ายเข้าส่วนกลางทำอย่างไร?',
