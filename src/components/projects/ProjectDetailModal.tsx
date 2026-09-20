@@ -135,12 +135,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                 <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-xs text-[#0a4d44] dark:text-emerald-400">
                   <Scale className="w-4 h-4 text-[#0a4d44]" />
-                  <span>ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ</span>
+                  <span>ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 - 2.7)</span>
                 </h4>
                 <div className="space-y-1.5 text-slate-600 dark:text-slate-300 pt-1 text-xs">
-                  <p><span className="text-slate-400 font-medium">ยุทธศาสตร์ชาติ:</span> {project.nationalStrategy || 'ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ'}</p>
-                  <p><span className="text-slate-400 font-medium">แผนแม่บทฯ:</span> {project.masterPlan || 'ประเด็นการบริหารจัดการภาครัฐ'}</p>
-                  <p><span className="text-slate-400 font-medium">แผนระดับอื่น ๆ:</span> {project.relatedPlans || 'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13'}</p>
+                  <p><span className="text-slate-400 font-semibold">2.1 ยุทธศาสตร์ชาติ:</span> {project.strategicSection2?.nationalStrategyPillar || project.nationalStrategy} (ประเด็น: {project.strategicSection2?.nationalStrategyIssue || '-'}, เป้าหมาย: {project.strategicSection2?.nationalStrategyTarget || '-'})</p>
+                  <p><span className="text-slate-400 font-semibold">2.2 แผนแม่บทฯ:</span> {project.strategicSection2?.masterPlanSubPlan || project.masterPlan} (เป้าหมายแผนย่อย: {project.strategicSection2?.masterPlanSubTarget || '-'})</p>
+                  <p><span className="text-slate-400 font-semibold">2.3 แผนการปฏิรูปประเทศ:</span> {project.strategicSection2?.nationalReformPlan || 'ด้านการบริหารราชการแผ่นดิน'}</p>
+                  <p><span className="text-slate-400 font-semibold">2.4 แผนพัฒนาเศรษฐกิจฯ:</span> {project.strategicSection2?.economicDevPlanMilestone || 'หมุดหมายที่ 13'}</p>
+                  <p><span className="text-slate-400 font-semibold">2.5 แผนระดับที่ 3:</span> {project.strategicSection2?.level3Plan || project.relatedPlans}</p>
+                  <p><span className="text-slate-400 font-semibold">2.6 ยุทธศาสตร์ กสม.:</span> ยุทธศาสตร์ที่ {project.strategicSection2?.nhrcStrategicPillar || project.strategicPillar || 1} ({project.strategicSection2?.nhrcStrategicIssue || '-'})</p>
+                  <p><span className="text-slate-400 font-semibold">2.7 กฎหมายที่เกี่ยวข้อง:</span> {project.strategicSection2?.relatedLaws || 'พ.ร.ป. กสม. พ.ศ. 2560'}</p>
                 </div>
               </div>
             </div>

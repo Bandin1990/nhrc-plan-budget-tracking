@@ -236,6 +236,33 @@ export interface ProjectAttachment {
   fileUrl?: string;
 }
 
+export interface StrategicSection2 {
+  // 2.1 ยุทธศาสตร์ชาติ
+  nationalStrategyPillar?: string; // ยุทธศาสตร์ที่ (1-6)
+  nationalStrategyIssue?: string; // ประเด็น
+  nationalStrategyTarget?: string; // เป้าหมาย
+
+  // 2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ
+  masterPlanSubPlan?: string; // แผนย่อย
+  masterPlanSubTarget?: string; // เป้าหมายแผนย่อย
+
+  // 2.3 แผนการปฏิรูปประเทศ
+  nationalReformPlan?: string; // แผนการปฏิรูปประเทศ
+
+  // 2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ
+  economicDevPlanMilestone?: string; // หมุดหมายที่ (เช่น หมุดหมายที่ 13 ภาครัฐที่มีความทันสมัย มีประสิทธิภาพสูง)
+
+  // 2.5 แผนระดับที่ 3 ที่เกี่ยวข้อง
+  level3Plan?: string; // แผนระดับที่ 3 ที่เกี่ยวข้อง (เช่น แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5)
+
+  // 2.6 ยุทธศาสตร์ กสม.
+  nhrcStrategicPillar?: number; // ยุทธศาสตร์ที่ (1, 2, 3, 4)
+  nhrcStrategicIssue?: string; // ประเด็นยุทธศาสตร์ที่
+
+  // 2.7 กฎหมายที่เกี่ยวข้อง
+  relatedLaws?: string; // กฎหมายที่เกี่ยวข้อง (เช่น พ.ร.ป. กสม. พ.ศ. 2560)
+}
+
 export interface Project {
   id: string;
   code: string; // e.g. '68O1-13314'
@@ -253,10 +280,11 @@ export interface Project {
   budgetSource?: string; // แหล่งงบประมาณ (เช่น งบประมาณแผ่นดินรายจ่ายประจำปี พ.ศ. 2569)
   budgetCategory?: 'งบดำเนินงาน' | 'งบลงทุน' | 'งบบุคลากร' | 'งบอุดหนุน' | 'งบรายจ่ายอื่น'; // ประเภทงบประมาณ
   
-  // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ
-  nationalStrategy?: string; // ยุทธศาสตร์ชาติ (เช่น ด้านความมั่นคง / ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ)
-  masterPlan?: string; // แผนแม่บทภายใต้ยุทธศาสตร์ชาติ
-  relatedPlans?: string; // แผนระดับต่าง ๆ ที่เกี่ยวข้อง (เช่น แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13, มติ ครม.)
+  // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 ถึง 2.7)
+  nationalStrategy?: string; // ยุทธศาสตร์ชาติ (ข้อความรวม/สรุป)
+  masterPlan?: string; // แผนแม่บท (ข้อความรวม/สรุป)
+  relatedPlans?: string; // แผนระดับต่าง ๆ ที่เกี่ยวข้อง (ข้อความรวม/สรุป)
+  strategicSection2?: StrategicSection2; // รายละเอียดเจาะจง 2.1 - 2.7
 
   // ส่วนที่ 3: รายละเอียดโครงการ
   rationale?: string; // หลักการและเหตุผล

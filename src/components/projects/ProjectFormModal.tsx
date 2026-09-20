@@ -59,10 +59,21 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   const [budgetCategory, setBudgetCategory] = useState<'งบดำเนินงาน' | 'งบลงทุน' | 'งบบุคลากร' | 'งบอุดหนุน' | 'งบรายจ่ายอื่น'>('งบดำเนินงาน');
   const [timeframeText, setTimeframeText] = useState(`ตุลาคม ${(activeFiscalYear || 2569) - 1} ถึงกันยายน ${activeFiscalYear || 2569}`);
 
-  // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ
-  const [nationalStrategy, setNationalStrategy] = useState('ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
-  const [masterPlan, setMasterPlan] = useState('แผนแม่บทภายใต้ยุทธศาสตร์ชาติ ประเด็นการบริการประชาชนและประสิทธิภาพภาครัฐ');
-  const [relatedPlans, setRelatedPlans] = useState('แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 / แผนปฏิบัติการประจำปี กสม.');
+  // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 - 2.7)
+  const [natStrategyPillar, setNatStrategyPillar] = useState('ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+  const [natStrategyIssue, setNatStrategyIssue] = useState('การพัฒนาระบบบริหารราชการแผ่นดินและบริการประชาชน');
+  const [natStrategyTarget, setNatStrategyTarget] = useState('ภาครัฐมีความโปร่งใส มีประสิทธิภาพ และตอบสนองประชาชน');
+
+  const [mpSubPlan, setMpSubPlan] = useState('ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+  const [mpSubTarget, setMpSubTarget] = useState('ยกระดับบริการประชาชนและการขับเคลื่อนองค์กรภาครัฐดิจิทัล');
+
+  const [nationalReformPlan, setNationalReformPlan] = useState('แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน');
+  const [econDevMilestone, setEconDevMilestone] = useState('หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน');
+  const [level3Plan, setLevel3Plan] = useState('แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)');
+
+  const [nhrcStrategyPillarVal, setNhrcStrategyPillarVal] = useState<number>(1);
+  const [nhrcStrategyIssueVal, setNhrcStrategyIssueVal] = useState('ประเด็นยุทธศาสตร์การส่งเสริมและปกป้องสิทธิมนุษยชน');
+  const [relatedLawsVal, setRelatedLawsVal] = useState('พ.ร.ป. คณะกรรมการสิทธิมนุษยชนแห่งชาติ พ.ศ. 2560 และระเบียบ กสม. ว่าด้วยการงบประมาณ พ.ศ. 2566');
 
   // ส่วนที่ 3: รายละเอียดโครงการ
   const [rationale, setRationale] = useState('');
@@ -102,9 +113,21 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       setBudgetCategory(projectToEdit.budgetCategory || 'งบดำเนินงาน');
       setTimeframeText(projectToEdit.timeframeText);
 
-      setNationalStrategy(projectToEdit.nationalStrategy || 'ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
-      setMasterPlan(projectToEdit.masterPlan || 'แผนแม่บทภายใต้ยุทธศาสตร์ชาติ ประเด็นการบริหารจัดการภาครัฐ');
-      setRelatedPlans(projectToEdit.relatedPlans || 'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13');
+      const sec2 = projectToEdit.strategicSection2;
+      setNatStrategyPillar(sec2?.nationalStrategyPillar || projectToEdit.nationalStrategy || 'ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+      setNatStrategyIssue(sec2?.nationalStrategyIssue || 'การพัฒนาระบบบริหารราชการแผ่นดินและบริการประชาชน');
+      setNatStrategyTarget(sec2?.nationalStrategyTarget || 'ภาครัฐมีความโปร่งใส มีประสิทธิภาพ และตอบสนองประชาชน');
+
+      setMpSubPlan(sec2?.masterPlanSubPlan || projectToEdit.masterPlan || 'ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+      setMpSubTarget(sec2?.masterPlanSubTarget || 'ยกระดับบริการประชาชนและการขับเคลื่อนองค์กรภาครัฐดิจิทัล');
+
+      setNationalReformPlan(sec2?.nationalReformPlan || 'แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน');
+      setEconDevMilestone(sec2?.economicDevPlanMilestone || 'หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน');
+      setLevel3Plan(sec2?.level3Plan || 'แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)');
+
+      setNhrcStrategyPillarVal(sec2?.nhrcStrategicPillar || projectToEdit.strategicPillar || 1);
+      setNhrcStrategyIssueVal(sec2?.nhrcStrategicIssue || 'ประเด็นยุทธศาสตร์การส่งเสริมและปกป้องสิทธิมนุษยชน');
+      setRelatedLawsVal(sec2?.relatedLaws || 'พ.ร.ป. คณะกรรมการสิทธิมนุษยชนแห่งชาติ พ.ศ. 2560');
 
       setRationale(projectToEdit.rationale || '');
       setObjectives(projectToEdit.objectives?.length ? projectToEdit.objectives : ['']);
@@ -145,9 +168,20 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       setBudgetCategory('งบดำเนินงาน');
       setTimeframeText(`ตุลาคม ${year - 1} ถึงกันยายน ${year}`);
 
-      setNationalStrategy('ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
-      setMasterPlan('แผนแม่บทภายใต้ยุทธศาสตร์ชาติ ประเด็นการบริหารจัดการภาครัฐ');
-      setRelatedPlans('แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 / แผนปฏิบัติการประจำปี กสม.');
+      setNatStrategyPillar('ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+      setNatStrategyIssue('การพัฒนาระบบบริหารราชการแผ่นดินและบริการประชาชน');
+      setNatStrategyTarget('ภาครัฐมีความโปร่งใส มีประสิทธิภาพ และตอบสนองประชาชน');
+
+      setMpSubPlan('ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+      setMpSubTarget('ยกระดับบริการประชาชนและการขับเคลื่อนองค์กรภาครัฐดิจิทัล');
+
+      setNationalReformPlan('แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน');
+      setEconDevMilestone('หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน');
+      setLevel3Plan('แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)');
+
+      setNhrcStrategyPillarVal(1);
+      setNhrcStrategyIssueVal('ประเด็นยุทธศาสตร์การส่งเสริมและปกป้องสิทธิมนุษยชน');
+      setRelatedLawsVal('พ.ร.ป. คณะกรรมการสิทธิมนุษยชนแห่งชาติ พ.ศ. 2560 และระเบียบ กสม. ว่าด้วยการงบประมาณ พ.ศ. 2566');
 
       setRationale('เพื่อขับเคลื่อนภารกิจตามพระราชบัญญัติประกอบรัฐธรรมนูญว่าด้วยคณะกรรมการสิทธิมนุษยชนแห่งชาติ พ.ศ. 2560 และแผนปฏิบัติการประจำปี');
       setObjectives(['เพื่อส่งเสริมและปกป้องสิทธิมนุษยชนให้เป็นไปตามมาตรฐานสากล']);
@@ -315,9 +349,22 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       operationMethod,
       budgetSource,
       budgetCategory,
-      nationalStrategy,
-      masterPlan,
-      relatedPlans,
+      nationalStrategy: natStrategyPillar,
+      masterPlan: mpSubPlan,
+      relatedPlans: level3Plan,
+      strategicSection2: {
+        nationalStrategyPillar: natStrategyPillar,
+        nationalStrategyIssue: natStrategyIssue,
+        nationalStrategyTarget: natStrategyTarget,
+        masterPlanSubPlan: mpSubPlan,
+        masterPlanSubTarget: mpSubTarget,
+        nationalReformPlan: nationalReformPlan,
+        economicDevPlanMilestone: econDevMilestone,
+        level3Plan: level3Plan,
+        nhrcStrategicPillar: nhrcStrategyPillarVal,
+        nhrcStrategicIssue: nhrcStrategyIssueVal,
+        relatedLaws: relatedLawsVal,
+      },
       rationale,
       budgetAllocated: totalCalculatedBudget || (projectToEdit?.budgetAllocated ?? 200000),
       budgetSpent: projectToEdit ? projectToEdit.budgetSpent : 0,
@@ -607,196 +654,192 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             </div>
           )}
 
-          {/* TAB 2: ความเชื่อมโยงยุทธศาสตร์ชาติ */}
+          {/* TAB 2: ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 - 2.7) */}
           {activeTab === 2 && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-5 animate-fadeIn">
               <div className="border-b pb-2 border-slate-200 dark:border-slate-800">
                 <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
-                  ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ และแผนระดับต่าง ๆ (Dropdown Selection)
+                  ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติและแผนระดับต่าง ๆ (2.1 - 2.7)
                 </h4>
                 <p className="text-slate-500 text-[11px] mt-0.5">
-                  เลือกระดับยุทธศาสตร์ชาติ 20 ปี, แผนแม่บทภายใต้ยุทธศาสตร์ชาติ และแผนระดับต่าง ๆ จากรายการ (Dropdown)
+                  เชื่อมโยงยุทธศาสตร์ชาติ 20 ปี, แผนแม่บท, แผนปฏิรูปประเทศ, แผนพัฒนาเศรษฐกิจฯ ฉบับที่ 13, แผนระดับที่ 3, ยุทธศาสตร์ กสม. และกฎหมายที่เกี่ยวข้อง
                 </p>
               </div>
 
-              <div className="space-y-4">
-                {/* 1. ยุทธศาสตร์ชาติ Dropdown */}
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    1. ยุทธศาสตร์ชาติ (6 ด้าน)*
-                  </label>
-                  <select
-                    value={
-                      [
-                        'ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ',
-                        'ยุทธศาสตร์ชาติด้านความมั่นคง',
-                        'ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม',
-                        'ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์',
-                        'ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน',
-                        'ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม'
-                      ].includes(nationalStrategy)
-                        ? nationalStrategy
-                        : 'อื่น ๆ'
-                    }
-                    onChange={(e) => {
-                      if (e.target.value !== 'อื่น ๆ') {
-                        setNationalStrategy(e.target.value);
-                      } else {
-                        setNationalStrategy('ยุทธศาสตร์ชาติเพิ่มเติม (ระบุรายละเอียด)');
-                      }
-                    }}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
-                  >
-                    <option value="ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">
-                      1. ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ
-                    </option>
-                    <option value="ยุทธศาสตร์ชาติด้านความมั่นคง">
-                      2. ยุทธศาสตร์ชาติด้านความมั่นคง
-                    </option>
-                    <option value="ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม">
-                      3. ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม
-                    </option>
-                    <option value="ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์">
-                      4. ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์
-                    </option>
-                    <option value="ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน">
-                      5. ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน
-                    </option>
-                    <option value="ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม">
-                      6. ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม
-                    </option>
-                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
-                  </select>
-                  <textarea
-                    rows={2}
-                    value={nationalStrategy}
-                    onChange={(e) => setNationalStrategy(e.target.value)}
-                    placeholder="รายละเอียดเพิ่มเติมความเชื่อมโยงยุทธศาสตร์ชาติ"
-                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
-                  />
+              <div className="space-y-5">
+                {/* 2.1 ยุทธศาสตร์ชาติ */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400 flex items-center gap-1.5">
+                    <Target className="w-4 h-4" />
+                    <span>2.1 ยุทธศาสตร์ชาติ</span>
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ยุทธศาสตร์ที่ (6 ด้าน)*</label>
+                      <select
+                        value={natStrategyPillar}
+                        onChange={(e) => setNatStrategyPillar(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
+                      >
+                        <option value="ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">1. ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ</option>
+                        <option value="ยุทธศาสตร์ชาติด้านความมั่นคง">2. ด้านความมั่นคง</option>
+                        <option value="ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม">3. ด้านการสร้างโอกาสและความเสมอภาคทางสังคม</option>
+                        <option value="ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์">4. ด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์</option>
+                        <option value="ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน">5. ด้านการสร้างความสามารถในการแข่งขัน</option>
+                        <option value="ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม">6. ด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ประเด็น*</label>
+                      <input
+                        type="text"
+                        value={natStrategyIssue}
+                        onChange={(e) => setNatStrategyIssue(e.target.value)}
+                        placeholder="เช่น การพัฒนาระบบการบริหารราชการแผ่นดินและบริการประชาชน"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">เป้าหมาย*</label>
+                      <input
+                        type="text"
+                        value={natStrategyTarget}
+                        onChange={(e) => setNatStrategyTarget(e.target.value)}
+                        placeholder="เช่น ภาครัฐมีความโปร่งใส มีประสิทธิภาพ และเปิดกว้าง"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* 2. แผนแม่บท Dropdown */}
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    2. แผนแม่บทภายใต้ยุทธศาสตร์ชาติ (Master Plan)*
-                  </label>
-                  <select
-                    value={
-                      [
-                        'ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ',
-                        'ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน',
-                        'ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม',
-                        'ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน',
-                        'ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย',
-                        'ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ',
-                        'ประเด็น 01 การต่างประเทศ',
-                        'ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส',
-                        'ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต'
-                      ].includes(masterPlan)
-                        ? masterPlan
-                        : 'อื่น ๆ'
-                    }
-                    onChange={(e) => {
-                      if (e.target.value !== 'อื่น ๆ') {
-                        setMasterPlan(e.target.value);
-                      } else {
-                        setMasterPlan('แผนแม่บทฯ ประเด็นเพิ่มเติม (ระบุรายละเอียด)');
-                      }
-                    }}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
-                  >
-                    <option value="ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">
-                      ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ
-                    </option>
-                    <option value="ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน">
-                      ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน
-                    </option>
-                    <option value="ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม">
-                      ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม
-                    </option>
-                    <option value="ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน">
-                      ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน
-                    </option>
-                    <option value="ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย">
-                      ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย
-                    </option>
-                    <option value="ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ">
-                      ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ
-                    </option>
-                    <option value="ประเด็น 01 การต่างประเทศ">
-                      ประเด็น 01 การต่างประเทศ
-                    </option>
-                    <option value="ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส">
-                      ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส
-                    </option>
-                    <option value="ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต">
-                      ประเด็น 05 การพัฒนาศักยภาพคนตลอดช่วงชีวิต
-                    </option>
-                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
-                  </select>
-                  <textarea
-                    rows={2}
-                    value={masterPlan}
-                    onChange={(e) => setMasterPlan(e.target.value)}
-                    placeholder="รายละเอียดเพิ่มเติมแผนแม่บทภายใต้ยุทธศาสตร์ชาติ"
-                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
-                  />
+                {/* 2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                    2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">แผนย่อย (Sub-plan)*</label>
+                      <select
+                        value={mpSubPlan}
+                        onChange={(e) => setMpSubPlan(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
+                      >
+                        <option value="ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ</option>
+                        <option value="ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน">ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน</option>
+                        <option value="ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม">ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม</option>
+                        <option value="ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน">ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน</option>
+                        <option value="ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย">ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย</option>
+                        <option value="ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ">ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ</option>
+                        <option value="ประเด็น 01 การต่างประเทศ">ประเด็น 01 การต่างประเทศ</option>
+                        <option value="ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส">ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">เป้าหมายแผนย่อย*</label>
+                      <input
+                        type="text"
+                        value={mpSubTarget}
+                        onChange={(e) => setMpSubTarget(e.target.value)}
+                        placeholder="เช่น ยกระดับบริการประชาชนและการขับเคลื่อนองค์กรภาครัฐดิจิทัล"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* 3. แผนระดับต่าง ๆ ที่เกี่ยวข้อง Dropdown */}
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    3. แผนระดับต่าง ๆ ที่เกี่ยวข้อง (Related Level 2/3 Plans)*
-                  </label>
-                  <select
-                    value={
-                      [
-                        'แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.',
-                        'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)',
-                        'แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)',
-                        'แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)',
-                        'แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน',
-                        'มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ'
-                      ].includes(relatedPlans)
-                        ? relatedPlans
-                        : 'อื่น ๆ'
-                    }
-                    onChange={(e) => {
-                      if (e.target.value !== 'อื่น ๆ') {
-                        setRelatedPlans(e.target.value);
-                      } else {
-                        setRelatedPlans('แผนระดับต่าง ๆ เพิ่มเติม (ระบุรายละเอียด)');
-                      }
-                    }}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white"
-                  >
-                    <option value="แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.">
-                      1. แผนปฏิบัติการประจำปีงบประมาณ พ.ศ. 2569 สำนักงาน กสม.
-                    </option>
-                    <option value="แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)">
-                      2. แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (พ.ศ. 2566 - 2570)
-                    </option>
-                    <option value="แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)">
-                      3. แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)
-                    </option>
-                    <option value="แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)">
-                      4. แผนนโยบายของคณะกรรมการสิทธิมนุษยชนแห่งชาติ (กสม.)
-                    </option>
-                    <option value="แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน">
-                      5. แผนระดับที่ 3 ด้านการส่งเสริมและคุ้มครองสิทธิมนุษยชน
-                    </option>
-                    <option value="มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ">
-                      6. มติคณะรัฐมนตรีที่เกี่ยวข้องด้านการงบประมาณและการบริหารภาครัฐ
-                    </option>
-                    <option value="อื่น ๆ">อื่น ๆ (ระบุรายละเอียดเพิ่มเติม)</option>
-                  </select>
-                  <textarea
-                    rows={2}
-                    value={relatedPlans}
-                    onChange={(e) => setRelatedPlans(e.target.value)}
-                    placeholder="รายละเอียดเพิ่มเติมแผนระดับต่าง ๆ ที่เกี่ยวข้อง"
-                    className="w-full mt-2 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
+                {/* 2.3 & 2.4 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 2.3 แผนการปฏิรูปประเทศ */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      2.3 แผนการปฏิรูปประเทศ
+                    </h5>
+                    <select
+                      value={nationalReformPlan}
+                      onChange={(e) => setNationalReformPlan(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
+                    >
+                      <option value="แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน">ด้านการบริหารราชการแผ่นดิน</option>
+                      <option value="แผนการปฏิรูปประเทศด้านกระบวนการยุติธรรม">ด้านกระบวนการยุติธรรม</option>
+                      <option value="แผนการปฏิรูปประเทศด้านกฎหมาย">ด้านกฎหมาย</option>
+                      <option value="แผนการปฏิรูปประเทศด้านสังคม">ด้านสังคม</option>
+                      <option value="แผนการปฏิรูปประเทศด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม">ด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
+                    </select>
+                  </div>
+
+                  {/* 2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ
+                    </h5>
+                    <select
+                      value={econDevMilestone}
+                      onChange={(e) => setEconDevMilestone(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
+                    >
+                      <option value="หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน">หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง</option>
+                      <option value="หมุดหมายที่ 9 ไทยมีความยากจนข้ามรุ่นลดลง และมีความคุ้มครองทางสังคมที่ครอบคลุม">หมุดหมายที่ 9 การสร้างความคุ้มครองทางสังคม</option>
+                      <option value="หมุดหมายที่ 12 ไทยมีกำลังคนที่มีสมรรถนะสูง มุ่งเรียนรู้อย่างต่อเนื่อง">หมุดหมายที่ 12 การพัฒนากำลังคนมุ่งเรียนรู้</option>
+                      <option value="หมุดหมายที่ 8 ไทยมีพื้นที่และเมืองอัจฉริยะที่น่าอยู่ ปลอดภัย">หมุดหมายที่ 8 เมืองอัจฉริยะน่าอยู่ ปลอดภัย</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 2.5 & 2.6 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 2.5 แผนระดับที่ 3 ที่เกี่ยวข้อง */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      2.5 แผนระดับที่ 3 ที่เกี่ยวข้อง
+                    </h5>
+                    <input
+                      type="text"
+                      value={level3Plan}
+                      onChange={(e) => setLevel3Plan(e.target.value)}
+                      placeholder="เช่น แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)"
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    />
+                  </div>
+
+                  {/* 2.6 ยุทธศาสตร์ กสม. */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                      2.6 ยุทธศาสตร์ กสม.
+                    </h5>
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        value={nhrcStrategyPillarVal}
+                        onChange={(e) => setNhrcStrategyPillarVal(Number(e.target.value))}
+                        className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                      >
+                        <option value={1}>ยุทธศาสตร์ที่ 1</option>
+                        <option value={2}>ยุทธศาสตร์ที่ 2</option>
+                        <option value={3}>ยุทธศาสตร์ที่ 3</option>
+                        <option value={4}>ยุทธศาสตร์ที่ 4</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={nhrcStrategyIssueVal}
+                        onChange={(e) => setNhrcStrategyIssueVal(e.target.value)}
+                        placeholder="ประเด็นยุทธศาสตร์ที่"
+                        className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2.7 กฎหมายที่เกี่ยวข้อง */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
+                    2.7 กฎหมายที่เกี่ยวข้อง
+                  </h5>
+                  <input
+                    type="text"
+                    value={relatedLawsVal}
+                    onChange={(e) => setRelatedLawsVal(e.target.value)}
+                    placeholder="เช่น พ.ร.ป. คณะกรรมการสิทธิมนุษยชนแห่งชาติ พ.ศ. 2560 และระเบียบ กสม. ว่าด้วยการงบประมาณ พ.ศ. 2566"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
                   />
                 </div>
               </div>
