@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   FolderKanban, DollarSign, CheckCircle2, AlertTriangle, 
   TrendingUp, Building2, Plus, FileUp, Clock, Scale, ArrowUpRight, ChevronRight, BarChart3, Coins,
-  Download, BookOpen, Layers, PieChart, Target, Eye, X, Filter, Sparkles, ArrowRight
+  Download, BookOpen, Layers, PieChart, Target, Eye, X, Filter, Sparkles, ArrowRight, Wallet
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -72,11 +72,11 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
   // 1. Breakdown by 5 Budget Categories (ประเภทงบประมาณ)
   const BUDGET_CATEGORIES = [
-    { key: 'งบดำเนินงาน', color: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800' },
-    { key: 'งบลงทุน', color: 'bg-teal-600', text: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50 dark:bg-teal-950/60 border-teal-200 dark:border-teal-800' },
-    { key: 'งบอุดหนุน', color: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/60 border-purple-200 dark:border-purple-800' },
-    { key: 'งบบุคลากร', color: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800' },
-    { key: 'งบรายจ่ายอื่น', color: 'bg-sky-600', text: 'text-sky-700 dark:text-sky-300', bg: 'bg-sky-50 dark:bg-sky-950/60 border-sky-200 dark:border-sky-800' },
+    { key: 'งบดำเนินงาน', color: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50/70 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800' },
+    { key: 'งบลงทุน', color: 'bg-teal-600', text: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50/70 dark:bg-teal-950/60 border-teal-200 dark:border-teal-800' },
+    { key: 'งบอุดหนุน', color: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50/70 dark:bg-purple-950/60 border-purple-200 dark:border-purple-800' },
+    { key: 'งบบุคลากร', color: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50/70 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800' },
+    { key: 'งบรายจ่ายอื่น', color: 'bg-sky-600', text: 'text-sky-700 dark:text-sky-300', bg: 'bg-sky-50/70 dark:bg-sky-950/60 border-sky-200 dark:border-sky-800' },
   ] as const;
 
   const categoryStats = BUDGET_CATEGORIES.map((cat) => {
@@ -104,12 +104,12 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   // 2. Breakdown by 6 Budget Programs (6 แผนงานงบประมาณ)
   const programKeys = Object.keys(BUDGET_PROGRAMS) as ProgramCode[];
   const PROGRAM_COLORS: Record<ProgramCode, { bar: string; text: string; bg: string }> = {
-    P1: { bar: 'bg-indigo-600', text: 'text-indigo-700 dark:text-indigo-300', bg: 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800' },
-    M_T: { bar: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800' },
-    S1: { bar: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800' },
-    A: { bar: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-800' },
-    D2: { bar: 'bg-blue-600', text: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800' },
-    O: { bar: 'bg-rose-600', text: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800' },
+    P1: { bar: 'bg-indigo-600', text: 'text-indigo-700 dark:text-indigo-300', bg: 'bg-indigo-50/70 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800' },
+    M_T: { bar: 'bg-[#0a4d44]', text: 'text-[#0a4d44] dark:text-emerald-400', bg: 'bg-emerald-50/70 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800' },
+    S1: { bar: 'bg-amber-600', text: 'text-amber-800 dark:text-amber-300', bg: 'bg-amber-50/70 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800' },
+    A: { bar: 'bg-purple-600', text: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50/70 dark:bg-purple-950/50 border-purple-200 dark:border-purple-800' },
+    D2: { bar: 'bg-blue-600', text: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50/70 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800' },
+    O: { bar: 'bg-rose-600', text: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50/70 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800' },
   };
 
   const programStats = programKeys.map((pCode) => {
@@ -141,6 +141,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     const unitProjects = yearProjects.filter(p => p.division === uKey);
     const allocated = unitProjects.reduce((sum, p) => sum + (p.budgetAllocated || 0), 0);
     const spent = unitProjects.reduce((sum, p) => sum + (p.budgetSpent || 0), 0);
+    const remaining = allocated - spent;
     const percent = allocated > 0 ? (spent / allocated) * 100 : 0;
     return {
       code: uKey,
@@ -149,6 +150,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       projectCount: unitProjects.length,
       allocated,
       spent,
+      remaining,
       percent,
       projects: unitProjects,
     };
@@ -467,20 +469,20 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 3: USER-FRIENDLY BUDGET BREAKDOWN CARDS */}
+      {/* SECTION 3: EXECUTIVE 3-METRIC FINANCIAL CARDS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
       {/* ========================================================================= */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
-        {/* Header Title */}
+        {/* Header Title & Legend for Executives */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
+              <Wallet className="w-5 h-5 text-[#0a4d44] dark:text-emerald-400" />
               <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white">
-                สรุปสัดส่วนงบประมาณและการเบิกจ่าย
+                รายงานสัดส่วนทางการเงินสำหรับผู้บริหาร (จัดสรร vs เบิกจ่าย vs คงเหลือ)
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              เปรียบเทียบวงเงินจัดสรรกับยอดเบิกจ่ายจริง จำแนกตามประเภทงบประมาณและแผนงาน
+              แสดงการเปรียบเทียบวงเงินจัดสรร ยอดเบิกจ่ายจริง และวงเงินคงเหลือสุทธิอย่างชัดเจน
             </p>
           </div>
 
@@ -514,7 +516,23 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
         </div>
 
-        {/* PERSPECTIVE 1: USER-FRIENDLY CATEGORY CARDS */}
+        {/* Legend for 3 Colors */}
+        <div className="flex flex-wrap items-center gap-4 text-xs bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
+            <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
+            <span>🔵 วงเงินจัดสรร (Allocated)</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+            <span>🟢 เบิกจ่ายจริง (Spent)</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400">
+            <span className="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+            <span>🟠 งบประมาณคงเหลือ (Remaining)</span>
+          </span>
+        </div>
+
+        {/* PERSPECTIVE 1: CATEGORY CARDS WITH 3 METRICS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
         {activeChartTab === 'category' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -529,11 +547,12 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: cat.allocated,
                     totalSpent: cat.spent
                   })}
-                  className={`p-4 rounded-2xl ${cat.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                  className={`p-5 rounded-3xl ${cat.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 ${cat.text} shadow-2xs`}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+                      <span className={`text-xs font-bold px-3 py-1 rounded-xl bg-white dark:bg-slate-800 ${cat.text} shadow-2xs`}>
                         {cat.name}
                       </span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
@@ -542,42 +561,65 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                       </span>
                     </div>
 
-                    <div className="space-y-2 mt-1">
-                      <div className="flex justify-between items-baseline text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">วงเงินจัดสรร:</span>
-                        <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">
-                          {formatCurrency(cat.allocated)} บาท
+                    {/* 3 Executive Metrics */}
+                    <div className="space-y-2.5">
+                      {/* Metric 1: Allocated */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-blue-100 dark:border-blue-900/40">
+                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                          <span>จัดสรรไป:</span>
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm">
+                          {formatCurrency(cat.allocated)} <span className="text-[10px] text-slate-400">บ.</span>
                         </span>
                       </div>
 
-                      <div className="flex justify-between items-baseline text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">เบิกจ่ายจริง:</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-sm">
-                          {formatCurrency(cat.spent)} บาท
+                      {/* Metric 2: Spent */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60">
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>เบิกจ่ายไป:</span>
                         </span>
+                        <div className="text-right">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono text-xs sm:text-sm">
+                            {formatCurrency(cat.spent)} <span className="text-[10px] text-emerald-500">บ.</span>
+                          </span>
+                          <span className="text-[10px] font-extrabold text-emerald-600 ml-1.5 bg-emerald-100 dark:bg-emerald-900 px-1.5 py-0.5 rounded">
+                            {cat.percent.toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="flex justify-between items-baseline text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">คงเหลือ:</span>
-                        <span className="font-semibold text-slate-600 dark:text-slate-300 font-mono text-xs">
-                          {formatCurrency(cat.remaining)} บาท
+                      {/* Metric 3: Remaining */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800/60">
+                        <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                          <span>คงเหลือ:</span>
                         </span>
+                        <div className="text-right">
+                          <span className="font-bold text-amber-800 dark:text-amber-300 font-mono text-xs sm:text-sm">
+                            {formatCurrency(cat.remaining)} <span className="text-[10px] text-amber-600">บ.</span>
+                          </span>
+                          <span className="text-[10px] font-extrabold text-amber-700 ml-1.5 bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded">
+                            {cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800">
-                    <div className="flex justify-between text-xs mb-1.5 font-bold">
-                      <span className="text-slate-600 dark:text-slate-300">ความก้าวหน้าเบิกจ่าย:</span>
-                      <span className={cat.percent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
-                        {cat.percent.toFixed(1)}%
-                      </span>
+                  {/* Multi-Segment Visual Progress Bar (Spent vs Remaining) */}
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-1">
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-500">
+                      <span>เบิกจ่ายแล้ว {cat.percent.toFixed(1)}%</span>
+                      <span>คงเหลือ {cat.allocated > 0 ? ((cat.remaining / cat.allocated) * 100).toFixed(1) : '0.0'}%</span>
                     </div>
 
-                    <div className="w-full bg-slate-200/80 dark:bg-slate-700/80 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-amber-400 dark:bg-amber-600 rounded-full h-3 overflow-hidden flex shadow-inner">
                       <div 
-                        className={`h-2.5 rounded-full ${cat.color} transition-all duration-700`}
+                        className="bg-emerald-500 h-3 rounded-l-full transition-all duration-700"
                         style={{ width: `${Math.min(100, cat.percent)}%` }}
+                        title={`เบิกจ่ายแล้ว ${formatCurrency(cat.spent)} บาท`}
                       />
                     </div>
                   </div>
@@ -587,7 +629,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
         )}
 
-        {/* PERSPECTIVE 2: USER-FRIENDLY PROGRAM CARDS */}
+        {/* PERSPECTIVE 2: PROGRAM CARDS WITH 3 METRICS (จัดสรร, เบิกจ่าย, คงเหลือ) */}
         {activeChartTab === 'program' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -602,11 +644,12 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     totalAllocated: prog.allocated,
                     totalSpent: prog.spent
                   })}
-                  className={`p-4 rounded-2xl ${prog.style.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
+                  className={`p-5 rounded-3xl ${prog.style.bg} border transition-all cursor-pointer group flex flex-col justify-between hover:shadow-md hover:scale-[1.01]`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 ${prog.style.text} shadow-2xs`}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+                      <span className={`text-xs font-extrabold px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 ${prog.style.text} shadow-2xs`}>
                         แผนงาน {prog.code}
                       </span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-[#0a4d44] flex items-center gap-1">
@@ -619,34 +662,65 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                       {prog.name}
                     </h4>
 
-                    <div className="space-y-1.5 mt-3 text-xs">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-slate-500 dark:text-slate-400">วงเงินจัดสรร:</span>
-                        <span className="font-bold text-slate-900 dark:text-white font-mono">
-                          {formatCurrency(prog.allocated)} บ.
+                    {/* 3 Executive Metrics */}
+                    <div className="space-y-2 mt-3">
+                      {/* Metric 1: Allocated */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-blue-100 dark:border-blue-900/40">
+                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                          <span>จัดสรรไป:</span>
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm">
+                          {formatCurrency(prog.allocated)} <span className="text-[10px] text-slate-400">บ.</span>
                         </span>
                       </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-slate-500 dark:text-slate-400">เบิกจ่ายจริง:</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                          {formatCurrency(prog.spent)} บ.
+
+                      {/* Metric 2: Spent */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60">
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>เบิกจ่ายไป:</span>
                         </span>
+                        <div className="text-right">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono text-xs sm:text-sm">
+                            {formatCurrency(prog.spent)} <span className="text-[10px] text-emerald-500">บ.</span>
+                          </span>
+                          <span className="text-[10px] font-extrabold text-emerald-600 ml-1.5 bg-emerald-100 dark:bg-emerald-900 px-1.5 py-0.5 rounded">
+                            {prog.percent.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Metric 3: Remaining */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800/60">
+                        <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                          <span>คงเหลือ:</span>
+                        </span>
+                        <div className="text-right">
+                          <span className="font-bold text-amber-800 dark:text-amber-300 font-mono text-xs sm:text-sm">
+                            {formatCurrency(prog.remaining)} <span className="text-[10px] text-amber-600">บ.</span>
+                          </span>
+                          <span className="text-[10px] font-extrabold text-amber-700 ml-1.5 bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded">
+                            {prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800">
-                    <div className="flex justify-between text-xs mb-1.5 font-bold">
-                      <span className="text-slate-600 dark:text-slate-300">ความก้าวหน้าเบิกจ่าย:</span>
-                      <span className={prog.percent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
-                        {prog.percent.toFixed(1)}%
-                      </span>
+                  {/* Multi-Segment Visual Progress Bar */}
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-1">
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-500">
+                      <span>เบิกจ่ายแล้ว {prog.percent.toFixed(1)}%</span>
+                      <span>คงเหลือ {prog.allocated > 0 ? ((prog.remaining / prog.allocated) * 100).toFixed(1) : '0.0'}%</span>
                     </div>
 
-                    <div className="w-full bg-slate-200/80 dark:bg-slate-700/80 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-amber-400 dark:bg-amber-600 rounded-full h-3 overflow-hidden flex shadow-inner">
                       <div 
-                        className={`h-2.5 rounded-full ${prog.style.bar} transition-all duration-700`}
+                        className="bg-emerald-500 h-3 rounded-l-full transition-all duration-700"
                         style={{ width: `${Math.min(100, prog.percent)}%` }}
+                        title={`เบิกจ่ายแล้ว ${formatCurrency(prog.spent)} บาท`}
                       />
                     </div>
                   </div>
@@ -658,7 +732,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 4: MAIN DEPARTMENT BREAKDOWN BAR GRAPH (14 สำนัก/ส่วนราชการ) */}
+      {/* SECTION 4: MAIN DEPARTMENT BREAKDOWN WITH 3 METRICS (14 สำนัก) */}
       {/* ========================================================================= */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -668,7 +742,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span>งบประมาณจำแนกตามสำนัก / ส่วนราชการ (14 สำนัก)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              เปรียบเทียบวงเงินที่ได้รับจัดสรร (100%) กับ ยอดเบิกจ่ายจริงจำแนกตามรายหน่วยงาน
+              สรุปวงเงินจัดสรร ยอดเบิกจ่ายจริง และวงเงินคงเหลือสุทธิจำแนกตามรายสำนัก
             </p>
           </div>
 
@@ -693,33 +767,32 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                 totalAllocated: u.allocated,
                 totalSpent: u.spent
               })}
-              className="group cursor-pointer p-3 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-slate-800/80 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/60 transition-all space-y-1.5"
+              className="group cursor-pointer p-3.5 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-slate-800/80 border border-slate-100 dark:border-slate-800/80 hover:border-emerald-200 dark:hover:border-emerald-800/60 transition-all space-y-2"
             >
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
-                  <span className="font-extrabold text-white bg-[#0a4d44] px-2 py-0.5 rounded-md text-[11px] shrink-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="font-extrabold text-white bg-[#0a4d44] px-2.5 py-0.5 rounded-md text-[11px] shrink-0">
                     {u.code}
                   </span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-[#0a4d44] dark:group-hover:text-emerald-400">
                     {u.name} ({u.projectCount} โครงการ)
                   </span>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                  <span className="font-bold text-[#0a4d44] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full text-xs">
-                    {u.percent.toFixed(1)}%
-                  </span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300 w-24 sm:w-28 text-right font-mono">
-                    {formatCurrency(u.allocated)} บ.
-                  </span>
+
+                {/* 3 Metrics Badge Row */}
+                <div className="flex flex-wrap items-center gap-3 shrink-0 text-[11px]">
+                  <span>🔵 จัดสรร: <strong className="font-mono text-slate-800 dark:text-slate-200">{formatCurrency(u.allocated)}</strong> บ.</span>
+                  <span>🟢 เบิกจ่าย: <strong className="font-mono text-emerald-600 dark:text-emerald-400">{formatCurrency(u.spent)}</strong> บ. ({u.percent.toFixed(1)}%)</span>
+                  <span>🟠 คงเหลือ: <strong className="font-mono text-amber-700 dark:text-amber-300">{formatCurrency(u.remaining)}</strong> บ.</span>
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden flex">
+              {/* Progress Bar (Spent vs Remaining) */}
+              <div className="w-full bg-amber-300 dark:bg-amber-700 rounded-full h-3 overflow-hidden flex shadow-inner">
                 <div
-                  className="bg-[#0a4d44] dark:bg-emerald-500 h-3 rounded-full transition-all duration-500"
+                  className="bg-[#0a4d44] dark:bg-emerald-500 h-3 rounded-l-full transition-all duration-500"
                   style={{ width: `${Math.min(100, u.percent)}%` }}
-                  title={`เบิกจ่ายแล้ว ${formatCurrency(u.spent)} บ.`}
+                  title={`เบิกจ่ายแล้ว ${formatCurrency(u.spent)} บ. | คงเหลือ ${formatCurrency(u.remaining)} บ.`}
                 />
               </div>
             </div>
@@ -733,7 +806,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
               <span>เบิกจ่ายแล้ว (% เทียบงบจัดสรร)</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
               <span>งบประมาณคงเหลือ</span>
             </span>
           </div>
@@ -780,17 +853,22 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             {/* Modal Summary Bar */}
             <div className="p-4 bg-emerald-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4 text-xs">
               <div>
-                <span className="text-slate-500">งบประมาณจัดสรรรวม: </span>
+                <span className="text-slate-500">🔵 งบจัดสรรรวม: </span>
                 <strong className="text-slate-900 dark:text-white text-sm font-bold">{formatCurrency(selectedDrillDown.totalAllocated)} บาท</strong>
               </div>
 
               <div>
-                <span className="text-slate-500">เบิกจ่ายจริงรวม: </span>
+                <span className="text-slate-500">🟢 เบิกจ่ายจริงรวม: </span>
                 <strong className="text-emerald-600 dark:text-emerald-400 text-sm font-bold">{formatCurrency(selectedDrillDown.totalSpent)} บาท</strong>
               </div>
 
               <div>
-                <span className="text-slate-500">อัตราเบิกจ่ายสะสม: </span>
+                <span className="text-slate-500">🟠 คงเหลือสุทธิ: </span>
+                <strong className="text-amber-700 dark:text-amber-300 text-sm font-bold">{formatCurrency(selectedDrillDown.totalAllocated - selectedDrillDown.totalSpent)} บาท</strong>
+              </div>
+
+              <div>
+                <span className="text-slate-500">อัตราเบิกจ่าย: </span>
                 <strong className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">
                   {selectedDrillDown.totalAllocated > 0 ? ((selectedDrillDown.totalSpent / selectedDrillDown.totalAllocated) * 100).toFixed(1) : '0.0'}%
                 </strong>
@@ -827,9 +905,9 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                       </h4>
 
                       <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
-                        <span>งบจัดสรร: <strong className="text-slate-700 dark:text-slate-200">{formatCurrency(p.budgetAllocated)}</strong> บ.</span>
+                        <span>จัดสรร: <strong className="text-slate-700 dark:text-slate-200">{formatCurrency(p.budgetAllocated)}</strong> บ.</span>
                         <span>เบิกจ่าย: <strong className="text-emerald-600">{formatCurrency(p.budgetSpent)}</strong> บ.</span>
-                        <span>ความก้าวหน้า: <strong className="text-blue-600">{p.progressPercent}%</strong></span>
+                        <span>คงเหลือ: <strong className="text-amber-600">{formatCurrency(p.budgetAllocated - p.budgetSpent)}</strong> บ.</span>
                       </div>
                     </div>
 
