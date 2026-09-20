@@ -19,6 +19,7 @@ import { BudgetComparisonView } from './components/budget/BudgetComparisonView';
 import { UnitBreakdownView } from './components/reports/UnitBreakdownView';
 import { UserPermissionManagement } from './components/auth/UserPermissionManagement';
 import { SystemSettingsView } from './components/settings/SystemSettingsView';
+import { UserManualView } from './components/manual/UserManualView';
 import { FloatingActionButton } from './components/common/FloatingActionButton';
 import { Project } from './types/project';
 import { ProgressReport } from './types/progress';
@@ -261,6 +262,12 @@ export const AppContent: React.FC = () => {
 
           {activeTab === 'settings' && (
             <SystemSettingsView />
+          )}
+
+          {activeTab === 'user_manual' && (
+            <UserManualView
+              onNavigate={(tab) => setActiveTab(tab)}
+            />
           )}
         </main>
       </div>

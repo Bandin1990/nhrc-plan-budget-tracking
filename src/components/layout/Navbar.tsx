@@ -3,7 +3,7 @@ import {
   Search, Calendar, Moon, Sun, Bell, 
   Check, ChevronDown, ShieldCheck, LogOut, Users,
   X, FolderKanban, ArrowRight, Sparkles, Building2, Clock, Scale,
-  FileUp, LayoutDashboard, Target, TrendingUp, BarChart3, Database, Menu
+  FileUp, LayoutDashboard, Target, TrendingUp, BarChart3, Database, Menu, BookOpen
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -91,6 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuickSearch, onNavigate, o
       { tab: 'user_permissions' as NavTab, label: 'จัดการสิทธิ์ผู้ใช้งาน (RBAC)', desc: 'กำหนดสิทธิ์โครงการและบทบาทผู้ใช้งาน', icon: Users, category: 'ระบบ' },
     ] : []),
     { tab: 'word_import' as NavTab, label: 'นำเข้าแผนปฏิบัติการประจำปี (Word/AI)', desc: 'แปลงไฟล์เอกสารคำของบประมาณเข้าสู่ระบบและตั้งเป็นแผนประจำปี', icon: FileUp, category: 'แผนงาน' },
+    { tab: 'user_manual' as NavTab, label: 'คู่มือการใช้งานระบบ (User Manual)', desc: 'ขั้นตอนการใช้งานระบบ การสกัดไฟล์ Word และคำถามที่พบบ่อย', icon: BookOpen, category: 'ช่วยเหลือ' },
   ];
 
   const filteredMenus = isSearching

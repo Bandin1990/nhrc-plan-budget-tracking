@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, TrendingUp, FolderKanban, FileUp, Target, 
   Clock, Printer, Scale, FileText, History, BarChart3, Building2, 
-  Users, Cloud, Settings, ChevronLeft, ChevronRight, X
+  Users, Cloud, Settings, ChevronLeft, ChevronRight, X, BookOpen
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -22,7 +22,8 @@ export type NavTab =
   | 'executive_summary'
   | 'unit_breakdown'
   | 'user_permissions'
-  | 'settings';
+  | 'settings'
+  | 'user_manual';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -81,8 +82,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'user_permissions', label: 'จัดการสิทธิ์โครงการ (RBAC)', icon: Users },
         { id: 'settings', label: 'ตั้งค่าระบบ & ฐานข้อมูล', icon: Settings },
+        { id: 'user_manual', label: 'คู่มือการใช้งานระบบ', icon: BookOpen },
       ]
-    }] : [])
+    }] : [{
+      title: 'ช่วยเหลือและคู่มือ',
+      items: [
+        { id: 'user_manual', label: 'คู่มือการใช้งานระบบ', icon: BookOpen },
+      ]
+    }])
   ];
 
   const handleNavClick = (tabId: NavTab) => {
