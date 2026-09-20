@@ -577,9 +577,6 @@ export const WordImportView: React.FC<WordImportViewProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              แปลงเอกสารคำของบประมาณ (.docx/.doc) และเล่มแผนปฏิบัติการ (.pdf) เป็นโครงการตั้งต้นด้วย AI อัตโนมัติ
-            </p>
           </div>
         </div>
 

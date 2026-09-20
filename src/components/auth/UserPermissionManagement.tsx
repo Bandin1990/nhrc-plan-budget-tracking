@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Users, Shield, ShieldCheck, Lock, UserCheck, Key, Plus, 
-  Trash2, Edit, Check, X, Search, Filter, AlertCircle, Save, ShieldAlert, Database 
+  Trash2, Edit, Check, X, Search, Filter, AlertCircle, Save, ShieldAlert, Database, Upload, Camera
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProjects } from '../../contexts/ProjectContext';
@@ -35,6 +35,51 @@ export const UserPermissionManagement: React.FC = () => {
     avatar: '',
     assignedProjectIds: [] as string[]
   });
+
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showFeedback('error', 'กรุณาเลือกไฟล์รูปภาพเท่านั้น (.jpg, .png, .webp ฯลฯ)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setFormData(prev => ({ ...prev, avatar: dataUrl }));
+          showFeedback('success', 'แนบรูปภาพโปรไฟล์เรียบร้อยแล้ว');
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Strict Admin-Only Guard
   if (currentUser.role !== 'ADMIN') {
@@ -364,7 +409,7 @@ export const UserPermissionManagement: React.FC = () => {
                     <td className="py-3 px-3 text-slate-600 dark:text-slate-300">{u.position}</td>
                     <td className="py-3 px-3">
                       <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold">
-                        {u.division}
+                        {u.division === 'งบบริหาร กสม.' ? 'ผู้บริหาร' : u.division}
                       </span>
                     </td>
                     <td className="py-3 px-3">
@@ -514,7 +559,7 @@ export const UserPermissionManagement: React.FC = () => {
                   >
                     {Object.keys(NHRC_UNITS).map((key) => (
                       <option key={key} value={key}>
-                        {key} - {NHRC_UNITS[key as NHRCUnit].fullName}
+                        {key === 'งบบริหาร กสม.' ? 'ผู้บริหาร' : `${key} - ${NHRC_UNITS[key as NHRCUnit].fullName}`}
                       </option>
                     ))}
                   </select>
@@ -549,24 +594,58 @@ export const UserPermissionManagement: React.FC = () => {
 
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  รูปถ่ายโปรไฟล์ (URL รูปภาพ)
+                  รูปถ่ายโปรไฟล์ (แนบรูปภาพหรือระบุ URL)
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    value={formData.avatar}
-                    onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                    placeholder="https://... หรือปล่อยว่างเพื่อใช้สัญลักษณ์ย่อ"
-                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs"
-                  />
-                  {formData.avatar && (
-                    <img 
-                      src={formData.avatar} 
-                      alt="Preview" 
-                      className="w-8 h-8 rounded-full object-cover border border-emerald-400 shrink-0 shadow-xs" 
-                      onError={(e) => (e.target as HTMLElement).style.display = 'none'}
-                    />
+                <div className="flex items-center gap-3">
+                  {formData.avatar ? (
+                    <div className="relative group shrink-0">
+                      <img 
+                        src={formData.avatar} 
+                        alt="Avatar Preview" 
+                        className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shadow-xs" 
+                        onError={(e) => (e.target as HTMLElement).style.display = 'none'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, avatar: '' })}
+                        className="absolute -top-1 -right-1 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-0.5 transition-colors cursor-pointer"
+                        title="ลบรูปภาพ"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                      <Camera className="w-5 h-5 text-slate-400" />
+                    </div>
                   )}
+
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="user-avatar-file-input"
+                        onChange={handleImageFileUpload}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="user-avatar-file-input"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>แนบภาพจากเครื่อง</span>
+                      </label>
+                    </div>
+
+                    <input
+                      type="url"
+                      value={formData.avatar}
+                      onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
+                      placeholder="หรือวาง URL รูปภาพ (https://...)"
+                      className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[11px]"
+                    />
+                  </div>
                 </div>
               </div>
 

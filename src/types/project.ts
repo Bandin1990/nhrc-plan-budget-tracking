@@ -130,8 +130,8 @@ export const NHRC_UNITS: Record<NHRCUnit, NHRCUnitInfo> = {
   },
   'งบบริหาร กสม.': {
     code: 'งบบริหาร กสม.',
-    fullName: 'งบบริหาร กสม. / สำนักงาน กสม.',
-    shortName: 'งบบริหาร',
+    fullName: 'ผู้บริหาร',
+    shortName: 'ผู้บริหาร',
     subDivisions: ['งานประชุม กสม./ผู้บริหาร', 'งานคณะอนุกรรมการ/ทำงาน', 'งานสนับสนุนผู้บริหารระดับสูง']
   }
 };
