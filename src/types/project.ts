@@ -289,9 +289,12 @@ export interface Project {
   // ส่วนที่ 3: รายละเอียดโครงการ
   rationale?: string; // หลักการและเหตุผล
   objectives: string[]; // วัตถุประสงค์
+  targetGroup?: string; // กลุ่มเป้าหมาย
+  targetArea?: string; // พื้นที่ดำเนินงาน
   expectedOutputs: string[]; // ผลผลิตของโครงการ
   expectedOutcomes: string[]; // ผลลัพธ์ของโครงการ
-  indicators: ProjectIndicator[]; // ตัวชี้วัด
+  expectedBenefits?: string[]; // ผลที่คาดว่าจะเกิดขึ้นหรือได้รับ
+  indicators: ProjectIndicator[]; // ตัวชี้วัดความสำเร็จของโครงการ
   activities: ProjectActivity[];
 
   // ส่วนที่ 4: แผนการดำเนินงานและการใช้จ่ายงบประมาณ (มาตรการเร่งรัด มติ ครม. 21 ต.ค. 2568)

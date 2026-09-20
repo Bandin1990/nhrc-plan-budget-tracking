@@ -4,6 +4,13 @@ import { Project, ProjectActivity, ProjectIndicator, NHRC_UNITS, BUDGET_PROGRAMS
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { fromThaiNumerals, formatCurrency } from '../../utils/thaiNumber';
+import {
+  NATIONAL_STRATEGY_PILLARS,
+  MASTER_PLAN_ISSUES,
+  NATIONAL_REFORM_AREAS,
+  FIVE_YEAR_DEV_PLAN_MILESTONES,
+  NHRC_STRATEGIC_PILLARS_FULL
+} from '../../constants/strategicOptions';
 
 interface ProjectFormModalProps {
   isOpen: boolean;
@@ -60,15 +67,15 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   const [timeframeText, setTimeframeText] = useState(`ตุลาคม ${(activeFiscalYear || 2569) - 1} ถึงกันยายน ${activeFiscalYear || 2569}`);
 
   // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ (2.1 - 2.7)
-  const [natStrategyPillar, setNatStrategyPillar] = useState('ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+  const [natStrategyPillar, setNatStrategyPillar] = useState(NATIONAL_STRATEGY_PILLARS[5]);
   const [natStrategyIssue, setNatStrategyIssue] = useState('การพัฒนาระบบบริหารราชการแผ่นดินและบริการประชาชน');
   const [natStrategyTarget, setNatStrategyTarget] = useState('ภาครัฐมีความโปร่งใส มีประสิทธิภาพ และตอบสนองประชาชน');
 
-  const [mpSubPlan, setMpSubPlan] = useState('ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ');
+  const [mpSubPlan, setMpSubPlan] = useState(MASTER_PLAN_ISSUES[19]);
   const [mpSubTarget, setMpSubTarget] = useState('ยกระดับบริการประชาชนและการขับเคลื่อนองค์กรภาครัฐดิจิทัล');
 
-  const [nationalReformPlan, setNationalReformPlan] = useState('แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน');
-  const [econDevMilestone, setEconDevMilestone] = useState('หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน');
+  const [nationalReformPlan, setNationalReformPlan] = useState(NATIONAL_REFORM_AREAS[1]);
+  const [econDevMilestone, setEconDevMilestone] = useState(FIVE_YEAR_DEV_PLAN_MILESTONES[12]);
   const [level3Plan, setLevel3Plan] = useState('แผนสิทธิมนุษยชนแห่งชาติ ฉบับที่ 5 (พ.ศ. 2566 - 2570)');
 
   const [nhrcStrategyPillarVal, setNhrcStrategyPillarVal] = useState<number>(1);
@@ -78,8 +85,11 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   // ส่วนที่ 3: รายละเอียดโครงการ
   const [rationale, setRationale] = useState('');
   const [objectives, setObjectives] = useState<string[]>(['เพื่อส่งเสริมและปกป้องสิทธิมนุษยชนให้เป็นไปตามมาตรฐานสากล']);
+  const [targetGroup, setTargetGroup] = useState('ประชาชนทั่วไป องค์กรภาคเอกชน และเจ้าหน้าที่รัฐ');
+  const [targetArea, setTargetArea] = useState('ทั่วประเทศ (77 จังหวัด)');
   const [expectedOutputs, setExpectedOutputs] = useState<string[]>(['รายงาน/ข้อเสนอแนะเชิงนโยบายด้านสิทธิมนุษยชน']);
   const [expectedOutcomes, setExpectedOutcomes] = useState<string[]>(['หน่วยงานที่เกี่ยวข้องนำข้อเสนอแนะไปปรับปรุงการทำงาน']);
+  const [expectedBenefits, setExpectedBenefits] = useState<string[]>(['ประชาชนได้รับการคุ้มครองสิทธิมนุษยชนอย่างเท่าเทียมและเป็นธรรม']);
   const [indicators, setIndicators] = useState<ProjectIndicator[]>([
     { id: 'ind_1', title: 'ร้อยละของกิจกรรมที่บรรลุตามแผน', target: '100%', actual: '', status: 'on_track' }
   ]);
@@ -131,8 +141,11 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
 
       setRationale(projectToEdit.rationale || '');
       setObjectives(projectToEdit.objectives?.length ? projectToEdit.objectives : ['']);
+      setTargetGroup(projectToEdit.targetGroup || 'ประชาชนทั่วไป องค์กรภาคเอกชน และเจ้าหน้าที่รัฐ');
+      setTargetArea(projectToEdit.targetArea || 'ทั่วประเทศ (77 จังหวัด)');
       setExpectedOutputs(projectToEdit.expectedOutputs?.length ? projectToEdit.expectedOutputs : ['']);
       setExpectedOutcomes(projectToEdit.expectedOutcomes?.length ? projectToEdit.expectedOutcomes : ['']);
+      setExpectedBenefits(projectToEdit.expectedBenefits?.length ? projectToEdit.expectedBenefits : ['']);
       setIndicators(projectToEdit.indicators || []);
       setActivities(projectToEdit.activities || []);
 
@@ -374,8 +387,11 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       endDate: projectToEdit ? projectToEdit.endDate : '2026-09-30',
       timeframeText,
       objectives: objectives.filter(o => o.trim().length > 0),
+      targetGroup: targetGroup.trim(),
+      targetArea: targetArea.trim(),
       expectedOutputs: expectedOutputs.filter(o => o.trim().length > 0),
       expectedOutcomes: expectedOutcomes.filter(o => o.trim().length > 0),
+      expectedBenefits: expectedBenefits.filter(o => o.trim().length > 0),
       indicators,
       activities,
       monthlyBudgetPlan: monthlyPlan,
@@ -666,7 +682,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 </p>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-5 text-xs">
                 {/* 2.1 ยุทธศาสตร์ชาติ */}
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
                   <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400 flex items-center gap-1.5">
@@ -681,12 +697,9 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                         onChange={(e) => setNatStrategyPillar(e.target.value)}
                         className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
                       >
-                        <option value="ยุทธศาสตร์ชาติด้านการปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">1. ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ</option>
-                        <option value="ยุทธศาสตร์ชาติด้านความมั่นคง">2. ด้านความมั่นคง</option>
-                        <option value="ยุทธศาสตร์ชาติด้านการสร้างโอกาสและความเสมอภาคทางสังคม">3. ด้านการสร้างโอกาสและความเสมอภาคทางสังคม</option>
-                        <option value="ยุทธศาสตร์ชาติด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์">4. ด้านการพัฒนาและเสริมสร้างศักยภาพทรัพยากรมนุษย์</option>
-                        <option value="ยุทธศาสตร์ชาติด้านการสร้างความสามารถในการแข่งขัน">5. ด้านการสร้างความสามารถในการแข่งขัน</option>
-                        <option value="ยุทธศาสตร์ชาติด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม">6. ด้านการสร้างการเติบโตบนคุณภาพชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม</option>
+                        {NATIONAL_STRATEGY_PILLARS.map((p, idx) => (
+                          <option key={idx} value={p}>{p}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -715,24 +728,19 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 {/* 2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ */}
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
                   <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
-                    2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ
+                    2.2 แผนแม่บทภายใต้ยุทธศาสตร์ชาติ (23 ประเด็น)
                   </h5>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">แผนย่อย (Sub-plan)*</label>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ประเด็นแผนแม่บท (23 ประเด็น)*</label>
                       <select
                         value={mpSubPlan}
                         onChange={(e) => setMpSubPlan(e.target.value)}
                         className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
                       >
-                        <option value="ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ">ประเด็น 03 การปรับสมดุลและพัฒนาระบบการบริหารจัดการภาครัฐ</option>
-                        <option value="ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน">ประเด็น 04 ความมั่นคงและสิทธิมนุษยชน</option>
-                        <option value="ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม">ประเด็น 06 การสร้างความเสมอภาคและลดความเหลื่อมล้ำทางสังคม</option>
-                        <option value="ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน">ประเด็น 07 การยกระดับการคุ้มครองสิทธิและความปลอดภัยของประชาชน</option>
-                        <option value="ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย">ประเด็น 08 การพัฒนาระบบยุติธรรมและกฎหมาย</option>
-                        <option value="ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ">ประเด็น 09 การพัฒนาบริการประชาชนและดิจิทัลภาครัฐ</option>
-                        <option value="ประเด็น 01 การต่างประเทศ">ประเด็น 01 การต่างประเทศ</option>
-                        <option value="ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส">ประเด็น 02 การต้านทุจริตและประเมินคุณธรรมและความโปร่งใส</option>
+                        {MASTER_PLAN_ISSUES.map((issue, idx) => (
+                          <option key={idx} value={issue}>{issue}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -753,35 +761,32 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   {/* 2.3 แผนการปฏิรูปประเทศ */}
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                     <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
-                      2.3 แผนการปฏิรูปประเทศ
+                      2.3 แผนการปฏิรูปประเทศ (13 ด้าน)
                     </h5>
                     <select
                       value={nationalReformPlan}
                       onChange={(e) => setNationalReformPlan(e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
                     >
-                      <option value="แผนการปฏิรูปประเทศด้านการบริหารราชการแผ่นดิน">ด้านการบริหารราชการแผ่นดิน</option>
-                      <option value="แผนการปฏิรูปประเทศด้านกระบวนการยุติธรรม">ด้านกระบวนการยุติธรรม</option>
-                      <option value="แผนการปฏิรูปประเทศด้านกฎหมาย">ด้านกฎหมาย</option>
-                      <option value="แผนการปฏิรูปประเทศด้านสังคม">ด้านสังคม</option>
-                      <option value="แผนการปฏิรูปประเทศด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม">ด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
+                      {NATIONAL_REFORM_AREAS.map((reform, idx) => (
+                        <option key={idx} value={reform}>{reform}</option>
+                      ))}
                     </select>
                   </div>
 
                   {/* 2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ */}
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                     <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
-                      2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ
+                      2.4 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (13 หมุดหมาย)
                     </h5>
                     <select
                       value={econDevMilestone}
                       onChange={(e) => setEconDevMilestone(e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white"
                     >
-                      <option value="หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง และตอบสนองประชาชน">หมุดหมายที่ 13 ภาครัฐมีความทันสมัย มีประสิทธิภาพสูง</option>
-                      <option value="หมุดหมายที่ 9 ไทยมีความยากจนข้ามรุ่นลดลง และมีความคุ้มครองทางสังคมที่ครอบคลุม">หมุดหมายที่ 9 การสร้างความคุ้มครองทางสังคม</option>
-                      <option value="หมุดหมายที่ 12 ไทยมีกำลังคนที่มีสมรรถนะสูง มุ่งเรียนรู้อย่างต่อเนื่อง">หมุดหมายที่ 12 การพัฒนากำลังคนมุ่งเรียนรู้</option>
-                      <option value="หมุดหมายที่ 8 ไทยมีพื้นที่และเมืองอัจฉริยะที่น่าอยู่ ปลอดภัย">หมุดหมายที่ 8 เมืองอัจฉริยะน่าอยู่ ปลอดภัย</option>
+                      {FIVE_YEAR_DEV_PLAN_MILESTONES.map((m, idx) => (
+                        <option key={idx} value={m}>{m}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -805,25 +810,26 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   {/* 2.6 ยุทธศาสตร์ กสม. */}
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                     <h5 className="font-bold text-xs text-[#0a4d44] dark:text-emerald-400">
-                      2.6 ยุทธศาสตร์ กสม.
+                      2.6 ยุทธศาสตร์ กสม. (ยุทธศาสตร์ที่และชื่อยุทธศาสตร์)
                     </h5>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
                       <select
                         value={nhrcStrategyPillarVal}
                         onChange={(e) => setNhrcStrategyPillarVal(Number(e.target.value))}
-                        className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium"
                       >
-                        <option value={1}>ยุทธศาสตร์ที่ 1</option>
-                        <option value={2}>ยุทธศาสตร์ที่ 2</option>
-                        <option value={3}>ยุทธศาสตร์ที่ 3</option>
-                        <option value={4}>ยุทธศาสตร์ที่ 4</option>
+                        {[1, 2, 3, 4].map((num) => (
+                          <option key={num} value={num}>
+                            {NHRC_STRATEGIC_PILLARS_FULL[num]}
+                          </option>
+                        ))}
                       </select>
                       <input
                         type="text"
                         value={nhrcStrategyIssueVal}
                         onChange={(e) => setNhrcStrategyIssueVal(e.target.value)}
-                        placeholder="ประเด็นยุทธศาสตร์ที่"
-                        className="w-full px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                        placeholder="ประเด็นยุทธศาสตร์ กสม. ที่เกี่ยวข้อง"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
                       />
                     </div>
                   </div>
@@ -848,7 +854,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
 
           {/* TAB 3: รายละเอียดโครงการ */}
           {activeTab === 3 && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="space-y-5 animate-fadeIn text-xs">
               <div className="border-b pb-2 border-slate-200 dark:border-slate-800">
                 <h4 className="font-bold text-sm text-[#0a4d44] dark:text-emerald-400">
                   ส่วนที่ 3 : รายละเอียดโครงการ (Rationale, Objectives, Targets, Indicators)
@@ -862,7 +868,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   value={rationale}
                   onChange={(e) => setRationale(e.target.value)}
                   placeholder="อธิบายความเป็นมา สภาพปัญหา ความจำเป็น และเหตุผลในการจัดทำโครงการ"
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                 />
               </div>
 
@@ -880,7 +886,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                         setObjectives(newObjs);
                       }}
                       placeholder={`วัตถุประสงค์ ข้อที่ ${idx + 1}`}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
                     />
                     {objectives.length > 1 && (
                       <button
@@ -902,16 +908,50 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 </button>
               </div>
 
-              {/* Expected Outputs & Outcomes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Target Group, Target Area & Timeframe */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">กลุ่มเป้าหมาย*</label>
+                  <input
+                    type="text"
+                    value={targetGroup}
+                    onChange={(e) => setTargetGroup(e.target.value)}
+                    placeholder="เช่น ประชาชนทั่วไป องค์กรภาคเอกชน และเจ้าหน้าที่รัฐ"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">พื้นที่ดำเนินงาน*</label>
+                  <input
+                    type="text"
+                    value={targetArea}
+                    onChange={(e) => setTargetArea(e.target.value)}
+                    placeholder="เช่น ทั่วประเทศ (77 จังหวัด) หรือ สงขลา"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ระยะเวลาการดำเนินโครงการ*</label>
+                  <input
+                    type="text"
+                    value={timeframeText}
+                    onChange={(e) => setTimeframeText(e.target.value)}
+                    placeholder="เช่น ตุลาคม 2568 ถึงกันยายน 2569"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Expected Outputs, Outcomes & Benefits */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ผลผลิตของโครงการ (Outputs)</label>
                   <textarea
                     rows={3}
                     value={expectedOutputs.join('\n')}
                     onChange={(e) => setExpectedOutputs(e.target.value.split('\n'))}
-                    placeholder="ระบุผลผลิตเชิงปริมาณหรือคุณภาพที่เกิดขึ้นจากโครงการ"
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                    placeholder="ระบุผลผลิตเชิงปริมาณหรือคุณภาพ"
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                   />
                 </div>
                 <div>
@@ -920,8 +960,18 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                     rows={3}
                     value={expectedOutcomes.join('\n')}
                     onChange={(e) => setExpectedOutcomes(e.target.value.split('\n'))}
-                    placeholder="ระบุผลลัพธ์ระยะยาว ประโยชน์ หรือการเปลี่ยนแปลงที่เกิดจากโครงการ"
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed"
+                    placeholder="ระบุผลลัพธ์ระยะยาว ประโยชน์ที่เกิดจากโครงการ"
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">ผลที่คาดว่าจะเกิดขึ้นหรือได้รับ</label>
+                  <textarea
+                    rows={3}
+                    value={expectedBenefits.join('\n')}
+                    onChange={(e) => setExpectedBenefits(e.target.value.split('\n'))}
+                    placeholder="ระบุผลประโยชน์ต่อประชาชน หรือหน่วยงาน"
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl leading-relaxed text-xs"
                   />
                 </div>
               </div>

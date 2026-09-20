@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   X, Calendar, Building2, User as UserIcon, DollarSign, 
-  TrendingUp, Clock, Scale, Printer, CheckCircle2, AlertCircle, Edit3, Coins
+  TrendingUp, Clock, Scale, Printer, CheckCircle2, AlertCircle, Edit3, Coins, FileText, Target
 } from 'lucide-react';
 import { Project, BUDGET_PROGRAMS, NHRC_UNITS } from '../../types/project';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency, fromThaiNumerals } from '../../utils/thaiNumber';
 import { WorkflowStepper } from '../common/WorkflowStepper';
+import { PrintableProjectPlan } from './PrintableProjectPlan';
+import { NHRC_STRATEGIC_PILLARS_FULL } from '../../constants/strategicOptions';
 
 interface ProjectDetailModalProps {
   project: Project | null;
@@ -32,8 +34,13 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 }) => {
   const { getReportsForProject, memos } = useProjects();
   const { canEditProject } = useAuth();
+  const [showPrintPlan, setShowPrintPlan] = useState(false);
 
   if (!isOpen || !project) return null;
+
+  if (showPrintPlan) {
+    return <PrintableProjectPlan project={project} onBack={() => setShowPrintPlan(false)} />;
+  }
 
   const isOwner = canEditProject(project);
   const projectReports = getReportsForProject(project.id);
@@ -42,6 +49,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   );
 
   const remaining = project.budgetAllocated - project.budgetSpent;
+  const pillarNum = project.strategicSection2?.nhrcStrategicPillar || project.strategicPillar || 1;
+  const nhrcPillarName = NHRC_STRATEGIC_PILLARS_FULL[pillarNum] || `ยุทธศาสตร์ที่ ${pillarNum}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
@@ -63,12 +72,22 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               {project.name}
             </h3>
           </div>
-          <button
-            onClick={onClose}
-            className="text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#073b34]"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPrintPlan(true)}
+              className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+              title="พิมพ์แบบฟอร์มรายละเอียดโครงการ (5 ส่วน)"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>พิมพ์แบบโครงการ</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#073b34]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -143,7 +162,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   <p><span className="text-slate-400 font-semibold">2.3 แผนการปฏิรูปประเทศ:</span> {project.strategicSection2?.nationalReformPlan || 'ด้านการบริหารราชการแผ่นดิน'}</p>
                   <p><span className="text-slate-400 font-semibold">2.4 แผนพัฒนาเศรษฐกิจฯ:</span> {project.strategicSection2?.economicDevPlanMilestone || 'หมุดหมายที่ 13'}</p>
                   <p><span className="text-slate-400 font-semibold">2.5 แผนระดับที่ 3:</span> {project.strategicSection2?.level3Plan || project.relatedPlans}</p>
-                  <p><span className="text-slate-400 font-semibold">2.6 ยุทธศาสตร์ กสม.:</span> ยุทธศาสตร์ที่ {project.strategicSection2?.nhrcStrategicPillar || project.strategicPillar || 1} ({project.strategicSection2?.nhrcStrategicIssue || '-'})</p>
+                  <p><span className="text-slate-400 font-semibold">2.6 ยุทธศาสตร์ กสม.:</span> {nhrcPillarName} ({project.strategicSection2?.nhrcStrategicIssue || '-'})</p>
                   <p><span className="text-slate-400 font-semibold">2.7 กฎหมายที่เกี่ยวข้อง:</span> {project.strategicSection2?.relatedLaws || 'พ.ร.ป. กสม. พ.ศ. 2560'}</p>
                 </div>
               </div>
@@ -152,7 +171,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             {/* Section 3 */}
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
               <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400">
-                ส่วนที่ 3 : รายละเอียดโครงการ (Rationale & Objectives)
+                ส่วนที่ 3 : รายละเอียดโครงการ (Rationale, Objectives, Targets, Indicators)
               </h4>
               {project.rationale && (
                 <div className="text-xs">
@@ -160,7 +179,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">{project.rationale}</p>
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                <p><span className="text-slate-400 font-bold">กลุ่มเป้าหมาย:</span> <span className="text-slate-800 dark:text-white font-medium">{project.targetGroup || '-'}</span></p>
+                <p><span className="text-slate-400 font-bold">พื้นที่ดำเนินงาน:</span> <span className="text-slate-800 dark:text-white font-medium">{project.targetArea || '-'}</span></p>
+                <p><span className="text-slate-400 font-bold">ระยะเวลาดำเนินงาน:</span> <span className="text-slate-800 dark:text-white font-medium">{project.timeframeText || '-'}</span></p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div>
                   <span className="text-slate-400 font-bold block mb-1">วัตถุประสงค์:</span>
                   <ul className="list-disc pl-4 space-y-1 text-slate-700 dark:text-slate-300">
@@ -168,11 +194,35 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </ul>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold block mb-1">ผลผลิตและผลลัพธ์ที่คาดว่าจะได้รับ:</span>
+                  <span className="text-slate-400 font-bold block mb-1">ผลผลิต & ผลลัพธ์:</span>
                   <p className="text-slate-700 dark:text-slate-300 font-medium"><b>ผลผลิต:</b> {project.expectedOutputs?.join(', ') || '-'}</p>
                   <p className="text-slate-700 dark:text-slate-300 font-medium mt-1"><b>ผลลัพธ์:</b> {project.expectedOutcomes?.join(', ') || '-'}</p>
                 </div>
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">ผลที่คาดว่าจะได้รับ:</span>
+                  <ul className="list-disc pl-4 space-y-1 text-slate-700 dark:text-slate-300">
+                    {(project.expectedBenefits && project.expectedBenefits.length > 0 ? project.expectedBenefits : project.expectedOutcomes || []).map((b, i) => (
+                      <li key={i}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
+
+              {project.indicators && project.indicators.length > 0 && (
+                <div className="pt-2">
+                  <span className="text-slate-400 font-bold block mb-1.5">ตัวชี้วัดความสำเร็จของโครงการ (KPIs):</span>
+                  <div className="space-y-1">
+                    {project.indicators.map((ind) => (
+                      <div key={ind.id} className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                        <span className="font-medium text-slate-800 dark:text-white">{ind.title}</span>
+                        <span className="font-bold text-[#0a4d44] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded text-[11px]">
+                          เป้าหมาย: {ind.target}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Section 4: Cabinet Targets */}
@@ -299,6 +349,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           </button>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPrintPlan(true)}
+              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>พิมพ์แบบฟอร์มรายละเอียดโครงการ</span>
+            </button>
+
             {isOwner && (
               <button
                 onClick={() => onOpenEditProject(project)}
