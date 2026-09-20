@@ -532,7 +532,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
       <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-6xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Header */}
-        <div className="bg-[#0a4d44] text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-[#0a4d44] text-white px-6 py-4 flex items-center justify-between shrink-0">
           <div>
             <h3 className="font-bold text-base flex items-center gap-2">
               <Building2 className="w-5 h-5 text-emerald-300" />
@@ -551,7 +551,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-emerald-800/60 bg-[#073b34] p-2 gap-1.5 overflow-x-auto text-xs sm:text-sm font-bold shadow-inner scrollbar-thin">
+        <div className="flex border-b border-emerald-800/60 bg-[#073b34] p-2 gap-1.5 overflow-x-auto text-xs sm:text-sm font-bold shadow-inner scrollbar-thin shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab(1)}
@@ -632,7 +632,9 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="p-6 overflow-y-auto flex-1 space-y-6 text-xs">
+        <form onSubmit={handleSave} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Scrollable Tab Content Area */}
+          <div className="p-6 overflow-y-auto flex-1 space-y-6 text-xs min-h-0">
           
           {/* TAB 1: ข้อมูลโครงการ */}
           {activeTab === 1 && (
@@ -1762,14 +1764,16 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             </div>
           )}
 
-          {/* Bottom Footer Actions */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          </div>
+
+          {/* Fixed Bottom Footer Actions */}
+          <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/80 shrink-0">
             <div className="flex items-center gap-2">
               {activeTab > 1 && (
                 <button
                   type="button"
                   onClick={() => setActiveTab(activeTab - 1)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 cursor-pointer"
                 >
                   ← ส่วนก่อนหน้า
                 </button>
@@ -1778,7 +1782,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab(activeTab + 1)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0a4d44]/10 dark:bg-emerald-950 text-[#0a4d44] dark:text-emerald-400 hover:bg-[#0a4d44]/20"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0a4d44]/10 dark:bg-emerald-950 text-[#0a4d44] dark:text-emerald-400 hover:bg-[#0a4d44]/20 cursor-pointer"
                 >
                   ส่วนถัดไป →
                 </button>
@@ -1789,7 +1793,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 ยกเลิก
               </button>
