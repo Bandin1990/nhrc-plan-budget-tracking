@@ -1526,7 +1526,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 )}
 
                 {/* Monthly Plan Grid */}
-                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-64 overflow-y-auto overflow-x-auto pr-1">
                   <table className="w-full text-left border-collapse text-[11px]">
                     <thead>
                       <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200">

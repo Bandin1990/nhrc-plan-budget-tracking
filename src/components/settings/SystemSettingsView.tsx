@@ -32,6 +32,10 @@ CREATE TABLE IF NOT EXISTS public.projects (
   target_group TEXT,
   target_area TEXT,
   expected_benefits JSONB DEFAULT '[]'::jsonb,
+  expense_details JSONB DEFAULT '[]'::jsonb,
+  monthly_budget_plan JSONB DEFAULT '[]'::jsonb,
+  attachments JSONB DEFAULT '[]'::jsonb,
+  investment_commitment_q1 NUMERIC(15, 2) DEFAULT 0.00,
   budget_allocated NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
   budget_spent NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
   budget_committed NUMERIC(15, 2) DEFAULT 0.00,
@@ -68,6 +72,10 @@ ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS strategic_section2 JSONB DE
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS target_group TEXT;
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS target_area TEXT;
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS expected_benefits JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS expense_details JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS monthly_budget_plan JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS investment_commitment_q1 NUMERIC(15, 2) DEFAULT 0.00;
 
 CREATE INDEX IF NOT EXISTS idx_projects_fy ON public.projects (fiscal_year);
 CREATE INDEX IF NOT EXISTS idx_projects_division ON public.projects (division);
