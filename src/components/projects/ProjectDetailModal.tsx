@@ -111,52 +111,110 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Details Tabs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Left: General & Officer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-              <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-xs">
-                <Building2 className="w-3.5 h-3.5 text-[#0a4d44]" />
-                <span>ข้อมูลหน่วยงานและผู้รับผิดชอบ</span>
-              </h4>
-              <div className="space-y-1.5 text-slate-600 dark:text-slate-300 pt-1">
-                <p><span className="text-slate-400">สำนัก:</span> {NHRC_UNITS[project.division]?.fullName || project.division}</p>
-                <p><span className="text-slate-400">กลุ่มงาน:</span> {project.subDivision}</p>
-                <p><span className="text-slate-400">แผนงาน:</span> {BUDGET_PROGRAMS[project.programCode]?.name}</p>
-                <p><span className="text-slate-400">ช่วงเวลา:</span> {project.timeframeText}</p>
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                  <p><span className="text-slate-400">ผู้รับผิดชอบ:</span> <strong className="text-slate-800 dark:text-white">{project.responsiblePerson?.name}</strong></p>
-                  <p><span className="text-slate-400">ตำแหน่ง:</span> {project.responsiblePerson?.position}</p>
-                  <p><span className="text-slate-400">เบอร์โทรศัพท์:</span> {fromThaiNumerals(project.responsiblePerson?.phone || '')}</p>
-                  <p><span className="text-slate-400">อีเมล:</span> {project.responsiblePerson?.email}</p>
+          {/* Details Sections: 5 Sections Layout */}
+          <div className="space-y-4">
+            {/* Section 1 & 2 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Section 1 */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-xs text-[#0a4d44] dark:text-emerald-400">
+                  <Building2 className="w-4 h-4 text-[#0a4d44]" />
+                  <span>ส่วนที่ 1 : ข้อมูลพื้นฐานโครงการ</span>
+                </h4>
+                <div className="space-y-1.5 text-slate-600 dark:text-slate-300 pt-1 text-xs">
+                  <p><span className="text-slate-400 font-medium">สำนัก/สังกัด:</span> {NHRC_UNITS[project.division]?.fullName || project.division} ({project.subDivision})</p>
+                  <p><span className="text-slate-400 font-medium">แผนงานงบประมาณ:</span> {BUDGET_PROGRAMS[project.programCode]?.name}</p>
+                  <p><span className="text-slate-400 font-medium">วิธีการดำเนินงาน:</span> <strong className="text-slate-800 dark:text-white">{project.operationMethod || 'ดำเนินการเอง'}</strong></p>
+                  <p><span className="text-slate-400 font-medium">แหล่งงบประมาณ:</span> {project.budgetSource || 'งบประมาณแผ่นดินประจำปี'}</p>
+                  <p><span className="text-slate-400 font-medium">ประเภทงบประมาณ:</span> <span className="font-bold text-emerald-700 dark:text-emerald-300">{project.budgetCategory || 'งบดำเนินงาน'}</span></p>
+                  <p><span className="text-slate-400 font-medium">ช่วงเวลา:</span> {project.timeframeText}</p>
+                </div>
+              </div>
+
+              {/* Section 2 */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-xs text-[#0a4d44] dark:text-emerald-400">
+                  <Scale className="w-4 h-4 text-[#0a4d44]" />
+                  <span>ส่วนที่ 2 : ความเชื่อมโยงยุทธศาสตร์ชาติ</span>
+                </h4>
+                <div className="space-y-1.5 text-slate-600 dark:text-slate-300 pt-1 text-xs">
+                  <p><span className="text-slate-400 font-medium">ยุทธศาสตร์ชาติ:</span> {project.nationalStrategy || 'ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ'}</p>
+                  <p><span className="text-slate-400 font-medium">แผนแม่บทฯ:</span> {project.masterPlan || 'ประเด็นการบริหารจัดการภาครัฐ'}</p>
+                  <p><span className="text-slate-400 font-medium">แผนระดับอื่น ๆ:</span> {project.relatedPlans || 'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13'}</p>
                 </div>
               </div>
             </div>
 
-            {/* Right: Objectives & Expected outputs */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-              <h4 className="font-bold text-slate-800 dark:text-white text-xs">
-                วัตถุประสงค์และตัวชี้วัดความสำเร็จ
+            {/* Section 3 */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+              <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400">
+                ส่วนที่ 3 : รายละเอียดโครงการ (Rationale & Objectives)
               </h4>
-              <div className="space-y-2 pt-1">
+              {project.rationale && (
+                <div className="text-xs">
+                  <span className="text-slate-400 font-bold block mb-1">หลักการและเหตุผล:</span>
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">{project.rationale}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-slate-400 font-bold block mb-1">วัตถุประสงค์:</span>
                   <ul className="list-disc pl-4 space-y-1 text-slate-700 dark:text-slate-300">
-                    {project.objectives.map((o, i) => (
-                      <li key={i}>{o}</li>
-                    ))}
+                    {project.objectives.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
                 </div>
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">ผลผลิตและผลลัพธ์ที่คาดว่าจะได้รับ:</span>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium"><b>ผลผลิต:</b> {project.expectedOutputs?.join(', ') || '-'}</p>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium mt-1"><b>ผลลัพธ์:</b> {project.expectedOutcomes?.join(', ') || '-'}</p>
+                </div>
+              </div>
+            </div>
 
-                {project.indicators.length > 0 && (
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-400 font-bold block mb-1">ตัวชี้วัดความสำเร็จ:</span>
-                    {project.indicators.map((ind, i) => (
-                      <div key={i} className="text-slate-700 dark:text-slate-300">
-                        • {ind.title}: <strong className="text-emerald-600">{ind.actual || ind.target}</strong>
+            {/* Section 4: Cabinet Targets */}
+            <div className="p-4 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-800/60 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-amber-900 dark:text-amber-200 text-xs">
+                  ส่วนที่ 4 : เกณฑ์มาตรการเร่งรัดเบิกจ่าย (มติ ครม. 21 ต.ค. 2568)
+                </h4>
+                <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-200 dark:bg-amber-900/60 px-2 py-0.5 rounded-full">
+                  เป้าหมายสะสม: Q1 38% | Q2 61% | Q3 81% | Q4 100%
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                วางแผนการใช้จ่ายงบประมาณรายเดือนสอดคล้องกับเกณฑ์เร่งรัดเบิกจ่ายของภาครัฐ ประจำปีงบประมาณ พ.ศ. 2569
+              </p>
+            </div>
+
+            {/* Section 5 & Attachments */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Officer */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1.5 text-xs">
+                <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400 mb-2">
+                  ส่วนที่ 5 : ผู้รับผิดชอบโครงการ
+                </h4>
+                <p><span className="text-slate-400 font-medium">ชื่อ-นามสกุล:</span> <strong className="text-slate-800 dark:text-white">{project.responsiblePerson?.name}</strong></p>
+                <p><span className="text-slate-400 font-medium">ตำแหน่ง:</span> {project.responsiblePerson?.position}</p>
+                <p><span className="text-slate-400 font-medium">เบอร์โทรศัพท์:</span> {fromThaiNumerals(project.responsiblePerson?.phone || '')}</p>
+                <p><span className="text-slate-400 font-medium">อีเมล:</span> {project.responsiblePerson?.email}</p>
+              </div>
+
+              {/* Attachments */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                <h4 className="font-bold text-slate-800 dark:text-white text-xs text-[#0a4d44] dark:text-emerald-400">
+                  เอกสารแนบประกอบโครงการ
+                </h4>
+                {project.attachments && project.attachments.length > 0 ? (
+                  <div className="space-y-1.5 pt-1">
+                    {project.attachments.map(att => (
+                      <div key={att.id} className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between text-[11px]">
+                        <span className="font-medium truncate">{att.fileName}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded text-[10px]">แนบแล้ว</span>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-slate-400 italic text-[11px] pt-1">(1) แบบฟอร์มขอรับการจัดสรรงบประมาณ & (2) แบบฟอร์มข้อเสนอโครงการเชิงยุทธศาสตร์</p>
                 )}
               </div>
             </div>

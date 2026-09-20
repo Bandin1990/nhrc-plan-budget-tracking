@@ -218,6 +218,24 @@ export interface ResponsiblePerson {
   email: string;
 }
 
+export interface MonthlyBudgetPlan {
+  month: number; // 1-12 (หรือ 10=ต.ค. ถึง 9=ก.ย.)
+  monthName: string; // 'ต.ค.', 'พ.ย.', 'ธ.ค.', etc.
+  quarter: 1 | 2 | 3 | 4;
+  plannedSpent: number; // งบประมาณที่จะเบิกจ่ายจริง
+  plannedCommitted?: number; // งบลงทุน: แผนก่อหนี้ผูกพัน (PO/สัญญา) ในไตรมาสที่ 1
+  operationMilestone?: string; // แผนการดำเนินงานรายเดือน
+}
+
+export interface ProjectAttachment {
+  id: string;
+  type: 'BUDGET_REQUEST_FORM' | 'STRATEGIC_PROPOSAL_FORM' | 'OTHER';
+  fileName: string;
+  fileSize?: string;
+  uploadedAt: string;
+  fileUrl?: string;
+}
+
 export interface Project {
   id: string;
   code: string; // e.g. '68O1-13314'
@@ -230,6 +248,28 @@ export interface Project {
   isStrategic: boolean; // เป็นโครงการเชิงยุทธศาสตร์หรือไม่
   strategicPillar?: number; // 1, 2, 3, 4 (ยุทธศาสตร์ กสม.)
   
+  // ส่วนที่ 1: ข้อมูลโครงการเพิ่มเติม
+  operationMethod?: string; // วิธีการดำเนินงาน (เช่น ดำเนินการเอง / จัดซื้อจัดจ้าง / จ้างเหมา / ประชุมสัมมนา)
+  budgetSource?: string; // แหล่งงบประมาณ (เช่น งบประมาณแผ่นดินรายจ่ายประจำปี พ.ศ. 2569)
+  budgetCategory?: 'งบดำเนินงาน' | 'งบลงทุน' | 'งบบุคลากร' | 'งบอุดหนุน' | 'งบรายจ่ายอื่น'; // ประเภทงบประมาณ
+  
+  // ส่วนที่ 2: ความเชื่อมโยงยุทธศาสตร์ชาติ
+  nationalStrategy?: string; // ยุทธศาสตร์ชาติ (เช่น ด้านความมั่นคง / ด้านการปรับสมดุลและพัฒนาระบบบริหารจัดการภาครัฐ)
+  masterPlan?: string; // แผนแม่บทภายใต้ยุทธศาสตร์ชาติ
+  relatedPlans?: string; // แผนระดับต่าง ๆ ที่เกี่ยวข้อง (เช่น แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13, มติ ครม.)
+
+  // ส่วนที่ 3: รายละเอียดโครงการ
+  rationale?: string; // หลักการและเหตุผล
+  objectives: string[]; // วัตถุประสงค์
+  expectedOutputs: string[]; // ผลผลิตของโครงการ
+  expectedOutcomes: string[]; // ผลลัพธ์ของโครงการ
+  indicators: ProjectIndicator[]; // ตัวชี้วัด
+  activities: ProjectActivity[];
+
+  // ส่วนที่ 4: แผนการดำเนินงานและการใช้จ่ายงบประมาณ (มาตรการเร่งรัด มติ ครม. 21 ต.ค. 2568)
+  monthlyBudgetPlan?: MonthlyBudgetPlan[]; // แผนรายเดือน (Q1=38%, Q2=61%, Q3=81%, Q4=100%)
+  investmentCommitmentQ1?: number; // แผนก่อหนี้ผูกพันงบลงทุนในไตรมาสที่ 1
+  
   budgetAllocated: number; // งบที่ได้รับจัดสรร
   budgetSpent: number; // งบเบิกจ่ายจริง
   budgetCommitted?: number; // ก่อหนี้ผูกพัน (PO/สัญญา)
@@ -239,12 +279,6 @@ export interface Project {
   startDate: string; // e.g. '2025-10-01'
   endDate: string; // e.g. '2026-09-30'
   timeframeText: string; // e.g. 'ธันวาคม 2568 ถึงกันยายน 2569'
-  
-  objectives: string[];
-  expectedOutputs: string[];
-  expectedOutcomes: string[];
-  indicators: ProjectIndicator[];
-  activities: ProjectActivity[];
   
   lastReportRound?: string; // e.g. 'รอบ 2 เดือน (ก.พ. - มี.ค. 69)'
   lastReportDate?: string;
@@ -256,7 +290,11 @@ export interface Project {
   lastRemindedAt?: string; // วันที่ส่งแจ้งเตือนรายงานผลล่าสุด
   reminderCount?: number; // จำนวนครั้งที่ส่งแจ้งเตือนซ้ำ
 
+  // เอกสารแนบ ( (1) แบบฟอร์มขอรับการจัดสรรงบประมาณ (2) แบบฟอร์มข้อเสนอโครงการเชิงยุทธศาสตร์ )
+  attachments?: ProjectAttachment[];
+
   // Tag / Notes
   notes?: string;
   updatedAt: string;
 }
+
