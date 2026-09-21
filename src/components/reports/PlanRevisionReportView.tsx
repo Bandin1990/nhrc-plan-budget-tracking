@@ -10,9 +10,9 @@ interface PlanRevisionReportViewProps {
 }
 
 export const PlanRevisionReportView: React.FC<PlanRevisionReportViewProps> = ({ onBack }) => {
-  const { fiscalYear, projects } = useProjects();
+  const { fiscalYear, projects, memos } = useProjects();
   const { isAdmin } = useAuth();
-  const stats = getPlanRevisionReportStats(fiscalYear, projects);
+  const stats = getPlanRevisionReportStats(fiscalYear, projects, memos);
 
   if (!isAdmin) {
     return (
@@ -42,11 +42,11 @@ export const PlanRevisionReportView: React.FC<PlanRevisionReportViewProps> = ({ 
                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">รายงานทบทวนแผน</h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-[#0a4d44] dark:text-emerald-300">ADMIN</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">แบบรายงานสำหรับเสนอวาระทบทวนแผนปฏิบัติการ ปีงบประมาณ {fiscalYear}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">ดึงข้อมูลโครงการและคำขอเปลี่ยนแปลงงบประมาณจริงในระบบ ปีงบประมาณ {fiscalYear}</p>
             </div>
           </div>
           <button
-            onClick={() => exportPlanRevisionReport(fiscalYear, projects)}
+            onClick={() => exportPlanRevisionReport(fiscalYear, projects, memos)}
             className="flex items-center justify-center gap-2 bg-[#0a4d44] hover:bg-[#083b34] text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" />

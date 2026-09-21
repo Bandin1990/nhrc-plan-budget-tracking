@@ -1,10 +1,16 @@
 import * as XLSX from 'xlsx';
 import { BUDGET_PROGRAMS, Project } from '../types/project';
+import { OfficialMemoData } from '../types/budget';
 
 type RevisionKind = 'return' | 'increase';
 
 interface RevisionItem {
-  project: Project;
+  name: string;
+  code: string;
+  division: string;
+  programCode: Project['programCode'];
+  budgetAllocated: number;
+  budgetSpent: number;
   amount: number;
   reason: string;
   classification: string;
@@ -20,12 +26,12 @@ function extractAmount(notes: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-function getRevisionItems(projects: Project[], fiscalYear: number, kind: RevisionKind): RevisionItem[] {
+function getRevisionItems(projects: Project[], memos: OfficialMemoData[], fiscalYear: number, kind: RevisionKind): RevisionItem[] {
   const isIncrease = (notes: string) => notes.includes('ขอรับจัดสรรเงินงบประมาณเพิ่มเติม');
   const isReturn = (notes: string) =>
     !isIncrease(notes) && (notes.includes('ขอส่งคืนงบประมาณเหลือจ่าย') || notes.includes('ขอคืนเงินงบประมาณเหลือจ่าย'));
 
-  return projects
+  const noteItems = projects
     .filter((project) => (project.fiscalYear || 2569) === fiscalYear)
     .flatMap((project) => {
       const notes = project.notes || '';
@@ -38,14 +44,48 @@ function getRevisionItems(projects: Project[], fiscalYear: number, kind: Revisio
         .replace(/^\s*\([^]*\)\s*$/, (value) => value.slice(1, -1))
         .trim();
       const classification = /ยกเลิก(?:งาน|กิจกรรม)/.test(notes) ? 'ยกเลิกกิจกรรม' : 'ปรับแผนการดำเนินงาน';
-      return [{ project, amount, reason, classification }];
-    })
-    .sort((a, b) => a.project.programCode.localeCompare(b.project.programCode) || a.project.division.localeCompare(b.project.division) || a.project.name.localeCompare(b.project.name, 'th'));
+      return [{
+        name: project.name,
+        code: project.code,
+        division: project.division,
+        programCode: project.programCode,
+        budgetAllocated: project.budgetAllocated || 0,
+        budgetSpent: project.budgetSpent || 0,
+        amount,
+        reason,
+        classification,
+      }];
+    });
+
+  const memoItems = memos
+    .filter((memo) => (memo.fiscalYear || 2569) === fiscalYear)
+    .flatMap((memo) => (memo.tableRows || []).map((row) => ({ memo, row })))
+    .flatMap(({ memo, row }) => {
+      const rowKind: RevisionKind = row.transferAmount < 0 || row.itemType === 'source' ? 'return' : 'increase';
+      if (rowKind !== kind || !row.transferAmount) return [];
+      const project = projects.find((item) => row.activityCode.includes(item.code));
+      const description = row.itemDescription || project?.name || '-';
+      const reason = [memo.subject, memo.section2_Facts?.savingsSource].filter(Boolean).join(' — ');
+      return [{
+        name: project?.name || description.replace(/\s*\[(?:โอนลด|โอนออก|โอนเพิ่ม|รับโอน)\]\s*/g, ''),
+        code: project?.code || row.activityCode,
+        division: project?.division || memo.division,
+        programCode: project?.programCode || row.programCode,
+        budgetAllocated: row.budgetOriginal || project?.budgetAllocated || 0,
+        budgetSpent: row.actualDisbursedAndCommitted || project?.budgetSpent || 0,
+        amount: Math.abs(row.transferAmount),
+        reason: reason || 'รายการเปลี่ยนแปลงงบประมาณจากระบบ',
+        classification: /ยกเลิก(?:งาน|กิจกรรม)/.test(`${memo.subject} ${description}`) ? 'ยกเลิกกิจกรรม' : 'ปรับแผนการดำเนินงาน',
+      }];
+    });
+
+  return [...noteItems, ...memoItems]
+    .sort((a, b) => a.programCode.localeCompare(b.programCode) || a.division.localeCompare(b.division) || a.name.localeCompare(b.name, 'th'));
 }
 
-export function getPlanRevisionReportStats(fiscalYear: number, projects: Project[]) {
-  const returns = getRevisionItems(projects, fiscalYear, 'return');
-  const increases = getRevisionItems(projects, fiscalYear, 'increase');
+export function getPlanRevisionReportStats(fiscalYear: number, projects: Project[], memos: OfficialMemoData[] = []) {
+  const returns = getRevisionItems(projects, memos, fiscalYear, 'return');
+  const increases = getRevisionItems(projects, memos, fiscalYear, 'increase');
   return {
     returnCount: returns.length,
     returnAmount: returns.reduce((sum, item) => sum + item.amount, 0),
@@ -83,7 +123,7 @@ function buildRevisionSheet(items: RevisionItem[], fiscalYear: number, kind: Rev
   let index = 1;
   let activeProgram = '';
   for (const item of items) {
-    const programName = BUDGET_PROGRAMS[item.project.programCode]?.name || item.project.programCode;
+    const programName = BUDGET_PROGRAMS[item.programCode]?.name || item.programCode;
     if (programName !== activeProgram) {
       addCell(ws, XLSX.utils.encode_cell({ r: row, c: 0 }), programName, subtitleStyle);
       ws['!merges'] = [...(ws['!merges'] || []), { s: { r: row, c: 0 }, e: { r: row, c: 7 } }];
@@ -91,7 +131,7 @@ function buildRevisionSheet(items: RevisionItem[], fiscalYear: number, kind: Rev
       row += 1;
     }
 
-    const values: Array<string | number> = [index, item.project.name, item.project.code, item.project.division, item.project.budgetAllocated || 0, item.project.budgetSpent || 0, item.amount, item.reason || '-'];
+    const values: Array<string | number> = [index, item.name, item.code, item.division, item.budgetAllocated, item.budgetSpent, item.amount, item.reason || '-'];
     values.forEach((value, column) => addCell(ws, XLSX.utils.encode_cell({ r: row, c: column }), value, column >= 4 && column <= 6 ? numberStyle : textStyle));
     row += 1;
     index += 1;
@@ -120,7 +160,7 @@ function buildSummarySheet(items: RevisionItem[], fiscalYear: number): XLSX.Work
 
   items.forEach((item, index) => {
     const row = index + 4;
-    const values: Array<string | number> = [index + 1, item.project.name, item.project.code, item.project.division, item.amount, item.classification];
+    const values: Array<string | number> = [index + 1, item.name, item.code, item.division, item.amount, item.classification];
     values.forEach((value, column) => addCell(ws, XLSX.utils.encode_cell({ r: row, c: column }), value, column === 4 ? numberStyle : textStyle));
   });
 
@@ -138,9 +178,9 @@ function buildSummarySheet(items: RevisionItem[], fiscalYear: number): XLSX.Work
 }
 
 /** Creates the three printable plan-review tables used for the agenda attachment. */
-export function exportPlanRevisionReport(fiscalYear: number, projects: Project[]): void {
-  const returns = getRevisionItems(projects, fiscalYear, 'return');
-  const increases = getRevisionItems(projects, fiscalYear, 'increase');
+export function exportPlanRevisionReport(fiscalYear: number, projects: Project[], memos: OfficialMemoData[] = []): void {
+  const returns = getRevisionItems(projects, memos, fiscalYear, 'return');
+  const increases = getRevisionItems(projects, memos, fiscalYear, 'increase');
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, buildRevisionSheet(returns, fiscalYear, 'return'), 'แนบ 1 อำนาจรับคืน');
   XLSX.utils.book_append_sheet(workbook, buildRevisionSheet(increases, fiscalYear, 'increase'), 'แนบ 1 อำนาจให้เพิ่ม');
