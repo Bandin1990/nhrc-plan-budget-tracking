@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, TrendingUp, FolderKanban, FileUp, Target, 
   Clock, Printer, Scale, FileText, History, BarChart3, Building2, 
-  Users, Cloud, Settings, ChevronLeft, ChevronRight, X, BookOpen
+  Users, Cloud, Settings, ChevronLeft, ChevronRight, X, BookOpen, FileSpreadsheet
 } from 'lucide-react';
 import { useProjects } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,6 +21,7 @@ export type NavTab =
   | 'transfer_history'
   | 'executive_summary'
   | 'unit_breakdown'
+  | 'plan_revision_report'
   | 'user_permissions'
   | 'settings'
   | 'user_manual';
@@ -75,6 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'executive_summary', label: 'สรุปภาพรวมผู้บริหาร', icon: BarChart3 },
         { id: 'unit_breakdown', label: 'รายงานจำแนกตามสำนัก', icon: Building2 },
+        ...(currentUser.role === 'ADMIN' ? [{ id: 'plan_revision_report', label: 'รายงานทบทวนแผน (Excel)', icon: FileSpreadsheet }] : []),
       ]
     },
     ...(currentUser.role === 'ADMIN' ? [{

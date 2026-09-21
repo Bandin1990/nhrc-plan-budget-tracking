@@ -17,6 +17,7 @@ import { TransferHistoryList } from './components/transfers/TransferHistoryList'
 import { ExecutivePrintReport } from './components/reports/ExecutivePrintReport';
 import { BudgetComparisonView } from './components/budget/BudgetComparisonView';
 import { UnitBreakdownView } from './components/reports/UnitBreakdownView';
+import { PlanRevisionReportView } from './components/reports/PlanRevisionReportView';
 import { UserPermissionManagement } from './components/auth/UserPermissionManagement';
 import { SystemSettingsView } from './components/settings/SystemSettingsView';
 import { UserManualView } from './components/manual/UserManualView';
@@ -253,6 +254,10 @@ export const AppContent: React.FC = () => {
             <UnitBreakdownView
               onSelectUnitFilter={handleSelectUnitFilter}
             />
+          )}
+
+          {activeTab === 'plan_revision_report' && (
+            <PlanRevisionReportView onBack={() => setActiveTab('executive_summary')} />
           )}
 
           {activeTab === 'user_permissions' && (

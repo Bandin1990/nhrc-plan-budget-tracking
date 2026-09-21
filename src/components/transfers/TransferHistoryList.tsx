@@ -114,13 +114,15 @@ export const TransferHistoryList: React.FC<TransferHistoryListProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onOpenNewTransfer}
-          className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#083b34] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>ขอโอนเปลี่ยนแปลงงบประมาณ</span>
-        </button>
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <button
+            onClick={onOpenNewTransfer}
+            className="flex items-center gap-1.5 bg-[#0a4d44] hover:bg-[#083b34] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>ขอโอนเปลี่ยนแปลงงบประมาณ</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Overview */}
